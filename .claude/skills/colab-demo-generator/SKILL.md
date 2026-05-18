@@ -13,7 +13,7 @@ Generate an educational Google Colab notebook that teaches one computer science 
 
 The input may include:
 
-- Lecture slides
+- The target Lecture slides
 - Transcript
 - Metadata
 - Topic description
