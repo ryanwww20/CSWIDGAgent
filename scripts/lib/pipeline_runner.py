@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from pipeline_validator import ValidationError, validate_demo_coder_outputs, validate_stage_output
+
 
 def log(message: str) -> None:
     print(f"[run_pipeline] {message}")
@@ -62,12 +64,32 @@ def load_json(path: Path) -> Any:
         die(f"invalid JSON in {path}: {exc}")
 
 
-def make_prompt(agent_file: Path, task: str) -> str:
-    return (
-        f"You are agent following instruction file: {agent_file}. "
-        f"{task} "
+def load_agent_instructions(agent_file: Path) -> str:
+    if not agent_file.exists():
+        die(f"agent instruction file missing: {agent_file}")
+    return agent_file.read_text(encoding="utf-8").strip()
+
+
+def make_prompt(agent_instructions: str, task: str, *, json_only: bool = True) -> str:
+    suffix = (
         "Return ONLY valid JSON. Do not include markdown fences or extra commentary."
+        if json_only
+        else (
+            "Write the notebook file to disk as instructed, then return ONLY the "
+            "04_generation_report.json content as valid JSON. "
+            "Do not include markdown fences or extra commentary."
+        )
     )
+    return (
+        "Follow these agent instructions exactly:\n\n"
+        f"{agent_instructions}\n\n"
+        f"Task: {task}\n\n"
+        f"{suffix}"
+    )
+
+
+def expected_notebook_path(topic: str) -> str:
+    return f"notebooks/{topic}_interactive_skill.ipynb"
 
 
 def main() -> None:
@@ -94,76 +116,126 @@ def main() -> None:
 
     run_id = args.run_id or f"run-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
     timestamp_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    notebook_target = expected_notebook_path(args.topic)
+
+    concepts_path = pipeline_dir / "01_concepts.json"
+    structure_path = pipeline_dir / "02_notebook_structure.json"
+    analysis_path = pipeline_dir / "03_cell_analysis.json"
+    report_path = pipeline_dir / "04_generation_report.json"
 
     stages = [
         {
             "name": "concept-extractor",
             "agent_file": agents_dir / "concept-extractor.md",
-            "output": pipeline_dir / "01_concepts.json",
+            "output": concepts_path,
+            "json_only": True,
             "task": (
-                f"Analyze course source at '{source_path}' and produce the Stage 1 artifact "
-                f"for this project. The output file target is '{pipeline_dir / '01_concepts.json'}'."
+                f"Analyze course source at '{source_path}' and produce the Stage 1 artifact. "
+                f"Write the result to '{concepts_path}'."
             ),
         },
         {
             "name": "notebook-architect",
             "agent_file": agents_dir / "notebook-architect.md",
-            "output": pipeline_dir / "02_notebook_structure.json",
+            "output": structure_path,
+            "json_only": True,
             "task": (
-                f"Read input artifact '{pipeline_dir / '01_concepts.json'}' and produce Stage 2 output. "
-                f"The output file target is '{pipeline_dir / '02_notebook_structure.json'}'."
+                f"Read input artifact '{concepts_path}' and produce Stage 2 output. "
+                f"Write the result to '{structure_path}'."
             ),
         },
         {
             "name": "cell-analyzer",
             "agent_file": agents_dir / "cell-analyzer.md",
-            "output": pipeline_dir / "03_cell_analysis.json",
+            "output": analysis_path,
+            "json_only": True,
             "task": (
-                f"Read input artifact '{pipeline_dir / '02_notebook_structure.json'}' and produce Stage 3 output. "
-                f"The output file target is '{pipeline_dir / '03_cell_analysis.json'}'."
+                f"Read input artifact '{structure_path}' and produce Stage 3 output. "
+                f"Write the result to '{analysis_path}'."
             ),
         },
         {
             "name": "demo-coder",
             "agent_file": agents_dir / "demo-coder.md",
-            "output": pipeline_dir / "04_generation_report.json",
+            "output": report_path,
+            "json_only": False,
             "task": (
-                f"Read input artifact '{pipeline_dir / '03_cell_analysis.json'}', generate a notebook for topic "
-                f"'{args.topic}', and produce Stage 4 report JSON. The output file target is "
-                f"'{pipeline_dir / '04_generation_report.json'}'."
+                f"Read '{structure_path}' and '{analysis_path}'. "
+                f"Generate topic '{args.topic}' and write the notebook to '{root_dir / notebook_target}'. "
+                f"Then produce Stage 4 report JSON and write it to '{report_path}'."
             ),
         },
     ]
 
+    structure_payload: dict[str, Any] | None = None
+    errors: list[str] = []
+
     for stage in stages:
-        if not stage["agent_file"].exists():
-            die(f"agent instruction file missing: {stage['agent_file']}")
+        agent_instructions = load_agent_instructions(stage["agent_file"])
         log(f"Running stage: {stage['name']}")
-        prompt = make_prompt(stage["agent_file"], stage["task"])
+        prompt = make_prompt(
+            agent_instructions,
+            stage["task"],
+            json_only=stage["json_only"],
+        )
         stdout = run_claude_prompt(args.claude_bin, prompt, args.dry_run)
         if args.dry_run:
             continue
+
         try:
             payload = extract_json(stdout)
         except ValueError as exc:
             die(f"{stage['name']} did not return parseable JSON: {exc}")
+
+        if not isinstance(payload, dict):
+            die(f"{stage['name']} must return a JSON object")
+
+        try:
+            if stage["name"] == "cell-analyzer":
+                if structure_payload is None:
+                    structure_payload = load_json(structure_path)
+                validate_stage_output(stage["name"], payload, structure=structure_payload)
+            elif stage["name"] == "demo-coder":
+                if structure_payload is None:
+                    structure_payload = load_json(structure_path)
+                validate_stage_output(stage["name"], payload)
+                cell_counts = validate_demo_coder_outputs(payload, structure_payload, root_dir)
+                log(
+                    "Stage 4 notebook verified: "
+                    f"{cell_counts['total_cells']} cells "
+                    f"({cell_counts['code_cells']} code, {cell_counts['markdown_cells']} markdown)"
+                )
+            else:
+                validate_stage_output(stage["name"], payload)
+        except ValidationError as exc:
+            die(f"{stage['name']} output failed validation: {exc}")
+
         write_json(stage["output"], payload, dry_run=False)
         load_json(stage["output"])
+
+        if stage["name"] == "notebook-architect":
+            structure_payload = payload
+
         log(f"Wrote {stage['output']}")
 
     if args.dry_run:
         log("Dry-run complete.")
         return
 
-    report = load_json(pipeline_dir / "04_generation_report.json")
-    final_notebook = report.get("final_notebook_path", f"notebooks/{args.topic}_interactive_skill.ipynb")
+    report = load_json(report_path)
+    final_notebook = report.get("final_notebook_path", notebook_target)
     runnable = bool(report.get("execution_status", {}).get("top_to_bottom_runnable", False))
+    structure = structure_payload or load_json(structure_path)
+    structure_cells = structure.get("cells", [])
+    code_cells = sum(1 for cell in structure_cells if cell.get("cell_type") == "code")
+    markdown_cells = len(structure_cells) - code_cells
 
     run_log = {
         "run_id": run_id,
         "timestamp_utc": timestamp_utc,
+        "topic": args.topic,
         "course_source_path": str(source_path),
-        "selected_concept": args.topic,
+        "generation_mode": "artifact_driven",
         "stage_status": {
             "concept_extractor": "completed",
             "notebook_architect": "completed",
@@ -177,8 +249,14 @@ def main() -> None:
             "generation_report": "pipeline_outputs/04_generation_report.json",
             "final_notebook": final_notebook,
         },
-        "summary": {"top_to_bottom_runnable": runnable},
-        "errors": [],
+        "summary": {
+            "top_to_bottom_runnable": runnable,
+            "total_cells": len(structure_cells),
+            "code_cells": code_cells,
+            "markdown_cells": markdown_cells,
+        },
+        "legacy_notes": None,
+        "errors": errors,
     }
 
     run_log_path = pipeline_dir / "run_log.json"
@@ -186,6 +264,7 @@ def main() -> None:
     load_json(run_log_path)
     log("Pipeline completed successfully.")
     log(f"Run ID: {run_id}")
+    log(f"Generation mode: artifact_driven")
     log(f"Run log: {run_log_path}")
 
 
