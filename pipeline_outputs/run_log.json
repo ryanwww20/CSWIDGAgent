@@ -1,49 +1,28 @@
 {
-  "run_date": "2026-06-01",
+  "run_id": "run-kvcache-legacy-20260601",
+  "timestamp_utc": "2026-06-01T00:00:00Z",
   "topic": "kvcache",
-  "source_path": "course_source/KVcahce.pdf",
-  "stages": {
-    "concept-extractor": {
-      "status": "complete",
-      "output": "pipeline_outputs/01_concepts.json",
-      "selected_concepts": [
-        "KV Cache Basics (Autoregressive Decoding)",
-        "KV Cache Memory Footprint & Hardware Constraints",
-        "Multi-query Attention (MQA) and Group-query Attention (GQA)",
-        "Cross-conversation Prompt Caching (Prefix Caching)"
-      ]
-    },
-    "notebook-architect": {
-      "status": "complete",
-      "output": "pipeline_outputs/02_notebook_structure.json",
-      "total_cells": 23,
-      "code_cells": 16,
-      "markdown_cells": 7,
-      "interactive_cells": ["C07", "C10", "C15", "C19"]
-    },
-    "cell-analyzer": {
-      "status": "complete",
-      "output": "pipeline_outputs/03_cell_analysis.json",
-      "cell_specs_count": 16,
-      "cross_cell_invariants_count": 10
-    },
-    "demo-coder": {
-      "status": "complete",
-      "output": "pipeline_outputs/04_generation_report.json",
-      "notebook_path": "notebooks/kvcache_interactive_skill.ipynb",
-      "notebook_size_bytes": 55661,
-      "top_to_bottom_runnable": true,
-      "failed_cell_ids": [],
-      "generation_script": "scripts/gen_kvcache_notebook.py"
-    }
+  "course_source_path": "course_source/KVcahce.pdf",
+  "generation_mode": "legacy_script",
+  "stage_status": {
+    "concept_extractor": "completed",
+    "notebook_architect": "completed",
+    "cell_analyzer": "completed",
+    "demo_coder": "completed"
   },
-  "final_notebook": "notebooks/kvcache_interactive_skill.ipynb",
-  "all_outputs": [
-    "pipeline_outputs/01_concepts.json",
-    "pipeline_outputs/02_notebook_structure.json",
-    "pipeline_outputs/03_cell_analysis.json",
-    "pipeline_outputs/04_generation_report.json",
-    "pipeline_outputs/run_log.json",
-    "notebooks/kvcache_interactive_skill.ipynb"
-  ]
+  "artifacts": {
+    "concepts": "pipeline_outputs/01_concepts.json",
+    "structure": "pipeline_outputs/02_notebook_structure.json",
+    "analysis": "pipeline_outputs/03_cell_analysis.json",
+    "generation_report": "pipeline_outputs/04_generation_report.json",
+    "final_notebook": "notebooks/kvcache_interactive_skill.ipynb"
+  },
+  "summary": {
+    "top_to_bottom_runnable": true,
+    "total_cells": 23,
+    "code_cells": 16,
+    "markdown_cells": 7
+  },
+  "legacy_notes": "Notebook was produced by scripts/legacy/gen_kvcache_notebook.py (hard-coded cells), not by demo-coder reading 02+03 artifacts. Stages 1-3 artifacts are valid and can be reused for an artifact_driven stage-4 re-run.",
+  "errors": []
 }

@@ -48,8 +48,25 @@ Do not skip stages unless explicitly requested.
 
 - Course source is run-specific.
 - Default root: `course_source/`
+- Official entry point: `./scripts/run_pipeline.sh --source <path> --topic <topic>`
 - Record per-run source path and outputs in `pipeline_outputs/run_log.json`.
 - Final notebook naming convention: `<topic>_interactive_skill.ipynb`.
+- See `docs/pipeline.md` for architecture, `generation_mode`, and legacy script policy.
+
+## Stage 4 Contract (demo-coder)
+
+Stage 4 is **artifact-driven**. It must:
+
+1. Read `pipeline_outputs/02_notebook_structure.json` and `pipeline_outputs/03_cell_analysis.json`.
+2. Write `notebooks/<topic>_interactive_skill.ipynb` to disk (valid Jupyter nbformat).
+3. Write `pipeline_outputs/04_generation_report.json`.
+
+Do **not** use one-off `scripts/legacy/gen_*_notebook.py` scripts for new runs. Legacy scripts are reference-only.
+
+`run_log.json` must include `generation_mode`:
+
+- `artifact_driven` — notebook produced from pipeline artifacts (required for new runs).
+- `legacy_script` — historical one-off script (deprecated).
 
 ## Agent Instruction Files
 

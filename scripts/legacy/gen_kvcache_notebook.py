@@ -1,7 +1,11 @@
-"""Generate kvcache_interactive_skill.ipynb from cell specs."""
+"""DEPRECATED — see scripts/legacy/README.md.
+
+One-off KV Cache notebook generator with hard-coded cell content.
+Does NOT read pipeline_outputs/03_cell_analysis.json.
+"""
 import json, pathlib
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 OUT  = ROOT / "notebooks" / "kvcache_interactive_skill.ipynb"
 
 def md(src): return {"cell_type":"markdown","metadata":{},"source":src}
