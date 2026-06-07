@@ -18,9 +18,10 @@ Each stage must read the previous stage artifact and write its own output under 
 - `pipeline_outputs/01_concepts.json`
 - `pipeline_outputs/02_notebook_structure.json`
 - `pipeline_outputs/03_cell_analysis.json`
+- `pipeline_outputs/04_cell_sources.json`
 - `pipeline_outputs/04_generation_report.json`
 - `pipeline_outputs/run_log.json`
-- final notebook under `notebooks/`
+- final notebook under `notebooks/` (assembled by `notebook_assembler.py`)
 
 ## Workflow Rule
 
@@ -53,15 +54,16 @@ Do not skip stages unless explicitly requested.
 - Final notebook naming convention: `<topic>_interactive_skill.ipynb`.
 - See `docs/pipeline.md` for architecture, `generation_mode`, and legacy script policy.
 
-## Stage 4 Contract (demo-coder)
+## Stage 4 Contract (demo-coder + assembler)
 
-Stage 4 is **artifact-driven**. It must:
+Stage 4 is **artifact-driven** in two steps:
 
-1. Read `pipeline_outputs/02_notebook_structure.json` and `pipeline_outputs/03_cell_analysis.json`.
-2. Write `notebooks/<topic>_interactive_skill.ipynb` to disk (valid Jupyter nbformat).
-3. Write `pipeline_outputs/04_generation_report.json`.
+1. **demo-coder** reads `02` + `03`, writes `pipeline_outputs/04_cell_sources.json`, returns `04_generation_report.json`.
+2. **notebook_assembler.py** reads `02` + `04_cell_sources.json`, writes `notebooks/<topic>_interactive_skill.ipynb`.
 
 Do **not** use one-off `scripts/legacy/gen_*_notebook.py` scripts for new runs. Legacy scripts are reference-only.
+
+See `docs/phase2_cell_sources_and_assembler.md` for schema and interface details.
 
 `run_log.json` must include `generation_mode`:
 
