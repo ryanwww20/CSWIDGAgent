@@ -73,6 +73,9 @@ CELL_SPEC_REQUIRED = {
 GENERATED_CELL_REQUIRED = {"cell_id", "status", "notes"}
 EXECUTION_STATUS_REQUIRED = {"top_to_bottom_runnable", "failed_cell_ids"}
 
+CELL_SOURCE_REQUIRED = {"cell_id", "cell_type", "source", "generation_notes"}
+CELL_SOURCES_TOP_LEVEL = {"topic", "notebook_title", "source_artifacts", "cells", "assumptions"}
+
 
 def _require_keys(obj: dict[str, Any], required: set[str], label: str) -> None:
     missing = required - set(obj.keys())
@@ -139,6 +142,43 @@ def validate_cell_analyzer(payload: dict[str, Any], structure: dict[str, Any] | 
         if extra:
             raise ValidationError(
                 f"cell_specs contain ids not present as code cells in structure: {sorted(extra)}"
+            )
+
+
+def validate_cell_sources(payload: dict[str, Any], structure: dict[str, Any]) -> None:
+    """Validate 04_cell_sources.json against 02_notebook_structure.json (Phase 2)."""
+    _require_keys(payload, CELL_SOURCES_TOP_LEVEL, "04_cell_sources.json")
+
+    source_artifacts = payload["source_artifacts"]
+    if not isinstance(source_artifacts, dict):
+        raise ValidationError("source_artifacts must be an object")
+    for key in ("structure", "analysis"):
+        if key not in source_artifacts:
+            raise ValidationError(f"source_artifacts missing '{key}'")
+
+    structure_cells = _require_list(structure.get("cells"), "02_notebook_structure.json cells")
+    source_cells = _require_list(payload["cells"], "cells")
+    if len(source_cells) != len(structure_cells):
+        raise ValidationError(
+            f"cell_sources count ({len(source_cells)}) does not match structure ({len(structure_cells)})"
+        )
+
+    by_id = {}
+    for idx, item in enumerate(source_cells):
+        if not isinstance(item, dict):
+            raise ValidationError(f"cells[{idx}] must be an object")
+        _require_keys(item, CELL_SOURCE_REQUIRED, f"cells[{idx}]")
+        if not str(item["source"]).strip():
+            raise ValidationError(f"cells[{idx}] source must be non-empty")
+        by_id[item["cell_id"]] = item
+
+    for idx, struct_cell in enumerate(structure_cells):
+        cell_id = struct_cell["cell_id"]
+        if cell_id not in by_id:
+            raise ValidationError(f"cell_sources missing entry for {cell_id}")
+        if by_id[cell_id]["cell_type"] != struct_cell["cell_type"]:
+            raise ValidationError(
+                f"{cell_id} cell_type mismatch between structure and cell_sources"
             )
 
 

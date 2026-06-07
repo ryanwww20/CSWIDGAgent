@@ -9,10 +9,13 @@ flowchart LR
   SRC[course_source] --> S1[01_concepts.json]
   S1 --> S2[02_notebook_structure.json]
   S2 --> S3[03_cell_analysis.json]
-  S2 --> S4[demo-coder]
-  S3 --> S4
-  S4 --> NB[notebooks/topic_interactive_skill.ipynb]
-  S4 --> RPT[04_generation_report.json]
+  S2 --> DC[demo-coder]
+  S3 --> DC
+  DC --> CS[04_cell_sources.json]
+  DC --> RPT[04_generation_report.json]
+  S2 --> ASM[notebook_assembler.py]
+  CS --> ASM
+  ASM --> NB[notebooks/topic_interactive_skill.ipynb]
 ```
 
 ## Official Entry Point
@@ -25,8 +28,14 @@ This invokes `scripts/lib/pipeline_runner.py`, which:
 
 1. Embeds each agent's `.md` instructions in the prompt (not just the file path).
 2. Validates minimum required JSON fields after stages 1–3.
-3. After stage 4, verifies the notebook file exists and cell counts match the structure artifact.
+3. After demo-coder: validates `04_cell_sources.json`, runs `notebook_assembler.py`, verifies the notebook.
 4. Writes `pipeline_outputs/run_log.json` with a `generation_mode` field.
+
+Assemble-only (no agents; for regression):
+
+```bash
+./scripts/run_pipeline.sh --assemble-only --topic kvcache
+```
 
 ## Stage Outputs
 
@@ -35,13 +44,14 @@ This invokes `scripts/lib/pipeline_runner.py`, which:
 | 1 | concept-extractor | course source | `01_concepts.json` |
 | 2 | notebook-architect | `01_concepts.json` | `02_notebook_structure.json` |
 | 3 | cell-analyzer | `02_notebook_structure.json` | `03_cell_analysis.json` |
-| 4 | demo-coder | `02` + `03` | `.ipynb` + `04_generation_report.json` |
+| 4a | demo-coder | `02` + `03` | `04_cell_sources.json` + `04_generation_report.json` |
+| 4b | notebook_assembler | `02` + `04_cell_sources.json` | `notebooks/<topic>_interactive_skill.ipynb` |
 
 ## Generation Modes (`run_log.json`)
 
 | Mode | Meaning |
 |------|---------|
-| `artifact_driven` | Notebook produced by `demo-coder` from pipeline artifacts (required for new runs). |
+| `artifact_driven` | Notebook assembled from `04_cell_sources.json` via `notebook_assembler.py` (required for new runs). |
 | `legacy_script` | Notebook produced by a one-off script under `scripts/legacy/` (pre-Phase-1 KV Cache run). |
 
 New runs via `run_pipeline.sh` must record `generation_mode: "artifact_driven"`. If stage 4 cannot produce a notebook from artifacts, the runner exits with an error instead of silently succeeding.
@@ -54,7 +64,7 @@ The following are **not** part of the official pipeline. They exist only as hist
 |--------|--------|-------|
 | `scripts/legacy/gen_kvcache_notebook.py` | Deprecated | Hard-coded 23-cell KV Cache notebook. Does **not** read `03_cell_analysis.json`. Used for the initial KV Cache delivery before Phase 1. |
 
-Do not add new `gen_<topic>_notebook.py` scripts. Extend the artifact-driven stage 4 path instead (see Phase 2 plan: `notebook_assembler.py`).
+Do not add new `gen_<topic>_notebook.py` scripts. Extend the artifact-driven stage 4 path instead (see [Phase 2 spec](phase2_cell_sources_and_assembler.md): `04_cell_sources.json` + `notebook_assembler.py`).
 
 ## Known Gap (KV Cache Initial Run)
 
@@ -84,6 +94,7 @@ Artifacts from that run remain valid inputs for a proper artifact-driven re-run 
     "concepts": "pipeline_outputs/01_concepts.json",
     "structure": "pipeline_outputs/02_notebook_structure.json",
     "analysis": "pipeline_outputs/03_cell_analysis.json",
+    "cell_sources": "pipeline_outputs/04_cell_sources.json",
     "generation_report": "pipeline_outputs/04_generation_report.json",
     "final_notebook": "notebooks/kvcache_interactive_skill.ipynb"
   },
