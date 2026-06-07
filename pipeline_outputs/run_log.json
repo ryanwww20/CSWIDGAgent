@@ -1,0 +1,49 @@
+{
+  "run_date": "2026-06-01",
+  "topic": "kvcache",
+  "source_path": "course_source/KVcahce.pdf",
+  "stages": {
+    "concept-extractor": {
+      "status": "complete",
+      "output": "pipeline_outputs/01_concepts.json",
+      "selected_concepts": [
+        "KV Cache Basics (Autoregressive Decoding)",
+        "KV Cache Memory Footprint & Hardware Constraints",
+        "Multi-query Attention (MQA) and Group-query Attention (GQA)",
+        "Cross-conversation Prompt Caching (Prefix Caching)"
+      ]
+    },
+    "notebook-architect": {
+      "status": "complete",
+      "output": "pipeline_outputs/02_notebook_structure.json",
+      "total_cells": 23,
+      "code_cells": 16,
+      "markdown_cells": 7,
+      "interactive_cells": ["C07", "C10", "C15", "C19"]
+    },
+    "cell-analyzer": {
+      "status": "complete",
+      "output": "pipeline_outputs/03_cell_analysis.json",
+      "cell_specs_count": 16,
+      "cross_cell_invariants_count": 10
+    },
+    "demo-coder": {
+      "status": "complete",
+      "output": "pipeline_outputs/04_generation_report.json",
+      "notebook_path": "notebooks/kvcache_interactive_skill.ipynb",
+      "notebook_size_bytes": 55661,
+      "top_to_bottom_runnable": true,
+      "failed_cell_ids": [],
+      "generation_script": "scripts/gen_kvcache_notebook.py"
+    }
+  },
+  "final_notebook": "notebooks/kvcache_interactive_skill.ipynb",
+  "all_outputs": [
+    "pipeline_outputs/01_concepts.json",
+    "pipeline_outputs/02_notebook_structure.json",
+    "pipeline_outputs/03_cell_analysis.json",
+    "pipeline_outputs/04_generation_report.json",
+    "pipeline_outputs/run_log.json",
+    "notebooks/kvcache_interactive_skill.ipynb"
+  ]
+}

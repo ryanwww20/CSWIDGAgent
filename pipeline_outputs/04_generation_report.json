@@ -1,0 +1,205 @@
+{
+  "final_notebook_path": "notebooks/kvcache_interactive_skill.ipynb",
+  "topic": "kvcache",
+  "source_path": "course_source/KVcahce.pdf",
+  "generated_cells": [
+    {
+      "cell_id": "C01",
+      "cell_type": "markdown",
+      "status": "generated",
+      "source_lines": 18,
+      "notes": "Title block with course context, section roadmap table, prerequisite and runtime notes."
+    },
+    {
+      "cell_id": "C02",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 29,
+      "notes": "pip install anthropic; imports numpy, torch, nn, F, matplotlib, ipywidgets, pandas, hashlib, os, time; version printout; CUDA availability notice; assert numpy >= 1.x."
+    },
+    {
+      "cell_id": "C03",
+      "cell_type": "markdown",
+      "status": "generated",
+      "source_lines": 22,
+      "notes": "Section 1 header with attention formula, LaTeX rendering, naive vs cached comparison table."
+    },
+    {
+      "cell_id": "C04",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 47,
+      "notes": "naive_attention_decode(): recomputes K and V for all past tokens each step; op_count grows as 2*(t+1) cumulative → O(T²). Full sanity check with seed 42 and identity weights."
+    },
+    {
+      "cell_id": "C05",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 58,
+      "notes": "cached_attention_decode(): projects only new token per step; op_count grows as +2 → O(T). Asserts np.allclose match with C04 output; prints both op count sequences."
+    },
+    {
+      "cell_id": "C06",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 64,
+      "notes": "build_naive_grid / build_cached_grid; side-by-side imshow with ListedColormap; cell labels R/N/C; legend patches; all assertions pass."
+    },
+    {
+      "cell_id": "C07",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 43,
+      "notes": "plot_flop_comparison(T): static run at T=16 then ipywidgets IntSlider (4–256, step 4, continuous_update=False); fill_between shaded wasted-work region; speedup ratio printed."
+    },
+    {
+      "cell_id": "C08",
+      "cell_type": "markdown",
+      "status": "generated",
+      "source_lines": 27,
+      "notes": "Section 2 header with LaTeX formula, Gemma 2 27B worked example, note on slide discrepancy (query heads vs KV heads), HBM/SRAM table."
+    },
+    {
+      "cell_id": "C09",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 38,
+      "notes": "DTYPE_BYTES dict; kv_cache_bytes_per_token(); max_tokens() with ValueError guard; Gemma 2 27B demo printing both slide value (num_heads=32) and GQA correct value (num_kv_heads=16); sanity asserts."
+    },
+    {
+      "cell_id": "C10",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 70,
+      "notes": "show_memory_interactive(): horizontal bar chart (3 context lengths, OOM coloring) + pie chart (weights/KV/free); ipywidgets with IntSliders and Dropdowns; continuous_update=False."
+    },
+    {
+      "cell_id": "C11",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 52,
+      "notes": "MODELS dict for 4 real models; barh chart with KB/token on x-axis; max-token annotations; OOM in red for GPT-3-175B on 40 GB; Llama-3-8B assertion verified."
+    },
+    {
+      "cell_id": "C12",
+      "cell_type": "markdown",
+      "status": "generated",
+      "source_lines": 29,
+      "notes": "Section 3 header; MHA/MQA/GQA comparison table; ASCII diagram of head-sharing patterns."
+    },
+    {
+      "cell_id": "C13",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 115,
+      "notes": "MultiHeadAttention, MultiQueryAttention, GroupedQueryAttention classes; MQA uses W_k/W_v of shape (d_model, head_dim) with broadcast; GQA uses repeat_interleave; kv_cache stored post-forward; all 9 shape assertions pass."
+    },
+    {
+      "cell_id": "C14",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 48,
+      "notes": "build_head_sharing_grid(); three-panel pcolormesh with tab10 colormap; KB/token subtitle using kv_cache_bytes_per_token; grid assertions pass."
+    },
+    {
+      "cell_id": "C15",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 47,
+      "notes": "plot_kv_reduction(num_kv_groups): guards non-divisor inputs with warning message; bar chart comparing GQA vs MHA bytes; regime label; IntSlider 1–8 continuous_update=False."
+    },
+    {
+      "cell_id": "C16",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 57,
+      "notes": "3-row DataFrame (MHA/GQA/MQA) for Llama-3-8B-like config; applymap/map compatibility shim for pandas < 2.1 vs >= 2.1; color_quality and color_retrain functions; row assertion."
+    },
+    {
+      "cell_id": "C17",
+      "cell_type": "markdown",
+      "status": "generated",
+      "source_lines": 32,
+      "notes": "Section 4 header; pricing table; stable-prefix-first design rule with ASCII layout diagram."
+    },
+    {
+      "cell_id": "C18",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 80,
+      "notes": "PrefixCacheSimulator class; MD5-hashed prefix lookup; cost at $2.50/$0.25 per 1M tokens; toy PrefixCacheSimulator assertions (hit_tokens==0 on first call, hit_tokens==5 on second); travel-agent demo with SYSTEM_PROMPT/USER1/USER2."
+    },
+    {
+      "cell_id": "C19",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 71,
+      "notes": "Textarea widgets for system+user prompts; Button with on_click; tokens_to_html() generates green/white span HTML; fresh PrefixCacheSimulator per click; error handling wraps entire on_click body."
+    },
+    {
+      "cell_id": "C20",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 86,
+      "notes": "LONG_SYSTEM_PROMPT (~500 words); measure_ttft() via Anthropic streaming API (text_stream, break after first chunk); guarded by try/except (ImportError, ValueError, Exception); skip message references C18–C19."
+    },
+    {
+      "cell_id": "C21",
+      "cell_type": "markdown",
+      "status": "generated",
+      "source_lines": 19,
+      "notes": "Summary markdown table with 8 methods × 4 columns; key insight callout."
+    },
+    {
+      "cell_id": "C22",
+      "cell_type": "code",
+      "status": "generated",
+      "source_lines": 72,
+      "notes": "summary_data list (8 rows); applymap/map compatibility shim; green/red/yellow coloring; dark header style; 3 assertions on data integrity."
+    },
+    {
+      "cell_id": "C23",
+      "cell_type": "markdown",
+      "status": "generated",
+      "source_lines": 36,
+      "notes": "5 key takeaways; further reading table with 5 arXiv links."
+    }
+  ],
+  "execution_status": {
+    "top_to_bottom_runnable": true,
+    "failed_cell_ids": [],
+    "syntax_check": "All 16 code cells parsed by ast.parse without SyntaxError",
+    "symbol_check": "All 11 required symbols verified present: naive_attention_decode, cached_attention_decode, kv_cache_bytes_per_token, max_tokens, MultiHeadAttention, MultiQueryAttention, GroupedQueryAttention, PrefixCacheSimulator, DTYPE_BYTES, plot_flop_comparison, plot_kv_reduction",
+    "notebook_size_bytes": 55661,
+    "total_cells": 23,
+    "code_cells": 16,
+    "markdown_cells": 7
+  },
+  "dependency_notes": [
+    "C02 must run first; all subsequent cells depend on its imports (numpy, torch, matplotlib, ipywidgets, pandas, hashlib, os, time).",
+    "C04 defines naive_attention_decode; required by C05, C06, C07.",
+    "C05 defines cached_attention_decode; required by C06, C07.",
+    "C09 defines DTYPE_BYTES, kv_cache_bytes_per_token, max_tokens; required by C10, C11, C14, C15, C16.",
+    "C13 defines MultiHeadAttention, MultiQueryAttention, GroupedQueryAttention; required by C14, C15.",
+    "C18 defines PrefixCacheSimulator, SYSTEM_PROMPT, USER1, USER2; required by C19.",
+    "C20 depends on C02 (imports) and references PrefixCacheSimulator in skip message; otherwise self-contained.",
+    "C22 depends only on C02 (pandas import); summary_data is hardcoded inline."
+  ],
+  "quality_checks": {
+    "executability": "Verified — no runtime dependencies beyond pip-installable packages; no GPU required; C20 gracefully skips without API key.",
+    "interactivity": "4 interactive cells: C07 (IntSlider, FLOPs), C10 (IntSliders+Dropdowns, memory), C15 (IntSlider, KV reduction), C19 (Textarea+Button, prefix cache visualizer).",
+    "visualizations": "6 matplotlib figures: C06 (imshow grids), C07 (line+fill), C10 (barh+pie), C11 (barh), C14 (pcolormesh × 3), C15 (bar).",
+    "assertions": "27 assert statements across code cells; all sanity checks execute before any interactive element.",
+    "pandas_compat": "applymap/map compatibility shim applied in C16 and C22 to handle pandas < 2.1 and >= 2.1."
+  },
+  "assumptions": [
+    "Notebook targets Google Colab with Python 3.10+; all packages except 'anthropic' are pre-installed in standard Colab.",
+    "C20 (live API demo) requires ANTHROPIC_API_KEY; the cell skips gracefully if absent and references simulation cells C18–C19 as fallback.",
+    "Word-split tokenization (str.split) in C18/C19 is intentionally naive — sufficient for demonstrating prefix matching without requiring tiktoken.",
+    "PyTorch attention in C13 does not apply a causal mask; full attention is used for shape/cache correctness demonstration.",
+    "Gemma 2 27B slide discrepancy (num_heads=32 vs num_kv_heads=16) is explicitly documented in C09 output with both values printed.",
+    "TTFT measurements in C20 include network latency; they demonstrate relative (warm vs cold) speedup rather than absolute values.",
+    "num_kv_groups slider in C15 allows non-divisors of 8 (e.g. 3, 5, 6, 7); the function prints a warning and returns early instead of crashing.",
+    "The summary table in C22 uses '?' for Sliding Window and Streaming LLM retraining requirement, matching the source lecture's slide 27."
+  ]
+}

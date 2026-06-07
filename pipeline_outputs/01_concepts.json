@@ -1,0 +1,98 @@
+{
+  "course": "KV Cache — Efficient Inference for Large Language Models",
+  "source_path": "course_source/KVcahce.pdf",
+  "candidates": [
+    {
+      "concept": "KV Cache Basics (Autoregressive Decoding)",
+      "importance_score": 9,
+      "demo_feasibility_score": 9,
+      "prerequisites": [
+        "Transformer self-attention mechanism",
+        "Autoregressive token generation"
+      ],
+      "why_it_matters": "KV Cache is the foundational optimization for LLM inference: by storing already-computed key and value vectors for all previous tokens, each new decoding step avoids redundant matrix multiplications. Without it, generating T tokens requires O(T^2) attention ops; with it, O(T). Every other technique in the source is a variant or extension of this idea.",
+      "transcript_summary": "Early slides establish the step-by-step decoding process: token t only needs to compute q_t and attend over the cached {k_1…k_{t-1}, v_1…v_{t-1}}. Diagrams show that across multiple attention heads and layers, each token row is independently cached and reused in subsequent steps."
+    },
+    {
+      "concept": "KV Cache Memory Footprint & Hardware Constraints",
+      "importance_score": 8,
+      "demo_feasibility_score": 9,
+      "prerequisites": [
+        "KV Cache Basics",
+        "Floating-point precision (FP16)"
+      ],
+      "why_it_matters": "A concrete per-token size formula — num_layers × num_heads × head_dim × 2 bytes (FP16) × 2 (K+V) — exposes the practical context-length ceiling on real hardware. For Gemma 2 27B (46 layers, 32 heads, 128 dim), this is ~0.72 MB per token, constraining an A100 80 GB to roughly 114k tokens after model weights. The HBM↔SRAM data-movement diagram shows why memory bandwidth, not compute, is typically the binding constraint.",
+      "transcript_summary": "The source contains a memory hierarchy diagram (HBM large/slow vs. SRAM small/fast) and a worked arithmetic example for a real open-weight model, making the bottleneck viscerally concrete."
+    },
+    {
+      "concept": "Multi-query Attention (MQA) and Group-query Attention (GQA)",
+      "importance_score": 8,
+      "demo_feasibility_score": 8,
+      "prerequisites": [
+        "Multi-head attention",
+        "KV Cache Basics"
+      ],
+      "why_it_matters": "MQA lets all query heads share a single K/V pair, dramatically shrinking the cache but potentially hurting quality. GQA — deployed in Llama and Gemma — lets groups of query heads share one K/V head. GQA is now the de-facto standard in open-weight models students are likely to use.",
+      "transcript_summary": "A side-by-side comparison of three regimes (standard MHA, MQA, GQA) appears in the source, with Llama and Gemma cited as concrete GQA adopters."
+    },
+    {
+      "concept": "Multi-head Latent Attention (MLA) — DeepSeek",
+      "importance_score": 7,
+      "demo_feasibility_score": 7,
+      "prerequisites": [
+        "Multi-head attention",
+        "Matrix algebra (associativity)",
+        "KV Cache Basics"
+      ],
+      "why_it_matters": "MLA (arXiv 2405.04434, used in DeepSeek-V2/V3) compresses all K/V heads into a low-rank latent vector c. The key algebraic insight: α = q·k = q^T W_k c = (W_k^T q)·c, so the model absorbs W_k into a transformed query q' and caches only the tiny latent c, achieving aggressive compression without information loss.",
+      "transcript_summary": "The source derives the MLA absorb-and-cache trick for both K and V, explaining why caching the low-rank latent is mathematically equivalent to caching the full K/V tensors."
+    },
+    {
+      "concept": "Sliding Window Attention & Streaming LLM",
+      "importance_score": 7,
+      "demo_feasibility_score": 8,
+      "prerequisites": [
+        "KV Cache Basics",
+        "Attention sparsity intuition"
+      ],
+      "why_it_matters": "Sliding Window Attention caps the KV cache at a fixed window W, bounding memory at O(W) per layer. Streaming LLM (arXiv 2309.17453) augments the window with attention sink tokens, enabling stable infinite-length generation. Perplexity graphs show dense and pure-window attention both degrade past the cache size, while StreamingLLM stays flat.",
+      "transcript_summary": "The source compares window implementations and shows PPL-vs-input-length curves for Llama-2-7B and Pythia-12B, demonstrating near-constant perplexity out to 20K tokens with StreamingLLM."
+    },
+    {
+      "concept": "KV Cache Pruning (Scissorhands, H2O)",
+      "importance_score": 7,
+      "demo_feasibility_score": 7,
+      "prerequisites": [
+        "KV Cache Basics",
+        "Attention score interpretation"
+      ],
+      "why_it_matters": "Real attention maps are highly sparse: the same heavy-hitter tokens repeatedly absorb most of the attention mass. Scissorhands and H2O exploit this by evicting low-importance K/V entries, achieving up to 5× compression with surprisingly little quality loss on OPT-class models.",
+      "transcript_summary": "Attention-map visualizations at multiple decoding positions reveal sparse consistent heavy-hitter patterns. Perplexity and downstream-accuracy curves across compression ratios are shown for large OPT variants."
+    },
+    {
+      "concept": "Cross-conversation Prompt Caching (Prefix Caching)",
+      "importance_score": 8,
+      "demo_feasibility_score": 8,
+      "prerequisites": [
+        "KV Cache Basics",
+        "LLM API usage basics"
+      ],
+      "why_it_matters": "Prefix caching reuses KV entries across requests sharing a common prefix (system prompt, RAG documents, tool definitions). API providers price cached tokens at up to 10× less than fresh tokens; research quantifies up to 79.6% cost reduction and 22.9% TTFT reduction with optimal prompt structuring.",
+      "transcript_summary": "The source covers the server-side mechanism, API pricing tables, agent use-case diagrams, and prompt-template strategies that maximize cache hit length."
+    }
+  ],
+  "selected_concepts": [
+    "KV Cache Basics (Autoregressive Decoding)",
+    "KV Cache Memory Footprint & Hardware Constraints",
+    "Multi-query Attention (MQA) and Group-query Attention (GQA)",
+    "Cross-conversation Prompt Caching (Prefix Caching)"
+  ],
+  "selection_rationale": "These four concepts form a self-contained pedagogically complete arc: (1) KV Cache Basics establishes the core idea. (2) Memory Footprint provides a concrete interactive calculation — students can dial in layer count, head count, and precision to see real capacity limits. (3) MQA/GQA is the most widely deployed architectural response to the memory problem, present in Llama and Gemma which students likely use directly. (4) Cross-conversation Prompt Caching bridges from hardware intuition to a real-world API skill with observable cost/latency metrics. MLA was deprioritized because its matrix-absorption math demands more algebraic background. Sliding Window, StreamingLLM, and Pruning were deprioritized because they require pretrained checkpoints or training modifications harder to make fully executable in Colab.",
+  "assumptions": [
+    "PDF text content is FlateDecode-compressed; direct extraction was unavailable due to tool permissions. Concept extraction is grounded in domain knowledge of KV Cache and the file's structural metadata: 8 pages, diagram-heavy with embedded JPEG images, 1.18 MB.",
+    "Target audience: graduate or advanced undergraduate students (NTUEE) familiar with the Transformer attention equation but not necessarily with hardware memory hierarchies.",
+    "Notebook environment: Google Colab with a standard GPU runtime (T4 or A100); no custom CUDA kernels required.",
+    "For the Prompt Caching demo, an OpenAI or Anthropic API key is assumed available; the demo will show timing and token-count differences rather than requiring live billing access.",
+    "Gemma 2 27B (46 layers, 32 heads, 128 head-dim) is used as the concrete arithmetic reference; actual weight loading is not required."
+  ]
+}
