@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cswidgagent.local/schemas/04_cell_sources.json",
+  "title": "Cell Sources Artifact (Phase 2)",
+  "description": "Per-cell source content produced by demo-coder before notebook assembly.",
+  "type": "object",
+  "required": ["topic", "notebook_title", "source_artifacts", "cells", "assumptions"],
+  "additionalProperties": false,
+  "properties": {
+    "topic": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Run topic slug for notebooks/<topic>_interactive_skill.ipynb"
+    },
+    "notebook_title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_artifacts": {
+      "type": "object",
+      "required": ["structure", "analysis"],
+      "additionalProperties": false,
+      "properties": {
+        "structure": {
+          "type": "string",
+          "const": "pipeline_outputs/02_notebook_structure.json"
+        },
+        "analysis": {
+          "type": "string",
+          "const": "pipeline_outputs/03_cell_analysis.json"
+        }
+      }
+    },
+    "cells": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["cell_id", "cell_type", "source", "generation_notes"],
+        "additionalProperties": false,
+        "properties": {
+          "cell_id": {
+            "type": "string",
+            "pattern": "^C[0-9]{2}$"
+          },
+          "cell_type": {
+            "type": "string",
+            "enum": ["markdown", "code"]
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Plain-text cell content; assembler converts to nbformat line array"
+          },
+          "generation_notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

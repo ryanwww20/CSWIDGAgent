@@ -1,0 +1,249 @@
+{
+  "notebook_title": "KV Cache: Efficient LLM Inference — Interactive Demo",
+  "learning_objectives": [
+    "Explain why KV Cache reduces autoregressive decoding from O(T²) to O(T) attention operations and implement both naive and cached variants from scratch.",
+    "Compute the per-token KV cache memory footprint for any transformer configuration and identify the hardware capacity ceiling it imposes.",
+    "Distinguish Multi-head Attention (MHA), Multi-query Attention (MQA), and Group-query Attention (GQA) by their K/V sharing structure and quantify the resulting cache size trade-offs.",
+    "Describe how cross-conversation prefix caching works, simulate cache-hit savings, and understand prompt-structuring strategies that maximize hit rate."
+  ],
+  "cells": [
+    {
+      "cell_id": "C01",
+      "cell_type": "markdown",
+      "goal": "Title block: notebook name, one-sentence course context, and a visual roadmap listing the four sections students will work through.",
+      "inputs": [],
+      "outputs": ["Rendered markdown header visible to students"],
+      "widget_plan": "none",
+      "estimated_lines": 30,
+      "depends_on": []
+    },
+    {
+      "cell_id": "C02",
+      "cell_type": "code",
+      "goal": "Install and import all dependencies needed by the entire notebook (numpy, torch, matplotlib, ipywidgets, anthropic). Print version info so students can verify the environment.",
+      "inputs": [],
+      "outputs": ["Installed packages confirmed", "Version string printout"],
+      "widget_plan": "none",
+      "estimated_lines": 20,
+      "depends_on": []
+    },
+    {
+      "cell_id": "C03",
+      "cell_type": "markdown",
+      "goal": "Section 1 header. Brief attention-mechanism refresher: the softmax(QK^T/√d)V formula, what Q/K/V represent, and why the naive autoregressive loop recomputes K and V for every previous token at each new step.",
+      "inputs": [],
+      "outputs": ["Conceptual framing before any code"],
+      "widget_plan": "none",
+      "estimated_lines": 40,
+      "depends_on": []
+    },
+    {
+      "cell_id": "C04",
+      "cell_type": "code",
+      "goal": "Implement naive_attention_decode(token_embeddings, W_q, W_k, W_v): at each step t, recompute all previous K and V from scratch, count total FLOP-equivalents as a list. Return per-step outputs and cumulative op counts.",
+      "inputs": ["token_embeddings (T×d numpy array)", "Weight matrices W_q, W_k, W_v (d×d)"],
+      "outputs": ["List of T output vectors", "List of cumulative op counts (grows quadratically)"],
+      "widget_plan": "none",
+      "estimated_lines": 50,
+      "depends_on": ["C02"]
+    },
+    {
+      "cell_id": "C05",
+      "cell_type": "code",
+      "goal": "Implement cached_attention_decode(token_embeddings, W_q, W_k, W_v): maintain a KV cache list; at step t append k_t and v_t, then attend only using the cached list. Count ops analogously. Assert outputs match C04.",
+      "inputs": ["token_embeddings (T×d numpy array)", "Weight matrices W_q, W_k, W_v (d×d)"],
+      "outputs": ["List of T output vectors (identical to C04)", "List of cumulative op counts (grows linearly)", "Printed assertion: 'Outputs match: True'"],
+      "widget_plan": "none",
+      "estimated_lines": 55,
+      "depends_on": ["C04"]
+    },
+    {
+      "cell_id": "C06",
+      "cell_type": "code",
+      "goal": "Visualize the KV recomputation problem: draw a grid where rows are generation steps and columns are token positions. Color cells red (recomputed) for naive, green (cached/new) for cached. Use matplotlib imshow.",
+      "inputs": ["T (sequence length, fixed at 8 for illustration)"],
+      "outputs": ["Side-by-side imshow: 'Naive (recompute all)' vs 'KV Cache (store & reuse)'"],
+      "widget_plan": "none",
+      "estimated_lines": 45,
+      "depends_on": ["C04", "C05"]
+    },
+    {
+      "cell_id": "C07",
+      "cell_type": "code",
+      "goal": "Interactive FLOP comparison: slider for sequence length T (range 4–256). On slide, rerun both op-count loops and plot naive vs cached cumulative ops on a shared axis. Label the O(T²) vs O(T) growth clearly.",
+      "inputs": ["IntSlider T in [4, 256]"],
+      "outputs": ["Live-updating line plot: naive ops (quadratic) vs cached ops (linear) as T changes"],
+      "widget_plan": "ipywidgets.interact with IntSlider(min=4, max=256, step=4, value=32, description='Sequence length T'). On change: recompute both op lists, update matplotlib figure via clear-and-redraw.",
+      "estimated_lines": 55,
+      "depends_on": ["C04", "C05"]
+    },
+    {
+      "cell_id": "C08",
+      "cell_type": "markdown",
+      "goal": "Section 2 header. Explain the per-token KV cache size formula: num_layers × num_kv_heads × head_dim × bytes_per_element × 2 (K and V). Walk through the Gemma 2 27B worked example: 46 × 32 × 128 × 2 × 2 = 753,664 bytes ≈ 0.72 MB. Explain the HBM/SRAM bandwidth bottleneck.",
+      "inputs": [],
+      "outputs": ["Formula and worked numeric example rendered in markdown"],
+      "widget_plan": "none",
+      "estimated_lines": 45,
+      "depends_on": []
+    },
+    {
+      "cell_id": "C09",
+      "cell_type": "code",
+      "goal": "Define kv_cache_bytes_per_token(num_layers, num_kv_heads, head_dim, dtype_bytes) and max_tokens(gpu_memory_gb, model_weight_gb, num_layers, num_kv_heads, head_dim, dtype_bytes). Include a lookup dict for common dtypes (FP32=4, FP16=2, INT8=1). Run it for Gemma 2 27B defaults and print results.",
+      "inputs": ["Function arguments as described"],
+      "outputs": ["Printed: per-token KV size in bytes and KB", "Printed: max tokens on A100-80GB (assuming ~56 GB used by weights)"],
+      "widget_plan": "none",
+      "estimated_lines": 40,
+      "depends_on": ["C02"]
+    },
+    {
+      "cell_id": "C10",
+      "cell_type": "code",
+      "goal": "Interactive memory calculator: sliders for num_layers (1–80), num_kv_heads (1–64), head_dim (64–256 step 64), dtype dropdown (FP32/FP16/INT8), gpu_memory_gb (24/40/80). Display: per-token size, max tokens, and a horizontal bar chart showing memory breakdown (weights placeholder vs KV cache at 10k/50k/100k tokens).",
+      "inputs": ["ipywidgets controls as described"],
+      "outputs": ["Live-updating text display of per-token size and max tokens", "Live-updating stacked bar chart: GPU memory allocation vs context length"],
+      "widget_plan": "ipywidgets.interact with IntSlider for num_layers, num_kv_heads, head_dim; Dropdown for dtype and gpu_memory_gb. Output widget clears and redraws a matplotlib figure showing memory breakdown.",
+      "estimated_lines": 75,
+      "depends_on": ["C09"]
+    },
+    {
+      "cell_id": "C11",
+      "cell_type": "code",
+      "goal": "Static comparison bar chart: plot per-token KV cache size (MB) for a curated set of real models — Llama-3-8B (32 layers, 8 KV heads, 128 dim, FP16), Gemma-2-9B (42 layers, 8 KV heads, 256 dim, FP16), Gemma-2-27B (46 layers, 16 KV heads, 128 dim, FP16), GPT-3-175B analogue (96 layers, 96 heads, 128 dim, FP16). Annotate each bar with the max-token count on a 40 GB GPU.",
+      "inputs": ["Hardcoded model config dicts"],
+      "outputs": ["Annotated horizontal bar chart comparing per-token KV size across models"],
+      "widget_plan": "none",
+      "estimated_lines": 55,
+      "depends_on": ["C09"]
+    },
+    {
+      "cell_id": "C12",
+      "cell_type": "markdown",
+      "goal": "Section 3 header. Explain the three attention head-sharing regimes: MHA (num_kv_heads = num_q_heads), MQA (num_kv_heads = 1), GQA (1 < num_kv_heads < num_q_heads). Note Llama 3 and Gemma 2 use GQA. Explain that reducing num_kv_heads directly scales down KV cache size.",
+      "inputs": [],
+      "outputs": ["Conceptual markdown with a simple ASCII diagram showing head groupings"],
+      "widget_plan": "none",
+      "estimated_lines": 40,
+      "depends_on": []
+    },
+    {
+      "cell_id": "C13",
+      "cell_type": "code",
+      "goal": "Implement three minimal attention classes in PyTorch (CPU-safe, small d_model=64, num_q_heads=8): MultiHeadAttention, MultiQueryAttention, GroupedQueryAttention(num_kv_groups). Each has a forward(x) returning output and stores the kv_cache after a forward pass. Verify all three produce the same output shape.",
+      "inputs": ["Toy sequence x of shape (seq_len=6, d_model=64)"],
+      "outputs": ["Three class definitions", "Printed output shapes confirming correctness", "Printed kv_cache tensor shapes for each variant"],
+      "widget_plan": "none",
+      "estimated_lines": 100,
+      "depends_on": ["C02"]
+    },
+    {
+      "cell_id": "C14",
+      "cell_type": "code",
+      "goal": "Visualize the K/V head sharing structure as a color-coded grid: rows = query heads (8), columns = positions (fixed 6 tokens). Each cell is colored by which KV head it reads. MHA: each row its own color. MQA: all rows same color. GQA: groups of rows share a color. Use matplotlib pcolormesh.",
+      "inputs": ["num_q_heads=8, num_kv_heads in {8, 1, 2} for the three variants"],
+      "outputs": ["Three-panel figure: MHA / MQA / GQA head-sharing grids with legend and title"],
+      "widget_plan": "none",
+      "estimated_lines": 60,
+      "depends_on": ["C13"]
+    },
+    {
+      "cell_id": "C15",
+      "cell_type": "code",
+      "goal": "Interactive KV cache size slider: given num_q_heads=8, slider for num_kv_groups (1 to 8). Show live bar chart with two bars: (1) KV cache bytes for current GQA config, (2) KV cache bytes for MHA baseline. Also display the reduction ratio as text.",
+      "inputs": ["IntSlider num_kv_groups in [1, 8]"],
+      "outputs": ["Live bar chart: GQA KV size vs MHA KV size", "Text: 'Cache reduction: {ratio:.1f}×' and 'Regime: MQA / GQA / MHA'"],
+      "widget_plan": "ipywidgets.interact with IntSlider(min=1, max=8, step=1, value=4, description='KV groups'). On change: recompute both cache sizes using C09 helper, redraw two-bar matplotlib chart.",
+      "estimated_lines": 50,
+      "depends_on": ["C13", "C09"]
+    },
+    {
+      "cell_id": "C16",
+      "cell_type": "code",
+      "goal": "Print a styled pandas DataFrame comparing MHA, MQA, GQA across: num_kv_heads, KV cache bytes per token (for Llama-3-8B config), cache reduction vs MHA, and qualitative quality impact (from slide 27 summary table: MQA 'may hurt quality', GQA 'minor impact').",
+      "inputs": ["Hardcoded values derived from C09 + slide 27 summary"],
+      "outputs": ["Styled pandas DataFrame rendered inline"],
+      "widget_plan": "none",
+      "estimated_lines": 35,
+      "depends_on": ["C13", "C09"]
+    },
+    {
+      "cell_id": "C17",
+      "cell_type": "markdown",
+      "goal": "Section 4 header. Explain cross-conversation prefix caching: when multiple requests share a common prefix (system prompt, tool list, RAG context), a server can store those KV entries once and reuse them. Show the API pricing example (GPT-5.4: $2.50 fresh vs $0.25 cached per 1M tokens). Discuss the 'stable prefix first, variable suffix last' structuring rule.",
+      "inputs": [],
+      "outputs": ["Markdown section with pricing table and structuring rule illustrated"],
+      "widget_plan": "none",
+      "estimated_lines": 45,
+      "depends_on": []
+    },
+    {
+      "cell_id": "C18",
+      "cell_type": "code",
+      "goal": "Implement a toy PrefixCacheSimulator class: stores a token-level KV cache keyed by prefix hash. Given (system_prompt_tokens, user_tokens), compute prefix match length, classify each token as 'cache hit' or 'cache miss', return cost assuming $2.50/1M fresh and $0.25/1M cached. Run two example calls sharing the same system prompt.",
+      "inputs": ["system_prompt string (tokenized as word-split for simplicity)", "Two different user_message strings"],
+      "outputs": ["Printed per-request breakdown: total tokens, hit tokens, miss tokens, cost", "Printed: savings from reuse on the second call"],
+      "widget_plan": "none",
+      "estimated_lines": 70,
+      "depends_on": ["C02"]
+    },
+    {
+      "cell_id": "C19",
+      "cell_type": "code",
+      "goal": "Interactive prefix visualizer: text areas for system_prompt and two user messages. On button click, tokenize (word-split), compute the shared prefix length, and render a colored token display: green background = cache hit, white = cache miss. Show hit rate percentage and estimated cost savings.",
+      "inputs": ["Textarea: system_prompt (default: multi-line agent system prompt)", "Textarea: user_message_1 and user_message_2 (default: two booking requests from slide 25)"],
+      "outputs": ["HTML-rendered token strip with color-coded cache hit/miss", "Text: 'Cache hit rate: X%', 'Estimated savings on call 2: $Y'"],
+      "widget_plan": "ipywidgets.Textarea × 3, Button('Compute Cache Hits'), Output widget. On button click: run PrefixCacheSimulator, generate HTML token display using IPython.display.HTML.",
+      "estimated_lines": 80,
+      "depends_on": ["C18"]
+    },
+    {
+      "cell_id": "C20",
+      "cell_type": "code",
+      "goal": "Optional live API timing demo (guarded by a try/except that gracefully skips if no API key is set). Use the Anthropic SDK to send two requests: first with a long system prompt (cold), second with the same system prompt (warm). Measure TTFT for each using time.perf_counter around the streaming first-chunk event. Print the speedup ratio.",
+      "inputs": ["ANTHROPIC_API_KEY from os.environ (optional)", "Fixed long system prompt (~500 words)", "Short user message"],
+      "outputs": ["If key present: printed TTFT cold vs warm and speedup ratio", "If key absent: printed notice 'API key not set — skipping live demo; see C18–C19 for simulation'"],
+      "widget_plan": "none",
+      "estimated_lines": 65,
+      "depends_on": ["C02", "C18"]
+    },
+    {
+      "cell_id": "C21",
+      "cell_type": "markdown",
+      "goal": "Section 5: Summary. Replicate the slide 27 comparison table in markdown for the four covered methods (KV Cache, MQA/GQA, MLA-brief-mention, Prefix Caching), using the same three columns: 'Changes attention?', 'Needs retraining?', 'Other cost'. Add a row for Flash Attention as context.",
+      "inputs": [],
+      "outputs": ["Markdown comparison table"],
+      "widget_plan": "none",
+      "estimated_lines": 30,
+      "depends_on": []
+    },
+    {
+      "cell_id": "C22",
+      "cell_type": "code",
+      "goal": "Render the summary table from C21 as a styled pandas DataFrame with conditional cell coloring: green for 'No' in 'Changes attention?' and 'Needs retraining?', yellow for 'Yes'. Use df.style.applymap.",
+      "inputs": ["Hardcoded summary dict matching slide 27"],
+      "outputs": ["Styled pandas DataFrame displayed inline with color coding"],
+      "widget_plan": "none",
+      "estimated_lines": 40,
+      "depends_on": ["C02"]
+    },
+    {
+      "cell_id": "C23",
+      "cell_type": "markdown",
+      "goal": "Key takeaways (5 bullet points) and further reading: links to StreamingLLM (arXiv 2309.17453), MLA / DeepSeek-V2 (arXiv 2405.04434), Scissorhands (arXiv 2305.17118), H2O (arXiv 2306.14048), and the prompt-caching survey (arXiv 2601.06007).",
+      "inputs": [],
+      "outputs": ["Closing markdown cell visible to students"],
+      "widget_plan": "none",
+      "estimated_lines": 25,
+      "depends_on": []
+    }
+  ],
+  "global_flow_notes": "The notebook is divided into five sections: (1) KV Cache Basics [C03–C07], (2) Memory Footprint [C08–C11], (3) MQA/GQA [C12–C16], (4) Prefix Caching [C17–C20], (5) Summary [C21–C23]. C01 and C02 are preamble. Each section opens with a markdown explanation cell before any code, matching the 'concept → implementation → visualization → interaction' pattern. Interactive cells (C07, C10, C15, C19) are placed after their static counterparts so students can first read the static output, then explore. C20 is the only cell requiring an external credential; it is explicitly guarded and skippable. The dependency graph is strictly top-to-bottom: no cell references a later cell. All code cells use only numpy, torch (CPU), matplotlib, ipywidgets, and optionally anthropic — all available in standard Colab.",
+  "assumptions": [
+    "Tokenization in Sections 3–4 uses Python str.split() as a word-level proxy; real subword tokenization is unnecessary for the cache-hit visualization concept.",
+    "PyTorch attention implementations use d_model=64, num_q_heads=8, seq_len=6 to keep forward passes fast on CPU; the pedagogical point does not require GPU or large tensors.",
+    "The memory calculator (C09–C10) treats model weights as an opaque fixed cost; students can adjust the 'model_weight_gb' slider rather than computing it from parameter counts.",
+    "Anthropic API is preferred for C20 because the course context references Claude Sonnet 4.5 in the prompt-caching benchmark (slide 26); OpenAI may be substituted by swapping the SDK import.",
+    "Estimated line counts include docstrings, blank lines, and print statements but exclude markdown cell content."
+  ]
+}

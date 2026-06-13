@@ -1,0 +1,29 @@
+{
+  "run_id": "assemble-only-20260607T135306Z",
+  "timestamp_utc": "2026-06-07T13:53:06Z",
+  "topic": "kvcache",
+  "course_source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/KVcahce.pdf",
+  "generation_mode": "artifact_driven",
+  "stage_status": {
+    "concept_extractor": "skipped",
+    "notebook_architect": "skipped",
+    "cell_analyzer": "skipped",
+    "demo_coder": "assemble_only"
+  },
+  "artifacts": {
+    "concepts": "pipeline_outputs/01_concepts.json",
+    "structure": "pipeline_outputs/02_notebook_structure.json",
+    "analysis": "pipeline_outputs/03_cell_analysis.json",
+    "cell_sources": "pipeline_outputs/04_cell_sources.json",
+    "generation_report": "pipeline_outputs/04_generation_report.json",
+    "final_notebook": "notebooks/kvcache_interactive_skill.ipynb"
+  },
+  "summary": {
+    "top_to_bottom_runnable": true,
+    "total_cells": 23,
+    "code_cells": 16,
+    "markdown_cells": 7
+  },
+  "legacy_notes": null,
+  "errors": []
+}
