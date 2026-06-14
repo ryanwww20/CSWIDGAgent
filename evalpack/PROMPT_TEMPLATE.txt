@@ -1,0 +1,47 @@
+You are generating an interactive teaching notebook from university course slides.
+
+INPUT
+You are given the full slide deck for one lecture topic as context (slide images
+and/or extracted text). Treat the whole deck as background you may draw on; not
+every slide needs to appear in the demo.
+
+YOUR TASK
+1. Choose ONE core concept from these slides that genuinely benefits from an
+   interactive, runnable demonstration — something a learner would understand more
+   deeply by manipulating it than by reading the static slide.
+2. Build ONE interactive Colab-compatible Jupyter notebook (.ipynb) that teaches
+   exactly that one concept.
+
+DECLARE YOUR CONCEPT (required)
+The FIRST cell of the notebook must be markdown that states:
+  - The single learning question this demo answers (one sentence).
+  - One line on why this concept is worth an interactive demo rather than a slide.
+A notebook with no clearly stated core concept does not meet the task.
+
+ONE CONCEPT — WHAT THAT MEANS
+The unit is one learning QUESTION, not one model. Within that one question you MAY:
+  - Compare several models / methods / algorithms head-to-head, as long as they are
+    compared on the SAME task and the SAME metric/axes (an interactive benchmark is
+    fine and encouraged where it fits).
+  - Explore multiple parameters, regimes, or sub-aspects of the same mechanism.
+  - Show multiple views or plots of the same underlying example.
+You MUST NOT stitch together two or more independent demos that answer DIFFERENT
+questions, each with its own separate setup. Test: if a learner could delete one
+section and the rest would still stand as its own separate lesson, you have built
+too many demos — narrow to one.
+
+INTERACTIVITY (required)
+Include at least one control the learner manipulates (ipywidgets sliders/dropdowns
+or equivalent) whose effect is clearly visible in the output. Every control must
+perturb the one concept you declared.
+
+FAITHFULNESS & CLARITY
+  - Stay accurate to the slides and to the underlying field; do not contradict or
+    fabricate. If you simplify, say so.
+  - Prefer behavior that emerges from real computation over hardcoded outcomes.
+  - The notebook must run top-to-bottom without errors and be readable on its own:
+    define terms, label plots, and tell the learner what to look for.
+
+OUTPUT
+A single runnable .ipynb. No separate standalone demos. One declared concept, one
+interactive exploration of it.
