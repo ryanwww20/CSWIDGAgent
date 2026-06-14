@@ -46,7 +46,11 @@ def extract_json(text: str) -> Any:
 
 
 def run_claude_prompt(claude_bin: str, prompt: str, dry_run: bool) -> str:
-    cmd = [claude_bin, "-p", prompt]
+    cmd = [
+        claude_bin, "-p", prompt,
+        "--allowedTools", "Read,Write,Bash",
+        "--dangerously-skip-permissions",
+    ]
     if dry_run:
         print(f"[dry-run] {' '.join(cmd)}")
         return ""
@@ -218,6 +222,7 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--assemble-only", action="store_true")
     parser.add_argument("--claude-bin", default="claude")
+    parser.add_argument("--from-stage", type=int, default=1, choices=[1, 2, 3, 4])
     args = parser.parse_args()
 
     root_dir = Path(args.root_dir).resolve()
@@ -299,6 +304,21 @@ def main() -> None:
 
     structure_payload: dict[str, Any] | None = None
 
+    # --- skip stages before --from-stage; ensure their outputs already exist ---
+    if args.from_stage > 1:
+        for skipped in stages[: args.from_stage - 1]:
+            out = Path(skipped["output"])
+            if not out.exists():
+                die(
+                    f"--from-stage {args.from_stage} requires {skipped['name']} output "
+                    f"at {out}, but it does not exist. Run from an earlier stage first."
+                )
+            log(f"Skipping {skipped['name']} (using existing {out.name})")
+        # demo-coder needs structure in memory; preload it when we skip past stage 2
+        if structure_path.exists():
+            structure_payload = load_json(structure_path)
+        stages = stages[args.from_stage - 1:]
+
     for stage in stages:
         agent_instructions = load_agent_instructions(stage["agent_file"])
         log(f"Running stage: {stage['name']}")
@@ -308,6 +328,7 @@ def main() -> None:
             response_mode=stage["response_mode"],
         )
         stdout = run_claude_prompt(args.claude_bin, prompt, args.dry_run)
+        print(f"[DEBUG] raw output:\n{stdout[:500]}")
         if args.dry_run:
             if stage["name"] == "demo-coder":
                 log(f"[dry-run] would assemble notebook at {notebook_path}")
@@ -315,8 +336,13 @@ def main() -> None:
 
         try:
             payload = extract_json(stdout)
-        except ValueError as exc:
-            die(f"{stage['name']} did not return parseable JSON: {exc}")
+        except ValueError:
+            output_path = stage["output"]
+            if Path(output_path).exists():
+                log(f"{stage['name']} stdout not JSON; reading from {output_path}")
+                payload = load_json(Path(output_path))
+            else:
+                die(f"{stage['name']} did not return parseable JSON and no output file found")
 
         if not isinstance(payload, dict):
             die(f"{stage['name']} must return a JSON object")
