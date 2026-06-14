@@ -1,101 +1,90 @@
 {
-  "course": "ML / Algorithms — KV Cache & Dijkstra's Algorithm (NTU EE4033-01, Spring 2025, Lecture 11)",
-  "source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source",
+  "course": "Algorithms (EE4033-01), 113-2 (Spring 2025), Lecture 11 — Dijkstra's Algorithm, Shao-Hua Sun, EE @ NTU",
+  "source_path": "/Users/justin/Desktop/NTU/CSWIDGAgent/course_source/Dijkstra.pdf",
   "candidates": [
     {
-      "concept": "KV Cache in Autoregressive Generation",
+      "concept": "Dijkstra's single-source shortest-path algorithm (main loop)",
       "importance_score": 10,
-      "demo_feasibility_score": 9,
+      "demo_feasibility_score": 10,
       "prerequisites": [
-        "Transformer self-attention (Q, K, V projections)",
-        "Autoregressive token generation"
+        "Weighted directed graphs and adjacency-list representation",
+        "Min-priority queue (Extract-Min)",
+        "Single-source shortest-path problem"
       ],
-      "why_it_matters": "KV Cache is the foundational optimization that makes LLM inference practical. Without it, every new token would require recomputing key/value projections for all past tokens, making inference cost grow quadratically with sequence length. With KV Cache, only q_t is new per step; k_1..k_{t-1} and v_1..v_{t-1} are read from memory. Every other technique covered in the lecture (MQA, GQA, MLA, sliding window, pruning) is a variant or extension of this base idea.",
-      "transcript_summary": "KVcache.pdf slides 2-5 walk step-by-step: at step t=4, only q_4 is freshly computed; k_1..k_3 and v_1..v_3 are fetched from cache. Slide 5 shows the full multi-layer KV tensor layout across heads and layers. Slide 7 (Gemma 2 table) quantifies the cost: 46 layers x 32 heads x 128 head-dim x 2 bytes (FP16) x 2 (K+V) = 753664 bytes = 0.72 MB per token, so an A100 80 GB can cache ~114k tokens after model weights."
+      "why_it_matters": "Core topic of the lecture: computes minimum-weight paths from a source s to every other vertex in a graph with non-negative edge weights by maintaining a set S of finalized vertices, repeatedly extracting the minimum-estimate vertex from Q, adding it to S, and relaxing its outgoing edges.",
+      "transcript_summary": "Pseudocode (slide 2): Initialize-Single-Source(G,s); S=Φ; Q=G.V; while Q≠Φ: u=Extract-Min(Q); S=S∪{u}; for each v∈Adj[u]: Relax(u,v,w). Greedy choice: always pick the vertex nearest the source; stated to execute essentially the same as Prim's algorithm."
     },
     {
-      "concept": "KV Cache Memory Footprint and Hardware Constraints",
-      "importance_score": 8,
-      "demo_feasibility_score": 9,
-      "prerequisites": [
-        "KV Cache in Autoregressive Generation",
-        "Floating-point precision (FP16/BF16)",
-        "GPU memory hierarchy (HBM vs. SRAM)"
-      ],
-      "why_it_matters": "Understanding how much memory a KV cache consumes and how that limits maximum context length on a given GPU is a critical engineering skill for deploying LLMs. The concrete Gemma 2-27B calculation grounds the theory in real hardware numbers and motivates all cache-reduction techniques. The HBM-SRAM diagram shows why memory bandwidth, not FLOPs, is typically the binding constraint during decoding.",
-      "transcript_summary": "Slide 6 shows the HBM (large/slow) vs. SRAM (small/fast) memory hierarchy. Slide 7 provides the per-token formula and a fully worked numeric example for Gemma 2 27B. The final summary table on slide 27 compares Flash Attention, KV Cache, MQA/GQA, MLA, Sliding Window, StreamingLLM, Pruning, and Speculative Decoding across: changes attention?, requires training?, other costs."
-    },
-    {
-      "concept": "Attention Head Variants for KV Cache Reduction: MHA vs. MQA vs. GQA vs. MLA",
+      "concept": "Edge relaxation and Initialize-Single-Source",
       "importance_score": 9,
-      "demo_feasibility_score": 8,
+      "demo_feasibility_score": 10,
       "prerequisites": [
-        "Multi-head self-attention",
-        "KV Cache in Autoregressive Generation"
+        "Distance estimate v.d and predecessor v.π",
+        "Edge weight function w(u, v)"
       ],
-      "why_it_matters": "Reducing KV cache size without degrading model quality is one of the central research problems in efficient LLM serving. The lecture traces the design progression: MHA (one KV per head) to MQA (one shared KV for all heads) to GQA (groups of heads share a KV pair; used in Llama, Gemma) to MLA (DeepSeek: compress all K/V into a low-dim latent c; cache only c; reconstruct using the identity alpha = q^T W_k c = (W_k^T q)^T c).",
-      "transcript_summary": "Slides 8-9 show side-by-side diagrams of MHA, MQA, and GQA with Llama/Gemma cited as GQA users. Slides 10-15 derive MLA in detail: the absorbed-query trick for keys (slide 13) and the analogous W_v absorption for values (slide 15). Slide 12 shows per-query latent vectors c_1..c_4."
+      "why_it_matters": "Relaxation is the atomic update that drives shortest-path estimates monotonically downward: if v.d > u.d + w(u,v), set v.d = u.d + w(u,v) and v.π = u. Initialization sets all v.d = ∞, v.π = NIL, and s.d = 0. Mastering relaxation is essential to understanding the whole algorithm and reconstructing paths via predecessors.",
+      "transcript_summary": "Relax(u,v,w) (slide 4): 1. if v.d > u.d + w(u,v) 2. v.d = u.d + w(u,v) 3. v.π = u. Initialize-Single-Source(G,s): v.d=∞, v.π=NIL for all v; s.d=0."
     },
     {
-      "concept": "KV Cache Eviction Strategies: Sliding Window Attention and StreamingLLM",
-      "importance_score": 7,
-      "demo_feasibility_score": 7,
+      "concept": "Step-by-step execution trace on an example graph",
+      "importance_score": 9,
+      "demo_feasibility_score": 10,
       "prerequisites": [
-        "KV Cache in Autoregressive Generation",
-        "Attention score distributions"
+        "Dijkstra's main loop",
+        "Edge relaxation"
       ],
-      "why_it_matters": "When context length exceeds GPU memory, the KV cache must be managed dynamically. Sliding Window Attention restricts attention to a local window, bounding memory at O(W) per layer. StreamingLLM augments the window with attention sink tokens, enabling stable infinite-length generation while maintaining near-training perplexity.",
-      "transcript_summary": "Slides 16-17 compare two sliding-window implementations (Mistral 7B and GPT-OSS). Slide 18 shows PPL-vs-input-length curves for Llama-2-7B and Pythia-12B: StreamingLLM maintains flat perplexity to 20K tokens while dense and window-only attention degrade."
+      "why_it_matters": "Two full slides (Example and Practice) trace the algorithm vertex-by-vertex, visualizing S (explored, black), the vertex u being processed (gray), vertices still in Q = V−S (white), distance labels, and predecessor edges. This trace is the primary pedagogical vehicle and is ideal for an interactive, animated visualization.",
+      "transcript_summary": "Example graph (slide 3): vertices s,t,x,y,z with weights 10,5,2,3,1,9,7,4,6,2; distances evolve from ∞ to final s=0, y=5, t=8, z=7, x=9, with predecessor edges highlighted. Practice graph (slide 4): vertices s,a,b,c,d,e for hands-on tracing, final labels a=8,b=5,c=9,d=7,e=10."
     },
     {
-      "concept": "KV Cache Pruning: Scissorhands and H2O",
-      "importance_score": 7,
-      "demo_feasibility_score": 7,
-      "prerequisites": [
-        "KV Cache in Autoregressive Generation",
-        "Attention score interpretation"
-      ],
-      "why_it_matters": "Real attention maps are highly sparse: a minority of tokens repeatedly attract the majority of attention mass. Scissorhands and H2O evict low-importance KV entries, achieving up to 5x compression with small accuracy loss. No retraining required — only a lightweight eviction policy at inference time.",
-      "transcript_summary": "Slide 19 shows sparse attention maps at three decoding positions (178, 228, 278) demonstrating consistent heavy-hitter patterns. Slide 20 shows Scissorhands compression-vs-accuracy curves on OPT-13B/30B/66B."
-    },
-    {
-      "concept": "Cross-Dialog Prompt Caching (Prefix Caching for LLM APIs)",
+      "concept": "Time complexity by priority-queue implementation",
       "importance_score": 8,
       "demo_feasibility_score": 8,
       "prerequisites": [
-        "KV Cache in Autoregressive Generation",
-        "LLM API basics (system prompt, tokens, cost)"
+        "Dijkstra's main loop",
+        "Linear array, binary heap, and Fibonacci heap",
+        "Asymptotic (big-O) analysis"
       ],
-      "why_it_matters": "Prefix caching extends KV reuse across separate API calls that share a common prefix. API providers price cached tokens at ~10x less than fresh tokens. Research (arXiv 2601.06007) measures up to 79.6% cost reduction and 22.9% TTFT reduction. For AI agents that re-send a large system prompt on every tool call, placing stable content first is the key design principle.",
-      "transcript_summary": "Slide 21 shows cross-dialog KV sharing. Slide 22 shows OpenAI pricing (gpt-5.4: $2.50 input vs. $0.25 cached input per 1M tokens). Slides 23-24 cover AI agent use case with AGENTS.md, SOUL.md, MEMORY.md placed first. Slide 25 illustrates prompt templating for better cache hit rate. Slide 26 shows cost and TTFT reductions across GPT-5.2, Claude Sonnet 4.5, Gemini 2.5 Pro, GPT-4o."
+      "why_it_matters": "The running time depends entirely on the priority-queue implementation: O(V^2) with a linear array, O(E lg V) with a binary heap, and O(E + V lg V) amortized with a Fibonacci heap. This ties algorithm design to data-structure choice and can be demonstrated empirically by timing array- vs. heap-based runs on growing graphs.",
+      "transcript_summary": "Slide 5: linear array — Extract-Min O(V) → O(V^2) over the loop, relaxation O(E)×O(1). Binary heap — Extract-Min O(lg V) → O(V lg V), relaxation O(E)×O(lg V) for Decrease-Key → O(E lg V). Fibonacci heap — amortized O(E + V lg V)."
     },
     {
-      "concept": "Dijkstra's Shortest-Path Algorithm",
-      "importance_score": 9,
-      "demo_feasibility_score": 9,
+      "concept": "Correctness proof (loop invariant and induction on |S|)",
+      "importance_score": 7,
+      "demo_feasibility_score": 5,
       "prerequisites": [
-        "Graph representation (adjacency list, edge weights)",
-        "Priority queue / min-heap data structure",
-        "Greedy algorithm paradigm"
+        "Loop invariants",
+        "Proof by induction",
+        "Shortest-path distance δ(s,v)",
+        "Non-negative edge weight assumption"
       ],
-      "why_it_matters": "Dijkstra's algorithm is the canonical single-source shortest-path algorithm for non-negative-weight graphs, underlying navigation systems, network routing, and ML pipelines. The lecture covers pseudocode, a detailed step-by-step example, three priority-queue implementations with their time complexities, and a formal correctness proof by induction.",
-      "transcript_summary": "Dijkstra.pdf slide 2 presents the algorithm alongside Prim's MST to highlight structural similarity. Slide 3 traces a 6-node example (s, t, x, y, z) through five while-loop iterations with colored nodes and predecessor arrows. Slide 4 is a practice problem on a 6-node graph (s, a, b, c, d, e). Slide 5 gives time complexity: O(V^2) with linear array, O(E log V) with binary heap, O(E + V log V) with Fibonacci heap. Slide 6 proves correctness via loop invariant (for all v in S: v.d = delta(s,v)) proved by induction on |S|."
+      "why_it_matters": "Establishes why the greedy choice is correct: the loop invariant says that for every v ∈ S, v.d = δ(s,v). The inductive argument depends critically on non-negative edge weights — any alternative path P must leave S and is already at least as long as P_v by the time it does. This also explains why Dijkstra fails with negative edges.",
+      "transcript_summary": "Slide 6: loop invariant 'for each v∈S, v.d=δ(s,v)'. Induction on |S|: basis |S|=1; inductive step grows S by v via final edge (u,v); P_u is shortest s-u path; any other s-v path P leaves S at first non-S node y (with x∈S just before); w(P_v)=v.d=u.d+w(u,v) ≤ x.d+w(x,y) ≤ w(P)."
+    },
+    {
+      "concept": "Relationship between Dijkstra's and Prim's algorithms",
+      "importance_score": 5,
+      "demo_feasibility_score": 6,
+      "prerequisites": [
+        "Dijkstra's main loop",
+        "Minimum spanning tree / Prim's algorithm"
+      ],
+      "why_it_matters": "Both are greedy, both use a min-priority queue with Extract-Min and key updates, and differ only in the update rule (path distance u.d + w(u,v) vs. raw edge weight w(u,v)). Contrasting them deepens understanding of greedy graph algorithms.",
+      "transcript_summary": "Slide 2 shows MST-Prim(G,w,r) pseudocode beside Dijkstra and states Dijkstra 'executes essentially the same as Prim's algorithm.' Prim sets v.key = w(u,v); Dijkstra relaxes v.d = u.d + w(u,v)."
     }
   ],
   "selected_concepts": [
-    "KV Cache in Autoregressive Generation",
-    "KV Cache Memory Footprint and Hardware Constraints",
-    "Attention Head Variants for KV Cache Reduction: MHA vs. MQA vs. GQA vs. MLA",
-    "Cross-Dialog Prompt Caching (Prefix Caching for LLM APIs)",
-    "Dijkstra's Shortest-Path Algorithm"
+    "Dijkstra's single-source shortest-path algorithm (main loop)",
+    "Edge relaxation and Initialize-Single-Source",
+    "Step-by-step execution trace on an example graph",
+    "Time complexity by priority-queue implementation",
+    "Correctness proof (loop invariant and induction on |S|)"
   ],
-  "selection_rationale": "The five selected concepts span both source documents and form a pedagogically complete arc. KV Cache (autoregressive mechanism) is the foundational concept — all other KV optimizations build on it and it admits a compelling before/after timing demo in pure PyTorch. Memory Footprint Analysis provides an interactive calculation cell where students manipulate real model hyperparameters. Attention Head Variants (MHA/MQA/GQA/MLA) are the most research-active sub-topic and can be demonstrated with memory-measurement cells using toy models. Cross-Dialog Prompt Caching connects hardware intuition to real API engineering practice with measurable cost/latency outcomes. Dijkstra's Algorithm is the core concept from the Algorithms lecture and has a rich step-by-step visualization opportunity plus interactive exercises. KV Cache eviction strategies (Sliding Window, StreamingLLM, Pruning) were de-prioritized because those demos require loading actual checkpoint weights and are noted as optional extension cells.",
+  "selection_rationale": "Selection follows the lecture's own structure and the project's quality priorities (executability, concept correctness, interactivity, visualization). The main loop, relaxation, and the worked execution trace form the irreducible core and are maximally demo-feasible: a Colab notebook can implement Dijkstra and animate the example/practice graphs (distance labels, S vs. Q, predecessor edges) for high interactivity and visualization value. Time complexity is selected because it is a full slide and supports an executable empirical comparison of linear-array vs. binary-heap implementations, linking algorithm to data structure. The correctness proof is selected for pedagogical completeness — it explains the non-negative-weight requirement and can be illustrated with a negative-edge counterexample — though its demo feasibility is lower since it is primarily mathematical. The Dijkstra-vs-Prim relationship remains a candidate only: a single contrasting remark of lower importance that would dilute focus, recorded for optional inclusion.",
   "assumptions": [
-    "Both PDFs were fully read directly: KVcahce.pdf (27 slides) and Dijkstra.pdf (6 slides, NTU EE4033-01 Lecture 11, Spring 2025, instructor Shao-Hua Sun).",
-    "No instructor transcript was provided; all concept extraction is based directly on slide content.",
-    "Target audience: NTU EE upper-level undergraduates or graduate students with prior exposure to Transformer attention equations, basic graph algorithms, and Python.",
-    "Notebook environment: Google Colab with a standard GPU runtime (T4 or better); no custom CUDA kernels required.",
-    "For the Prompt Caching demo, an Anthropic or OpenAI API key is assumed available.",
-    "Gemma 2 27B (46 layers, 32 heads, 128 head-dim, FP16) is used as the concrete arithmetic reference; actual model weight loading is not required."
+    "The single PDF (6 slides) is the complete source material for this run; no separate instructor transcript was provided, so transcript_summary fields are derived from slide text and figures.",
+    "Handwritten annotations in the Example/Practice figures (e.g., 'Relax(s,y,w)', '5+3=8') are instructor working notes confirming the trace, not additional concepts.",
+    "Final example distances are read from the figures as s=0, y=5, t=8, z=7, x=9, and are intended to be reproduced exactly by the demo implementation.",
+    "Graphs are directed with non-negative weights, consistent with the stated goal and the correctness proof."
   ]
 }

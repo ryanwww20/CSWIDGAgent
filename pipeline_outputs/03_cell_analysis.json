@@ -2,375 +2,231 @@
   "cell_specs": [
     {
       "cell_id": "C02",
-      "implementation_plan": "Run '!pip install -q numpy torch matplotlib ipywidgets anthropic' in a shell line. Then import: numpy as np, torch, torch.nn as nn, torch.nn.functional as F, matplotlib.pyplot as plt, ipywidgets as widgets, from ipywidgets import interact, from IPython.display import display HTML clear_output, import hashlib os time. Print versions: np.__version__, torch.__version__, widgets.__version__. Set matplotlib inline backend with '%matplotlib inline'.",
-      "function_signatures": [],
+      "implementation_plan": "Environment setup and centralized imports. (1) Wrap pip installs in a try/except: attempt 'import networkx, matplotlib, ipywidgets'; on ImportError run '!pip install -q networkx matplotlib ipywidgets' via get_ipython().system, then re-import. (2) Import standard libraries: heapq, math, time, random. (3) Import networkx as nx, matplotlib.pyplot as plt, ipywidgets as widgets plus 'from ipywidgets import interact, IntSlider, Dropdown, Checkbox, Play'. (4) Enable inline plotting via get_ipython().run_line_magic('matplotlib', 'inline') guarded by 'if get_ipython() is not None'. (5) Seed random with a fixed value (random.seed(42)) for reproducible timing graphs. (6) Print a one-line confirmation including the resolved networkx and matplotlib versions.",
+      "function_signatures": [
+        "ensure_dependencies() -> None"
+      ],
       "state_variables": [
-        "np (numpy module)",
-        "torch (torch module)",
-        "nn (torch.nn module)",
-        "F (torch.nn.functional module)",
-        "plt (matplotlib.pyplot module)",
-        "widgets (ipywidgets module)",
-        "interact (ipywidgets.interact function)",
-        "display, HTML, clear_output (IPython.display)",
-        "hashlib (stdlib module)",
-        "os (stdlib module)",
-        "time (stdlib module)"
+        "heapq, math, time, random (stdlib modules in global namespace)",
+        "nx (networkx module alias)",
+        "plt (matplotlib.pyplot alias)",
+        "widgets (ipywidgets alias) and interact/IntSlider/Dropdown/Checkbox/Play names"
       ],
       "error_handling": [
-        "If pip install fails for 'anthropic', catch the ImportError in C20 only — all other cells work without it.",
-        "Print a clear warning if torch is CPU-only ('CUDA not available — all attention ops will run on CPU, which is fine for this notebook')."
+        "Catch ImportError around the initial imports and trigger pip install before re-importing.",
+        "Guard the matplotlib inline magic with 'if get_ipython() is not None' so the cell does not crash outside IPython.",
+        "If pip install fails, print an actionable message naming the missing package rather than letting a raw traceback propagate."
       ],
       "test_checks": [
-        "assert int(np.__version__.split('.')[0]) >= 1, 'numpy >= 1.x required'",
-        "print('All imports OK')"
+        "assert all(m in globals() for m in ['heapq','math','time','random','nx','plt','widgets'])",
+        "Print 'Setup OK - networkx', nx.__version__ to confirm successful import.",
+        "Confirm random.seed(42) was applied (documented) and no exception was raised."
       ]
     },
     {
       "cell_id": "C04",
-      "implementation_plan": "Define naive_attention_decode(token_embeddings, W_q, W_k, W_v). token_embeddings is np.ndarray (T, d), W_q/W_k/W_v are np.ndarray (d, d). Loop t in range(T): (1) Recompute K = token_embeddings[:t+1] @ W_k shape (t+1, d) and V = token_embeddings[:t+1] @ W_v shape (t+1, d) — this is the expensive recomputation. (2) q = token_embeddings[t] @ W_q shape (d,). (3) scores = q @ K.T / np.sqrt(d) shape (t+1,). (4) Apply max-subtraction for numerical stability: scores -= scores.max(). (5) weights = np.exp(scores); weights /= weights.sum() shape (t+1,). (6) output = weights @ V shape (d,). Append output. (7) Count ops: cumulative_ops += 2*(t+1) (2 full projection matmuls — K and V — each over t+1 tokens). Append cumulative_ops. Return (outputs, op_counts). After definition, run a demo with T=8, d=4, random seed 42, identity weights to show it works.",
+      "implementation_plan": "Build the lecture example graph and the shared drawing primitive. (1) Define example_graph as a networkx.DiGraph (or plain adjacency dict {u: [(v, w), ...]} if nx unavailable) with vertices s,t,x,y,z and the CLRS slide-3 edges: s->t(10), s->y(5), t->x(1), t->y(2), y->t(3), y->x(9), y->z(2), x->z(4), z->x(6), z->s(7). (2) Define POS, a fixed dict of (x,y) coordinates for s,t,x,y,z so layout is stable across redraws. (3) Implement draw_graph(graph, pos, dist=None, pi=None, S=None, u=None, frontier=None, title=None, ax=None): create or reuse an axis; color nodes by state - S members black (white font), active vertex u gray, others (Q) white with black border; draw all edges light gray; if pi is given, highlight predecessor (tree) edges in a bold color; annotate each node with its current dist ('INF' for math.inf); draw edge-weight labels; set the title/caption. (4) Render the initial example graph once to verify the helper.",
       "function_signatures": [
-        "def naive_attention_decode(token_embeddings: np.ndarray, W_q: np.ndarray, W_k: np.ndarray, W_v: np.ndarray) -> tuple[list[np.ndarray], list[int]]"
+        "build_example_graph() -> tuple[graph, dict]",
+        "draw_graph(graph, pos, dist=None, pi=None, S=None, u=None, frontier=None, title=None, ax=None) -> matplotlib.axes.Axes"
       ],
       "state_variables": [
-        "naive_attention_decode (function, referenced by C05, C06, C07)"
+        "example_graph (networkx.DiGraph or adjacency dict)",
+        "POS (dict vertex -> (x, y) coordinates)"
       ],
       "error_handling": [
-        "Assert token_embeddings.ndim == 2, 'Expected (T, d) array'",
-        "Assert W_q.shape == W_k.shape == W_v.shape == (token_embeddings.shape[1], token_embeddings.shape[1]), 'Weight matrix shape mismatch'",
-        "Guard against weights summing to zero (should not happen with valid softmax but add assert weights.sum() > 1e-9)"
+        "If a node in S/u/frontier is absent from graph, skip it defensively rather than raising KeyError.",
+        "Render math.inf distances as the string 'INF' to avoid matplotlib label errors.",
+        "If networkx is unavailable, fall back to manual matplotlib drawing using POS and the adjacency dict.",
+        "When ax is None create a fresh figure/axis; when provided, ax.clear() so animation redraws do not stack artists."
       ],
       "test_checks": [
-        "outputs, ops = naive_attention_decode(np.random.randn(8, 4), np.eye(4), np.eye(4), np.eye(4))",
-        "assert len(outputs) == 8 and len(ops) == 8, 'Output length must equal T'",
-        "assert ops[-1] == 2 * (1+2+3+4+5+6+7+8), f'Expected {2*36}, got {ops[-1]}'",
-        "assert outputs[0].shape == (4,), 'Each output must be shape (d,)'",
-        "print(f'Naive op counts: {ops}')  # Should grow as [2,6,12,20,30,42,56,72]"
-      ]
-    },
-    {
-      "cell_id": "C05",
-      "implementation_plan": "Define cached_attention_decode(token_embeddings, W_q, W_k, W_v). Same signature as C04. Initialize kv_cache_k = [] and kv_cache_v = [] (lists of np.ndarray). Loop t in range(T): (1) Compute ONLY the new token's projections: k_t = token_embeddings[t] @ W_k shape (d,), v_t = token_embeddings[t] @ W_v shape (d,). Append to caches. (2) K = np.stack(kv_cache_k) shape (t+1, d), V = np.stack(kv_cache_v) shape (t+1, d). (3) q = token_embeddings[t] @ W_q. (4) scores, weights, output same as C04. (5) cumulative_ops += 2 (only ONE new token projected for K and V). Append. Return (outputs, op_counts, (kv_cache_k, kv_cache_v)). After definition, run with SAME inputs as C04 demo (fix np.random.seed(42) before both), assert np.allclose on all outputs, and print the comparison.",
-      "function_signatures": [
-        "def cached_attention_decode(token_embeddings: np.ndarray, W_q: np.ndarray, W_k: np.ndarray, W_v: np.ndarray) -> tuple[list[np.ndarray], list[int], tuple[list, list]]"
-      ],
-      "state_variables": [
-        "cached_attention_decode (function, referenced by C06, C07)"
-      ],
-      "error_handling": [
-        "Same shape assertions as C04.",
-        "Assert len(kv_cache_k) == t+1 after each step (cache grows monotonically).",
-        "If np.allclose assertion fails, print both output arrays side by side for debugging before raising AssertionError."
-      ],
-      "test_checks": [
-        "np.random.seed(42); emb = np.random.randn(8, 4); W = np.eye(4)",
-        "naive_out, naive_ops = naive_attention_decode(emb, W, W, W)",
-        "cached_out, cached_ops, _ = cached_attention_decode(emb, W, W, W)",
-        "for t, (n, c) in enumerate(zip(naive_out, cached_out)): assert np.allclose(n, c, atol=1e-6), f'Mismatch at step {t}'",
-        "assert cached_ops[-1] == 2 * 8, f'Cached total ops should be 2*T=16, got {cached_ops[-1]}'",
-        "print('Outputs match: True')",
-        "print(f'Cached op counts: {cached_ops}')  # Should be [2,4,6,8,10,12,14,16]"
+        "assert set of example_graph nodes == {'s','t','x','y','z'}",
+        "assert example_graph edge count == 10 (sum of adjacency list lengths == 10 in dict form)",
+        "assert set(POS.keys()) == set of example_graph nodes",
+        "Call draw_graph once and assert it returns an Axes without raising."
       ]
     },
     {
       "cell_id": "C06",
-      "implementation_plan": "Fix T=8. Build two 2D grids of shape (T, T) for visualization. naive_grid[step, pos] = 1 if pos <= step (red: recomputed from scratch), else 0 (white: not yet generated). cached_grid[step, pos]: 2 if pos == step (green: newly computed and cached this step), 1 if pos < step (light green: served from cache, no recompute), 0 if pos > step (white: future). Define a custom 3-color ListedColormap(['white', '#ff9999', '#cc0000']) for naive and (['white', '#99ddaa', '#00aa44']) for cached. Use plt.subplots(1, 2, figsize=(12, 5)). For each subplot: imshow with interpolation='nearest', set_xticks/yticks with labels 'Token 0'...'Token T-1' for columns and 'Step 0'...'Step T-1' for rows, add a text label in each colored cell ('R' for red recomputed cells in naive, 'C' for cached light-green cells, 'N' for new dark-green cells). Add colorbars with 3 categories. Title each plot clearly.",
+      "implementation_plan": "Implement the two atomic shortest-path primitives as pure, reusable functions. (1) initialize_single_source(graph, s): return (dist, pi) where dist maps every vertex to math.inf except dist[s]=0, and pi maps every vertex to None; iterate vertices via a representation-agnostic helper get_vertices(graph). (2) relax(u, v, w, dist, pi): if dist[u] + w < dist[v], set dist[v] = dist[u] + w, pi[v] = u, return True; else return False (inf + finite == inf in Python, which is safe). (3) Print a sanity check: initialize on example_graph from s and show dist with s=0 and all others INF.",
       "function_signatures": [
-        "def build_naive_grid(T: int) -> np.ndarray",
-        "def build_cached_grid(T: int) -> np.ndarray"
+        "get_vertices(graph) -> list",
+        "initialize_single_source(graph, s) -> tuple[dict, dict]",
+        "relax(u, v, w, dist, pi) -> bool"
       ],
-      "state_variables": [],
+      "state_variables": [
+        "dist (dict vertex -> float distance estimate, sanity-check instance)",
+        "pi (dict vertex -> predecessor or None, sanity-check instance)"
+      ],
       "error_handling": [
-        "Assert T >= 2 before building grids.",
-        "If matplotlib backend is not inline, call plt.show() explicitly."
+        "Raise a clear ValueError if s is not in the graph's vertex set.",
+        "In relax, treat missing keys as a programming error - assert u in dist and v in dist with an explanatory message.",
+        "relax itself is weight-sign agnostic; non-negativity is enforced by algorithm assumptions and exercised in C14 (documented here)."
       ],
       "test_checks": [
-        "naive_grid = build_naive_grid(8); assert naive_grid.shape == (8, 8)",
-        "assert naive_grid[0, 0] == 1 and naive_grid[0, 1] == 0, 'At step 0, only position 0 is colored'",
-        "assert naive_grid[7, 7] == 1 and np.sum(naive_grid[7]) == 8, 'At step 7, all 8 positions are recomputed'",
-        "cached_grid = build_cached_grid(8); assert cached_grid[3, 3] == 2 and cached_grid[3, 2] == 1 and cached_grid[3, 4] == 0"
+        "d, p = initialize_single_source(example_graph, 's'); assert d['s'] == 0 and all(d[v] == math.inf for v in get_vertices(example_graph) if v != 's')",
+        "assert all(p[v] is None for v in get_vertices(example_graph))",
+        "dist={'a':0,'b':math.inf}; pi={'a':None,'b':None}; assert relax('a','b',3,dist,pi) is True and dist['b'] == 3 and pi['b'] == 'a'",
+        "assert relax('a','b',5,dist,pi) is False (no update when 0+5 > existing 3)"
       ]
     },
     {
       "cell_id": "C07",
-      "implementation_plan": "Define inner function plot_flop_comparison(T). Inside: set np.random.seed(0); d=16 (small for speed); emb = np.random.randn(T, d); W = np.eye(d). Call naive_attention_decode(emb, W, W, W) → naive_ops. Call cached_attention_decode(emb, W, W, W) → cached_ops. Create plt.figure(figsize=(9, 4)). Plot steps=list(range(1,T+1)) on x-axis. Line 1: naive_ops in red with label f'Naive O(T²) — {naive_ops[-1]} total ops'. Line 2: cached_ops in green with label f'KV Cache O(T) — {cached_ops[-1]} total ops'. Fill between the two curves with alpha=0.15 red. Add xlabel 'Generation Step', ylabel 'Cumulative K/V Projection Ops', title f'KV Cache vs Naive at T={T}', legend, tight_layout, plt.show(). Print speedup ratio. Wrap the function in interact() with IntSlider(min=4, max=256, step=4, value=32, description='Sequence length T', continuous_update=False).",
+      "implementation_plan": "Interactive single-edge relaxation sanity check. (1) Build labeled edge options 'u->v (w=W)' mapped to (u, v, w) tuples from example_graph for a Dropdown. (2) Define relaxation_demo(edge_label, ud, vd): look up (u, v, w); build temporary dist={u: ud, v: vd}, pi={v: None}; capture before value vd; call relax(u, v, w, dist, pi); print before/after v.d, whether the condition ud + w < vd held, and the resulting predecessor. (3) Wire with interact: Dropdown(options=edge_labels), IntSlider(min=0, max=20) for u.d, IntSlider(min=0, max=30) for v.d. Keep output as plain printed text for Colab reliability.",
       "function_signatures": [
-        "def plot_flop_comparison(T: int) -> None"
+        "relaxation_demo(edge_label: str, ud: int, vd: int) -> None"
       ],
-      "state_variables": [],
+      "state_variables": [
+        "edge_options (dict label -> (u, v, w)) derived from example_graph"
+      ],
       "error_handling": [
-        "Use continuous_update=False on the slider to avoid triggering on every drag tick (which would be slow).",
-        "Wrap plt.close('all') before plt.figure() to prevent figure accumulation in Colab."
+        "If get_ipython() is None or ipywidgets unavailable, fall back to a single non-interactive call with default arguments plus a printed note.",
+        "Sliders enforce min=0 so values stay non-negative, within Dijkstra's assumptions.",
+        "Support a large sentinel value for v.d to mimic an unrelaxed vertex and label it clearly."
       ],
       "test_checks": [
-        "plot_flop_comparison(16)  # Run once without interact to confirm no errors",
-        "Visually verify: naive curve is roughly parabolic, cached curve is a straight line with much lower slope."
+        "Call relaxation_demo(first_edge_label, 0, 100) and confirm relaxation occurs (after < before).",
+        "Call relaxation_demo(first_edge_label, 100, 0) and confirm no relaxation (after == before).",
+        "assert len(edge_options) == 10 (all example-graph edges available)."
+      ]
+    },
+    {
+      "cell_id": "C08",
+      "implementation_plan": "Implement traced Dijkstra over a binary heap. (1) dijkstra_with_trace(graph, s): dist, pi = initialize_single_source(graph, s); S=set(); steps=[]; pq=[(0, s)]. Use lazy deletion since heapq lacks decrease-key. (2) Main loop: while pq, heappop (d, u); if u in S continue; add u to S; record a snapshot AFTER extract-min with caption f'Extract-Min: u = {u} (d={d})'. (3) For each neighbor v with weight w of u: did = relax(u, v, w, dist, pi); if did: heappush(pq, (dist[v], v)) and record a snapshot caption f'Relax({u}, {v}): {v}.d = {dist[v]}'. (4) Each snapshot is {'S': set(S), 'u': u, 'dist': dict(dist), 'pi': dict(pi), 'frontier': sorted vertices in pq not in S, 'caption': caption}; deep-copy per snapshot. (5) Return (steps, dist, pi). (6) Run on example_graph, print final dist and assert it equals the answer key.",
+      "function_signatures": [
+        "neighbors(graph, u) -> list[tuple[vertex, weight]]",
+        "dijkstra_with_trace(graph, s) -> tuple[list[dict], dict, dict]"
+      ],
+      "state_variables": [
+        "trace_steps (list of snapshot dicts for the example graph)",
+        "final_dist, final_pi (dicts from the example-graph run)",
+        "pq (heap list of (distance, vertex)), S (set of finalized vertices)"
+      ],
+      "error_handling": [
+        "Use lazy deletion ('if u in S: continue') to handle stale/duplicate heap entries safely instead of a non-existent decrease-key.",
+        "Deep-copy (dict(dist), dict(pi), set(S)) into every snapshot so animation frames are immutable and independent.",
+        "Raise ValueError if s not in graph before starting.",
+        "Heap tuples are (distance, vertex) so equal distances tie-break deterministically on the comparable vertex label and never raise."
+      ],
+      "test_checks": [
+        "steps, d, _ = dijkstra_with_trace(example_graph, 's'); assert d == {'s':0,'y':5,'t':8,'z':7,'x':9}",
+        "assert len(steps) > 0 and all({'S','u','dist','pi','frontier','caption'} <= set(snap) for snap in steps)",
+        "assert steps[0]['u'] == 's' (source extracted first)",
+        "assert len(steps[-1]['S']) == 5 (all vertices finalized by the end)"
       ]
     },
     {
       "cell_id": "C09",
-      "implementation_plan": "Define module-level DTYPE_BYTES = {'FP32': 4, 'FP16': 2, 'INT8': 1, 'BF16': 2}. Define kv_cache_bytes_per_token(num_layers, num_kv_heads, head_dim, dtype_bytes): return num_layers * num_kv_heads * head_dim * dtype_bytes * 2. The factor 2 accounts for both K and V. Define max_tokens(gpu_memory_gb, model_weight_gb, num_layers, num_kv_heads, head_dim, dtype_bytes): available = (gpu_memory_gb - model_weight_gb) * (1024**3); bpt = kv_cache_bytes_per_token(...); return int(available / bpt) if bpt > 0 else 0. Run demonstration: Gemma 2 27B has num_layers=46, num_kv_heads=16, head_dim=128, dtype='FP16'. NOTE: The course slide uses num_heads=32 (query heads) in its worked example to get 753,664 bytes; our formula correctly uses num_kv_heads=16 (the actual KV cache cost for GQA), giving 376,832 bytes. Print both values with explanation. model_weight_gb = 54 (27B params × 2 bytes ≈ 54 GB). max_tok = max_tokens(80, 54, 46, 16, 128, 2).",
+      "implementation_plan": "Animated scrubber over the example-graph trace. (1) Define show_step(i): fetch snap = trace_steps[i], ax.clear(), call draw_graph(example_graph, POS, dist=snap['dist'], pi=snap['pi'], S=snap['S'], u=snap['u'], frontier=snap['frontier'], title=f\"Step {i+1}/{len(trace_steps)}: {snap['caption']}\"), then display. (2) Wire interact(show_step, i=IntSlider(min=0, max=len(trace_steps)-1, step=1, value=0)); optionally link a Play widget to the same IntSlider via widgets.jslink for auto-advance. (3) Create fig, ax once and reuse them so Colab is not flooded with images.",
       "function_signatures": [
-        "def kv_cache_bytes_per_token(num_layers: int, num_kv_heads: int, head_dim: int, dtype_bytes: int) -> int",
-        "def max_tokens(gpu_memory_gb: float, model_weight_gb: float, num_layers: int, num_kv_heads: int, head_dim: int, dtype_bytes: int) -> int"
+        "show_step(i: int) -> None"
       ],
       "state_variables": [
-        "DTYPE_BYTES (dict, used by C10, C11, C15, C16)",
-        "kv_cache_bytes_per_token (function, used by C10, C11, C15, C16)",
-        "max_tokens (function, used by C10, C11)"
+        "step_slider (IntSlider bound to trace_steps index)",
+        "fig, ax (single reused matplotlib figure/axis for redraws)"
       ],
       "error_handling": [
-        "Raise ValueError if model_weight_gb >= gpu_memory_gb: 'Model weights exceed GPU memory; no room for KV cache'.",
-        "Return 0 (not error) if dtype_bytes is 0 or any dimension is 0 — caller should check.",
-        "Print a clear note distinguishing num_kv_heads (GQA) from num_q_heads (query heads) to address the slide's different calculation."
+        "Clamp i into [0, len(trace_steps)-1] before indexing.",
+        "If trace_steps is empty, print a message to run C08 first instead of indexing.",
+        "ax.clear() each frame to prevent artist accumulation; if ipywidgets unavailable, render the final step statically with a note."
       ],
       "test_checks": [
-        "assert kv_cache_bytes_per_token(1, 1, 1, 2) == 4, 'Minimal case: 1 layer, 1 head, dim=1, FP16 = 2*2=4 bytes'",
-        "gemma_bpt = kv_cache_bytes_per_token(46, 16, 128, 2)",
-        "assert gemma_bpt == 46 * 16 * 128 * 2 * 2, f'Expected {46*16*128*2*2}, got {gemma_bpt}'",
-        "print(f'Gemma 2 27B (GQA, num_kv_heads=16): {gemma_bpt:,} bytes = {gemma_bpt/1024:.1f} KB per token')",
-        "print(f'Max tokens on A100-80GB: {max_tokens(80, 54, 46, 16, 128, 2):,}')"
+        "assert len(trace_steps) >= 1 before building the slider.",
+        "Call show_step(0) and show_step(len(trace_steps)-1) and assert neither raises.",
+        "assert step_slider.max == len(trace_steps) - 1"
       ]
     },
     {
       "cell_id": "C10",
-      "implementation_plan": "Define show_memory_interactive(num_layers, num_kv_heads, head_dim_choice, dtype, gpu_memory_gb_choice). Map dtype string to bytes via DTYPE_BYTES. Map head_dim_choice ('64','128','192','256') to int. Map gpu_memory_gb_choice to int. model_weight_gb_est = 14 (fixed placeholder with note). Call kv_cache_bytes_per_token and max_tokens. Build figure with two subplots side by side: (left) horizontal bar chart — 3 bars for context lengths [10_000, 50_000, 100_000] showing KV size in GB, draw a vertical red dashed line at gpu_memory_gb with label; (right) pie chart showing GPU memory split: 'Model Weights', 'KV Cache @50k tokens', 'Free'. Add suptitle with per-token size and max-token summary. plt.tight_layout(); plt.show(). Wrap in interact() with: IntSlider(num_layers, 1, 80, 1, 32), IntSlider(num_kv_heads, 1, 64, 1, 8), Dropdown(head_dim, ['64','128','192','256'], '128'), Dropdown(dtype, ['FP32','FP16','BF16','INT8'], 'FP16'), Dropdown(gpu_memory_gb, ['24','40','80'], '80'). Use continuous_update=False.",
+      "implementation_plan": "Practice graph with predict-then-verify flow. (1) Build practice_graph (slide-4 vertices s,a,b,c,d,e) as a DiGraph/adjacency dict with weights chosen so the answer key holds: final distances a=8, b=5, c=9, d=7, e=10 from source s. Define PRACTICE_POS fixed coordinates. (2) Define EXPECTED_PRACTICE = {'s':0,'a':8,'b':5,'c':9,'d':7,'e':10}. (3) practice_steps, practice_dist, _ = dijkstra_with_trace(practice_graph, 's'). (4) Build show_practice_step(i) analogous to C09 over practice_steps reusing draw_graph. (5) Add a reveal_answers(reveal) Checkbox handler: unchecked prompts the student to predict; checked prints practice_dist alongside EXPECTED_PRACTICE with a per-vertex match table. Wire interact(reveal=Checkbox(value=False)) and an IntSlider over practice steps.",
       "function_signatures": [
-        "def show_memory_interactive(num_layers: int, num_kv_heads: int, head_dim_choice: str, dtype: str, gpu_memory_gb_choice: str) -> None"
+        "build_practice_graph() -> tuple[graph, dict]",
+        "show_practice_step(i: int) -> None",
+        "reveal_answers(reveal: bool) -> None"
       ],
-      "state_variables": [],
+      "state_variables": [
+        "practice_graph, PRACTICE_POS",
+        "practice_steps (snapshot list), practice_dist (final distances)",
+        "EXPECTED_PRACTICE (answer-key dict)"
+      ],
       "error_handling": [
-        "If KV cache at 10k tokens already exceeds GPU memory, color that bar red and label 'OOM'.",
-        "Clamp pie chart values to non-negative (model_weight_gb_est could exceed gpu_memory_gb for large GPU choices — show warning text instead of negative slice).",
-        "Call plt.close('all') before creating new figure to avoid accumulation."
+        "Assert at build time that practice_graph reproduces EXPECTED_PRACTICE; raise AssertionError with a diff if weights were mis-entered.",
+        "Clamp slider index; guard empty practice_steps.",
+        "Fall back to static final-state render plus printed answer key if ipywidgets unavailable."
       ],
       "test_checks": [
-        "show_memory_interactive(32, 8, '128', 'FP16', '40')  # run once without interact",
-        "Verify bar chart shows three bars, red line appears, pie chart has three non-zero slices."
+        "assert practice_dist == EXPECTED_PRACTICE",
+        "assert set of practice_graph nodes == {'s','a','b','c','d','e'}",
+        "Call show_practice_step(0) and reveal_answers(True) and assert neither raises."
       ]
     },
     {
-      "cell_id": "C11",
-      "implementation_plan": "Define MODELS as an ordered dict with four entries: 'Llama-3-8B': {num_layers:32, num_kv_heads:8, head_dim:128, dtype:'FP16', weight_gb:16}, 'Gemma-2-9B': {num_layers:42, num_kv_heads:8, head_dim:256, dtype:'FP16', weight_gb:18}, 'Gemma-2-27B': {num_layers:46, num_kv_heads:16, head_dim:128, dtype:'FP16', weight_gb:54}, 'GPT-3-175B (est)': {num_layers:96, num_kv_heads:96, head_dim:128, dtype:'FP16', weight_gb:350}. GPU_MEMORY_GB=40. Loop over models: compute bpt=kv_cache_bytes_per_token(...) in KB, compute mt=max_tokens(40, weight_gb, ...). Build horizontal bar chart (barh) with model names on y-axis, KB/token on x-axis, bar color 'cornflowerblue'. For each bar: if mt > 0, annotate right of bar with f'{mt//1000}k tokens'; else annotate 'OOM on 40GB' in red. Add xlabel, title, tight_layout, show.",
-      "function_signatures": [],
-      "state_variables": [
-        "MODELS (dict, available for reference in later cells)"
-      ],
-      "error_handling": [
-        "If weight_gb >= GPU_MEMORY_GB, set max_tokens to 0 and annotate 'OOM' — do not call max_tokens which would raise ValueError.",
-        "Assert each model config has all five required keys before computing."
-      ],
-      "test_checks": [
-        "llama_bpt = kv_cache_bytes_per_token(32, 8, 128, 2)",
-        "assert llama_bpt == 32 * 8 * 128 * 2 * 2, 'Llama-3-8B per-token bytes should be 131072'",
-        "assert llama_bpt / 1024 == 128.0, 'Llama-3-8B: 128 KB per token'",
-        "print('Model comparison chart rendered.')"
-      ]
-    },
-    {
-      "cell_id": "C13",
-      "implementation_plan": "Define three classes inheriting nn.Module. Common config: d_model=64, num_q_heads=8, head_dim=d_model//num_q_heads=8. (1) MultiHeadAttention: W_q=Linear(64,64), W_k=Linear(64,64), W_v=Linear(64,64), W_o=Linear(64,64). forward(x: Tensor shape (T,64)): unsqueeze batch dim → (1,T,64). Q=W_q(x).view(1,T,8,8).transpose(1,2) → (1,8,T,8). Same for K, V with W_k, W_v. scores=Q@K.mT/sqrt(8) → (1,8,T,T). weights=softmax(scores,-1). out=weights@V → (1,8,T,8). Reshape to (1,T,64). W_o(out).squeeze(0) → (T,64). Store self.kv_cache=(K,V). (2) MultiQueryAttention: W_k=Linear(64,8) and W_v=Linear(64,8) (single head dimension). K=W_k(x).unsqueeze(0).unsqueeze(0) → (1,1,T,8) then unsqueeze to match (1,1,T,8). Broadcast against Q (1,8,T,8). (3) GroupedQueryAttention(num_kv_groups=2): W_k=Linear(64, 2*8=16), W_v=Linear(64,16). K=W_k(x).view(1,T,2,8).transpose(1,2) → (1,2,T,8). K_expanded=K.repeat_interleave(4, dim=1) → (1,8,T,8). After all class definitions, instantiate all three with torch.manual_seed(0), run forward on x=torch.randn(6,64), print output.shape and kv_cache shapes.",
+      "cell_id": "C12",
+      "implementation_plan": "Empirical array-vs-heap timing. (1) dijkstra_array(graph, s): dist, pi = initialize_single_source; S=set(); while |S| < |V|: linear scan over V-S to find u with minimum dist (Extract-Min in O(V)); if the min is math.inf break (unreachable remainder); add u to S; relax all neighbors. Return dist. (2) dijkstra_heap(graph, s): same core as C08 without snapshot recording, returning only dist. (3) make_random_graph(n, density, max_w, seed): DiGraph on n vertices with random non-negative integer weights in [1, max_w], adding a random spanning path first to guarantee reachability from source 0. (4) For n in a small list (e.g., [10,25,50,100,150]): build a graph, time each algorithm with time.perf_counter over a few repeats, record averages. (5) Print a timing table and plot runtime vs n for array (O(V^2)) and heap (O(E lg V)) on shared matplotlib axes with a legend. (6) Optional IntSlider to set max n / density and re-run.",
       "function_signatures": [
-        "class MultiHeadAttention(nn.Module): def __init__(self, d_model=64, num_q_heads=8)",
-        "class MultiHeadAttention(nn.Module): def forward(self, x: torch.Tensor) -> torch.Tensor",
-        "class MultiQueryAttention(nn.Module): def __init__(self, d_model=64, num_q_heads=8)",
-        "class MultiQueryAttention(nn.Module): def forward(self, x: torch.Tensor) -> torch.Tensor",
-        "class GroupedQueryAttention(nn.Module): def __init__(self, d_model=64, num_q_heads=8, num_kv_groups=2)",
-        "class GroupedQueryAttention(nn.Module): def forward(self, x: torch.Tensor) -> torch.Tensor"
+        "dijkstra_array(graph, s) -> dict",
+        "dijkstra_heap(graph, s) -> dict",
+        "make_random_graph(n: int, density: float, max_w: int = 20, seed: int | None = None) -> graph",
+        "time_algorithm(fn, graph, s, repeats: int = 3) -> float",
+        "run_timing_experiment(sizes: list[int], density: float) -> dict"
       ],
       "state_variables": [
-        "MultiHeadAttention (class, used by C14, C15)",
-        "MultiQueryAttention (class, used by C14, C15)",
-        "GroupedQueryAttention (class, used by C14, C15)"
+        "sizes (list of vertex counts to benchmark)",
+        "timings (dict size -> {'array': sec, 'heap': sec})"
       ],
       "error_handling": [
-        "In GroupedQueryAttention.__init__, assert num_q_heads % num_kv_groups == 0, f'num_q_heads={num_q_heads} must be divisible by num_kv_groups={num_kv_groups}'",
-        "In forward, if x.dim() == 2 add batch dim via x.unsqueeze(0); if x.dim() == 3 use as-is. Always squeeze batch at output.",
-        "Use torch.no_grad() context in forward during demo to avoid grad overhead."
+        "Keep default sizes small and density moderate so Colab stays responsive; cap n to avoid runaway O(V^2) cost.",
+        "Add a spanning path so the source reaches all vertices, preventing timings dominated by early INF breaks.",
+        "Seed graph generation for reproducibility and pass the SAME generated graph to both algorithms for a fair comparison.",
+        "Wrap each timed run in try/except to skip a failing size rather than aborting the whole sweep."
       ],
       "test_checks": [
-        "torch.manual_seed(0); x = torch.randn(6, 64)",
-        "mha = MultiHeadAttention(); mqa = MultiQueryAttention(); gqa = GroupedQueryAttention()",
-        "with torch.no_grad(): o_mha = mha(x); o_mqa = mqa(x); o_gqa = gqa(x)",
-        "assert o_mha.shape == (6, 64), f'MHA output shape wrong: {o_mha.shape}'",
-        "assert o_mqa.shape == (6, 64), f'MQA output shape wrong: {o_mqa.shape}'",
-        "assert o_gqa.shape == (6, 64), f'GQA output shape wrong: {o_gqa.shape}'",
-        "assert mha.kv_cache[0].shape == (1, 8, 6, 8), 'MHA K cache should be (1, num_q_heads, T, head_dim)'",
-        "assert mqa.kv_cache[0].shape == (1, 1, 6, 8), 'MQA K cache should be (1, 1, T, head_dim)'",
-        "assert gqa.kv_cache[0].shape == (1, 2, 6, 8), 'GQA K cache should be (1, num_kv_groups, T, head_dim)'",
-        "print('All attention variants produce correct output shapes.')"
+        "g = make_random_graph(20, 0.3, seed=1); assert dijkstra_array(g, 0) == dijkstra_heap(g, 0) (algorithms agree on a shared graph)",
+        "assert all(timings[n]['array'] >= 0 and timings[n]['heap'] >= 0 for n in sizes)",
+        "assert dijkstra_heap(example_graph, 's') == {'s':0,'y':5,'t':8,'z':7,'x':9} (non-tracing heap matches the traced result)."
       ]
     },
     {
       "cell_id": "C14",
-      "implementation_plan": "Fix num_q_heads=8, seq_len=6. Define three configs: mha_kv=8, mqa_kv=1, gqa_kv=2. For each config build grid: np.zeros((num_q_heads, seq_len)) where grid[q, p] = q // (num_q_heads // num_kv_heads) — the KV head index that query head q reads. Create fig, axes = plt.subplots(1, 3, figsize=(14, 5)). For each ax, config pair: ax.pcolormesh(np.arange(seq_len+1), np.arange(num_q_heads+1), grid, cmap=plt.cm.tab10, vmin=0, vmax=num_kv_heads-0.01). Set ax.set_xlabel('Token Position'), ax.set_ylabel('Query Head Index'), ax.set_title(f'name (num_kv_heads={num_kv_heads})\\nKV cache = {kv_cache_bytes_per_token(32, num_kv_heads, 128, 2)//1024} KB/token'). Add a custom legend using matplotlib Patch for each unique KV head color. After all three panels, add colorbar on last axis. plt.suptitle, plt.tight_layout, plt.show.",
+      "implementation_plan": "Negative-edge counterexample. (1) Build neg_graph, a small cycle-free graph where a negative edge makes Dijkstra err (classic: s->u(1), s->v(2), v->u(-2): true dist[u]=0 via s->v->u, but Dijkstra finalizes u at 1). Hard-code with a comment proving the discrepancy and define NEG_POS. (2) bellman_ford(graph, s): V-1 relaxation passes over all edges returning correct shortest distances as ground truth. (3) Run dijkstra_heap and bellman_ford on neg_graph; print a side-by-side table of vertex, Dijkstra dist, true dist, and a 'WRONG' flag where they differ. (4) Draw neg_graph with draw_graph highlighting the negative edge. (5) Optional compare_on_weight(w) with an IntSlider on the offending edge weight from positive down through negative so students see exactly when the answer breaks.",
       "function_signatures": [
-        "def build_head_sharing_grid(num_q_heads: int, num_kv_heads: int, seq_len: int) -> np.ndarray"
-      ],
-      "state_variables": [],
-      "error_handling": [
-        "Assert num_q_heads % num_kv_heads == 0 for each config before building grid.",
-        "Use vmax=num_kv_heads-0.01 in pcolormesh to prevent the last color bleeding into the next tab10 color."
-      ],
-      "test_checks": [
-        "grid_mha = build_head_sharing_grid(8, 8, 6)",
-        "assert grid_mha[0, 0] == 0 and grid_mha[1, 0] == 1, 'MHA: each query head reads its own KV head'",
-        "grid_mqa = build_head_sharing_grid(8, 1, 6)",
-        "assert np.all(grid_mqa == 0), 'MQA: all query heads read KV head 0'",
-        "grid_gqa = build_head_sharing_grid(8, 2, 6)",
-        "assert grid_gqa[0, 0] == 0 and grid_gqa[4, 0] == 1, 'GQA: first 4 heads read KV 0, next 4 read KV 1'"
-      ]
-    },
-    {
-      "cell_id": "C15",
-      "implementation_plan": "Define plot_kv_reduction(num_kv_groups). Fixed config: num_q_heads=8, num_layers=32, head_dim=128, dtype_bytes=2. mha_bytes = kv_cache_bytes_per_token(32, 8, 128, 2). gqa_bytes = kv_cache_bytes_per_token(32, num_kv_groups, 128, 2). ratio = mha_bytes / gqa_bytes. Regime string: if num_kv_groups==1 'MQA'; elif num_kv_groups==8 'MHA (baseline)'; else f'GQA ({8//num_kv_groups} queries share each KV head)'. plt.close('all'); fig, ax = plt.subplots(figsize=(7,4)). Two bars: ['MHA (8 KV heads)', f'Current ({regime})']. Heights: [mha_bytes/1024, gqa_bytes/1024] in KB. Colors: ['salmon', 'steelblue']. Annotate each bar top with KB value. Set ylabel 'KV Cache per Token (KB)', title. Add text box in upper right: f'Reduction: {ratio:.1f}×'. plt.tight_layout(); plt.show(). Print regime string. Wrap in interact with IntSlider(min=1, max=8, step=1, value=4, continuous_update=False).",
-      "function_signatures": [
-        "def plot_kv_reduction(num_kv_groups: int) -> None"
-      ],
-      "state_variables": [],
-      "error_handling": [
-        "If num_kv_groups > num_q_heads, clip to num_q_heads and show a warning text in the plot.",
-        "Ensure 8 % num_kv_groups == 0; if slider yields non-divisor (e.g. 3, 5, 6, 7), display 'Invalid: 8 must be divisible by num_kv_groups' instead of crashing."
-      ],
-      "test_checks": [
-        "plot_kv_reduction(1)  # MQA: expect ratio=8",
-        "plot_kv_reduction(8)  # MHA: expect ratio=1",
-        "plot_kv_reduction(4)  # GQA: expect ratio=2",
-        "assert kv_cache_bytes_per_token(32,1,128,2) * 8 == kv_cache_bytes_per_token(32,8,128,2)"
-      ]
-    },
-    {
-      "cell_id": "C16",
-      "implementation_plan": "Import pandas as pd (it is pre-installed in Colab; add to C02 imports). Define rows as a list of dicts, one per variant. Use num_layers=32, head_dim=128, dtype_bytes=2, num_q_heads=32 (Llama-3-8B-like config with full MHA). Rows: (1) 'MHA': num_kv_heads=32, bytes=kv_cache_bytes_per_token(32,32,128,2), reduction='1.0×', quality='No change (baseline)', retraining='N/A'. (2) 'GQA (8 KV heads)': num_kv_heads=8, reduction=f'{32/8:.1f}×', quality='Minor impact', retraining='Yes'. (3) 'MQA (1 KV head)': num_kv_heads=1, reduction=f'{32/1:.1f}×', quality='May hurt quality', retraining='Yes'. Build DataFrame. Apply styling: .applymap on 'Quality Impact' column — green for 'No change', yellow for 'Minor', red for 'May hurt'. Apply .applymap on 'Needs Retraining' — gray for 'N/A', orange for 'Yes'. Display styled df.",
-      "function_signatures": [],
-      "state_variables": [
-        "import pandas as pd  (add to C02 import block)"
-      ],
-      "error_handling": [
-        "If pandas is not available, fall back to a plain print of the data in tabular format using str.ljust formatting."
-      ],
-      "test_checks": [
-        "assert len(rows) == 3, 'Table must have exactly 3 rows'",
-        "mha_row = next(r for r in rows if r['Variant']=='MHA')",
-        "assert mha_row['KV Cache / Token (KB)'] == 32*32*128*2*2/1024, 'MHA KB wrong'",
-        "print('Comparison table rendered.')"
-      ]
-    },
-    {
-      "cell_id": "C18",
-      "implementation_plan": "Define class PrefixCacheSimulator with class-level constants FRESH_COST = 2.50/1_000_000 and CACHED_COST = 0.25/1_000_000 (dollars per token). __init__: self.cache = {} (maps hashlib.md5(prefix_str).hexdigest() → list of tokens). _tokenize(text): return text.lower().split(). _hash(tokens): return hashlib.md5(' '.join(tokens).encode()).hexdigest(). process(system_prompt, user_message): (1) sys_toks = _tokenize(system_prompt), user_toks = _tokenize(user_message), all_toks = sys_toks + user_toks. (2) Find longest cached prefix: iterate i from len(sys_toks) down to 1; for each prefix = sys_toks[:i], compute h=_hash(prefix); if h in self.cache, set hit_len=i, break; else hit_len=0. (3) Store _hash(sys_toks) → sys_toks in self.cache. (4) miss_len = len(all_toks) - hit_len. cost = hit_len*CACHED_COST + miss_len*FRESH_COST. (5) Return dict: total_tokens, hit_tokens=hit_len, miss_tokens=miss_len, cost, tokens=all_toks, hit_mask=[True]*hit_len+[False]*miss_len. After class definition, create sim=PrefixCacheSimulator(), define SYSTEM_PROMPT and USER1, USER2. Run r1=sim.process(SYSTEM_PROMPT, USER1) and r2=sim.process(SYSTEM_PROMPT, USER2). Print formatted breakdown for both. Print cost saving: r1['cost']+r2_full_cost - r1['cost'] - r2['cost'].",
-      "function_signatures": [
-        "class PrefixCacheSimulator:",
-        "def __init__(self) -> None",
-        "def _tokenize(self, text: str) -> list[str]",
-        "def _hash(self, tokens: list[str]) -> str",
-        "def process(self, system_prompt: str, user_message: str) -> dict"
+        "build_negative_graph() -> tuple[graph, dict]",
+        "bellman_ford(graph, s) -> dict",
+        "compare_on_weight(w: int) -> None"
       ],
       "state_variables": [
-        "PrefixCacheSimulator (class, used by C19, C20-simulation path)",
-        "SYSTEM_PROMPT (str, default system prompt, also used as default in C19)",
-        "USER1 (str, default first user message)",
-        "USER2 (str, default second user message)"
+        "neg_graph, NEG_POS",
+        "dijkstra_result, true_result (distance dicts being compared)"
       ],
       "error_handling": [
-        "If system_prompt is empty string, hit_len=0 and cache entire prompt as miss.",
-        "If user_message is empty, process just the system prompt tokens — do not crash.",
-        "If self.cache is very large (>10k entries), print a warning but do not evict — this is a toy simulator."
+        "bellman_ford runs a V-th pass and warns if any edge still relaxes (negative cycle), keeping the demo graph cycle-free by construction.",
+        "When the slider sets the offending edge non-negative, the demo shows Dijkstra and Bellman-Ford agreeing, making the breaking point explicit.",
+        "Reuse draw_graph defensively; the negative-weight label is finite and must render (not 'INF')."
       ],
       "test_checks": [
-        "sim = PrefixCacheSimulator()",
-        "r1 = sim.process('Hello world from the system', 'user says hi')",
-        "assert r1['hit_tokens'] == 0, 'First call must be all cache miss'",
-        "assert r1['total_tokens'] == len('Hello world from the system user says hi'.split())",
-        "r2 = sim.process('Hello world from the system', 'user says bye')",
-        "assert r2['hit_tokens'] == len('Hello world from the system'.split()), 'Second call: system prompt should be full cache hit'",
-        "assert r2['cost'] < r1['cost'], 'Second call must be cheaper due to cache hit'",
-        "print(f'Test passed. Second call savings: ${(r1[\"cost\"]-r2[\"cost\"])*1e6:.2f} per million calls')"
-      ]
-    },
-    {
-      "cell_id": "C19",
-      "implementation_plan": "Define DEFAULT_SYSTEM as a multi-line string (~5 sentences describing an AI travel agent with tools and instructions). Define DEFAULT_USER1='Book a flight from Taipei to Boston for next Monday' and DEFAULT_USER2='Book a flight from San Francisco to New York for Friday' (matching the slide 25 example). Create widgets: sys_area=widgets.Textarea(value=DEFAULT_SYSTEM, description='System:', layout=Layout(width='95%',height='100px')); user1_area=widgets.Textarea(value=DEFAULT_USER1, description='User 1:', layout=Layout(width='95%')); user2_area=widgets.Textarea(value=DEFAULT_USER2, description='User 2:', layout=Layout(width='95%')); btn=widgets.Button(description='Compute Cache Hits', button_style='primary', icon='search'); out=widgets.Output(). Define on_click(b): fresh PrefixCacheSimulator each click. Run r1=sim.process(sys_area.value, user1_area.value) then r2=sim.process(sys_area.value, user2_area.value). Build HTML for each result: wrap each token in a <span> with background #d4edda (green) if hit_mask[i] else #ffffff (white). Include padded border, monospace font. Below token strip: show hit rate % and estimated cost. Display HTML in out widget. Call display(VBox([sys_area, user1_area, user2_area, btn, out])).",
-      "function_signatures": [
-        "def on_click(b: widgets.Button) -> None",
-        "def tokens_to_html(tokens: list[str], hit_mask: list[bool], label: str, hit_rate: float, cost: float, savings: float) -> str"
-      ],
-      "state_variables": [
-        "DEFAULT_SYSTEM, DEFAULT_USER1, DEFAULT_USER2 (str, default widget values)"
-      ],
-      "error_handling": [
-        "In on_click, wrap entire body in try/except Exception as e: with out: clear_output(); print(f'Error: {e}') to prevent silent widget failures.",
-        "If system prompt textarea is blank, display a red warning HTML message instead of computing.",
-        "Call clear_output(wait=True) before display to prevent output stacking on repeated button clicks."
-      ],
-      "test_checks": [
-        "Manually trigger on_click with default values and verify green tokens appear for the system prompt portion of Request 2.",
-        "Verify hit rate for Request 1 is 0% (cold cache) and Request 2 hit rate equals len(DEFAULT_SYSTEM.split()) / (len(DEFAULT_SYSTEM.split()) + len(DEFAULT_USER2.split())) * 100."
-      ]
-    },
-    {
-      "cell_id": "C20",
-      "implementation_plan": "Define LONG_SYSTEM_PROMPT as a multi-line string of approximately 500 words describing an ML expert assistant (covering topics: transformers, attention, KV cache, inference optimization, hardware). Define SHORT_USER = 'What is the key benefit of KV Cache in one sentence?'. Define measure_ttft(client, system_prompt, user_message) using the Anthropic streaming API: start=time.perf_counter(); open context manager 'with client.messages.stream(model=claude-sonnet-4-6, max_tokens=50, system=system_prompt, messages=[{role:user, content:user_message}]) as stream:'; iterate stream text_stream; on first chunk set first_token_time=time.perf_counter() and break. Return first_token_time - start. Main block: try: import anthropic; api_key=os.environ.get('ANTHROPIC_API_KEY'); if not api_key: raise ValueError('ANTHROPIC_API_KEY not set'). client=anthropic.Anthropic(api_key=api_key). Print 'Measuring cold TTFT...'; ttft_cold=measure_ttft(client, LONG_SYSTEM_PROMPT, SHORT_USER). time.sleep(0.5). Print 'Measuring warm TTFT (cached prefix)...'; ttft_warm=measure_ttft(client, LONG_SYSTEM_PROMPT, SHORT_USER). Print results table. except (ImportError, ValueError) as e: print('API key not set — skipping live demo; see C18–C19 for simulation'). print(f'Reason: {e}').",
-      "function_signatures": [
-        "def measure_ttft(client: 'anthropic.Anthropic', system_prompt: str, user_message: str) -> float"
-      ],
-      "state_variables": [
-        "LONG_SYSTEM_PROMPT (str, ~500 words, stable prefix for caching demo)",
-        "SHORT_USER (str, short query)",
-        "measure_ttft (function)"
-      ],
-      "error_handling": [
-        "Catch anthropic.APIConnectionError and print 'Connection failed — check your network and API key' before skipping.",
-        "Catch anthropic.RateLimitError and print 'Rate limit hit — wait 60s and retry'.",
-        "If ttft_cold or ttft_warm is 0 (stream returned nothing), print warning and skip speedup calculation.",
-        "Add a note that TTFT variance is high in practice; run 3 times and average for reliable measurement."
-      ],
-      "test_checks": [
-        "assert len(LONG_SYSTEM_PROMPT.split()) >= 400, 'System prompt too short to exercise prefix caching'",
-        "If API key is set: assert ttft_cold > 0 and ttft_warm > 0",
-        "If API key is set: assert ttft_cold >= ttft_warm * 0.5, 'Warm TTFT should not be slower than cold (within 2× variance)'",
-        "print('Live API demo complete.' if api_key else 'Live demo skipped — simulation cells C18-C19 demonstrate the concept.')"
-      ]
-    },
-    {
-      "cell_id": "C22",
-      "implementation_plan": "Import pandas as pd (already in C02). Define summary_data as a list of dicts with keys: Method, Approach, Changes_Attention, Needs_Retraining, Other_Cost. Rows: ('Flash Attention', 'Reduce HBM↔SRAM data movement', 'No', 'No', 'Extra compute + implementation complexity'), ('KV Cache', 'Store computed K/V for reuse at each step', 'No', 'No', 'GPU memory usage grows with context'), ('Multi-query Attention', 'All query heads share one K/V pair', 'Yes', 'Yes', 'May significantly hurt model quality'), ('Group-query Attention', 'Groups of queries share K/V pairs', 'Yes', 'Yes', 'Minor quality impact; used in Llama/Gemma'), ('MLA (DeepSeek)', 'Compress K/V to low-rank latent vector', 'Yes', 'Yes', 'Extra projection matrices'), ('Sliding Window Attention', 'Limit attention to W most recent tokens', 'Yes', '?', 'Cannot attend past window boundary'), ('Streaming LLM', 'Window + attention sink tokens', 'Yes', '?', 'Must always keep first few tokens'), ('Pruning KV Cache', 'Evict low-attention K/V entries', 'Yes', 'No', 'May significantly hurt model quality'). df = pd.DataFrame(summary_data). Rename columns to display-friendly names. Define color_yn(val): return green bg+text for 'No', red bg+text for 'Yes', yellow for '?', else ''. Apply .applymap(color_yn, subset=['Changes Attention?','Needs Retraining?']). Apply .set_table_styles with header styling. Display styled df.",
-      "function_signatures": [
-        "def color_yn(val: str) -> str"
-      ],
-      "state_variables": [],
-      "error_handling": [
-        "If pd.io.formats.style is unavailable (rare edge case), fall back to df.to_string() with print.",
-        "Use .applymap (pandas < 2.1) or .map (pandas >= 2.1) — check pd.__version__ and use appropriate method to avoid DeprecationWarning."
-      ],
-      "test_checks": [
-        "assert len(summary_data) == 8, 'Summary table must have 8 rows'",
-        "assert all(k in summary_data[0] for k in ['Method','Approach','Changes_Attention','Needs_Retraining','Other_Cost'])",
-        "kv_row = next(r for r in summary_data if r['Method'] == 'KV Cache')",
-        "assert kv_row['Changes_Attention'] == 'No' and kv_row['Needs_Retraining'] == 'No', 'KV Cache should require no attention changes and no retraining'",
-        "print('Summary table rendered successfully.')"
+        "true = bellman_ford(neg_graph, 's'); dij = dijkstra_heap(neg_graph, 's'); assert any(true[v] != dij[v] for v in true) (the counterexample exhibits a real discrepancy).",
+        "With the offending edge set non-negative, assert bellman_ford and dijkstra_heap agree (failure is specifically due to negativity).",
+        "A V-th Bellman-Ford pass produces no further relaxation (no negative cycle)."
       ]
     }
   ],
   "cross_cell_invariants": [
-    "All code cells assume C02 has been executed first; any cell run in isolation will raise NameError. Add a guard comment '# Run C02 first' at the top of each code cell.",
-    "numpy random seed must be fixed to np.random.seed(42) before any random array generation in C04/C05/C07 to ensure reproducibility across re-runs.",
-    "kv_cache_bytes_per_token from C09 is the single source of truth for all memory calculations in C10, C11, C15, C16. No cell should reimplement this formula independently.",
-    "The factor of 2 in kv_cache_bytes_per_token (for K and V) must never be 3 (K, Q, V) — Q is not cached.",
-    "All matplotlib figures must call plt.close('all') before plt.figure() or plt.subplots() to prevent figure accumulation in long Colab sessions.",
-    "All widget interact callbacks must use continuous_update=False to avoid triggering expensive computations on every slider tick.",
-    "PrefixCacheSimulator from C18 must be instantiated fresh inside on_click in C19 (not reused across clicks), so cache state reflects exactly the two requests shown — not prior click history.",
-    "C20 is the only cell requiring external credentials; its try/except guard must print a human-readable skip message that references C18–C19 as the fallback.",
-    "pandas must be imported in C02 (add 'import pandas as pd') even though it is only used in C16 and C22 — consistent with the single-import-cell convention.",
-    "All attention implementations in C13 must store kv_cache as an instance attribute (self.kv_cache) set during forward(), not __init__(), so the cache reflects the most recent forward pass."
+    "All cells run strictly top-to-bottom; every function a cell uses is defined in an earlier cell (C02 imports, C04 graph+draw_graph, C06 primitives, C08 traced Dijkstra) with no forward references.",
+    "Graphs are represented consistently (networkx.DiGraph or fallback adjacency dict {u: [(v, w)]}) and accessed only through representation-agnostic helpers get_vertices(graph) and neighbors(graph, u).",
+    "Distance maps use math.inf for unreached vertices and 0 for the source; predecessor maps use None for no predecessor; draw_graph renders math.inf as 'INF'.",
+    "draw_graph is the single visualization primitive reused by C09, C10, and C14; its node-coloring contract is fixed: S=black, active u=gray, Q/frontier=white.",
+    "Every trace snapshot is an independent deep copy (set(S), dict(dist), dict(pi)) so scrubbing forward/backward never mutates earlier frames.",
+    "The example-graph answer key {s:0,y:5,t:8,z:7,x:9} and practice-graph answer key {s:0,a:8,b:5,c:9,d:7,e:10} are the authoritative correctness targets reproduced by C08/C10.",
+    "All graphs except the C14 counterexample have non-negative edge weights, satisfying Dijkstra's correctness precondition.",
+    "ipywidgets is the only interaction library; every interactive cell (C07, C09, C10, C12, C14) degrades to a static default render when get_ipython() is None or ipywidgets is unavailable."
   ],
   "assumptions": [
-    "Colab runtime is Python 3.10+ with standard Colab pre-installed packages (numpy, torch, matplotlib, pandas, ipywidgets); only 'anthropic' requires explicit pip install.",
-    "ipywidgets requires '%load_ext widgetsnbextension' or equivalent in Colab — this is already enabled by default in recent Colab; no extra setup cell is needed.",
-    "The word-split tokenizer in C18/C19 is intentionally naive (str.split) — it is sufficient to demonstrate prefix matching without requiring tiktoken or sentencepiece.",
-    "PyTorch attention in C13 uses causal attention (full attention over all T positions) for simplicity — a causal mask is not added, as the pedagogical focus is on KV sharing structure not masking.",
-    "The TTFT measurement in C20 includes network round-trip time; the demo illustrates relative speedup (warm vs cold) rather than absolute TTFT values.",
-    "Gemma 2 27B parameter counts: num_kv_heads=16 is used (GQA correct value), not 32 (query heads); this intentionally differs from the slide's worked example which used query heads — both values are printed and explained.",
-    "The summary table in C22 uses '?' for 'Needs Retraining?' for Sliding Window Attention and Streaming LLM, matching slide 27, because these techniques are sometimes applied via fine-tuning and sometimes via inference-time heuristics only."
+    "The target Colab/IPython runtime supports ipywidgets interaction; static fallbacks are provided for non-interactive execution (CI or plain Jupyter without widget support).",
+    "networkx and matplotlib are importable or pip-installable in C02; draw_graph falls back to manual matplotlib drawing on the fixed position dictionaries if networkx is unavailable.",
+    "The edge weights of the example and practice graphs are those that yield the answer keys from 01_concepts.json; build functions assert the keys at construction time to catch transcription errors.",
+    "C12 uses small, Colab-friendly graph sizes and a fixed random seed so the O(V^2) vs O(E lg V) trend is visible and reproducible without long runtimes.",
+    "The negative-edge graph in C14 is deliberately cycle-free so Bellman-Ford yields a well-defined ground truth for comparison.",
+    "Heap entries are (distance, vertex) tuples with deterministic vertex tie-breaking, and stale entries are handled by lazy deletion since heapq provides no decrease-key operation."
   ]
 }
