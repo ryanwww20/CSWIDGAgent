@@ -1,50 +1,44 @@
 {
-  "notebook_title": "Dijkstra's Single-Source Shortest-Path Algorithm: An Interactive Walkthrough",
+  "notebook_title": "Machine Learning Basics: Finding the Best Function (Model, Loss, Optimization)",
   "learning_objectives": [
-    "Explain the single-source shortest-path problem and the greedy strategy Dijkstra uses to solve it on graphs with non-negative edge weights.",
-    "Implement Initialize-Single-Source and edge relaxation, and describe how relaxation drives distance estimates monotonically toward the true shortest-path distances.",
-    "Trace Dijkstra's main loop vertex-by-vertex on an example graph, distinguishing finalized vertices (S), the vertex being processed (u), and vertices still in the queue (Q = V - S).",
-    "Compare the running time of Dijkstra under linear-array, binary-heap, and Fibonacci-heap priority queues, and confirm the array-vs-heap trade-off empirically.",
-    "State the loop invariant (for every v in S, v.d = delta(s,v)) and explain via a negative-edge counterexample why correctness depends on non-negative weights."
+    "Explain machine learning as the three-step process of finding a function: defining a model (candidate function set), defining a loss, and optimizing to pick f* = argmin L(f).",
+    "Define a loss function and compute it for a simple linear-regression problem on synthetic data.",
+    "Run and visualize gradient descent descending a loss surface, and observe how the learning rate controls convergence, divergence, and oscillation.",
+    "Demonstrate overfitting by fitting polynomials of increasing degree, contrasting training vs testing error, and show how regularization mitigates it."
   ],
   "cells": [
     {
       "cell_id": "C01",
       "cell_type": "markdown",
-      "goal": "Title, learning objectives, and notebook roadmap; orient the student to Dijkstra's algorithm as the lecture's core topic.",
+      "goal": "Title and roadmap: introduce ML as automatic function finding and the three-step framework (Model, Loss, Optimization). Map the notebook's narrative arc (framework -> how we optimize -> why optimization alone is not enough).",
       "inputs": [],
-      "outputs": [
-        "Rendered title and objective list"
-      ],
-      "widget_plan": "None (introductory markdown).",
+      "outputs": [],
+      "widget_plan": "None (intro narrative).",
       "estimated_lines": 18,
       "depends_on": []
     },
     {
       "cell_id": "C02",
       "cell_type": "code",
-      "goal": "Environment setup: install if needed and import standard libraries (heapq, math, time, random), networkx, matplotlib, and ipywidgets; configure inline plotting. Centralizes all dependencies so later cells run top-to-bottom.",
+      "goal": "Setup: import NumPy, Matplotlib, and ipywidgets; configure inline plotting; set a fixed random seed for reproducibility. Provide a helper for consistent figure styling.",
       "inputs": [],
       "outputs": [
-        "Imported modules available in the global namespace",
-        "Confirmation message that setup succeeded"
+        "Imported libraries (np, plt, widgets, interact)",
+        "Global RNG seed",
+        "Confirmation print that environment is ready"
       ],
-      "widget_plan": "None (imports only); ipywidgets imported here for later interactive cells.",
-      "estimated_lines": 22,
-      "depends_on": [
-        "C01"
-      ]
+      "widget_plan": "None (imports only). Establishes ipywidgets availability for later interactive cells.",
+      "estimated_lines": 15,
+      "depends_on": []
     },
     {
       "cell_id": "C03",
       "cell_type": "markdown",
-      "goal": "Define the single-source shortest-path problem: weighted directed graph, source s, non-negative weights, distance estimate v.d, predecessor v.pi, and shortest-path distance delta(s,v). Introduce the greedy idea (always pick the nearest unfinalized vertex) and note the structural similarity to Prim's algorithm.",
+      "goal": "Step 1 - Model: explain the candidate function set H. Frame linear regression y = w*x + b as the simplest H and state the running example used throughout the notebook.",
       "inputs": [],
-      "outputs": [
-        "Rendered problem statement and notation table"
-      ],
-      "widget_plan": "None (conceptual markdown).",
-      "estimated_lines": 24,
+      "outputs": [],
+      "widget_plan": "None (concept explanation).",
+      "estimated_lines": 14,
       "depends_on": [
         "C01"
       ]
@@ -52,18 +46,17 @@
     {
       "cell_id": "C04",
       "cell_type": "code",
-      "goal": "Build the lecture's example graph (vertices s, t, x, y, z with the slide-3 edge weights) as a networkx / adjacency-list structure with fixed node positions for stable layout. Provide a reusable draw_graph helper that colors vertices by state (S = black, u = gray, Q = white) and labels distances and predecessor edges.",
+      "goal": "Generate synthetic linear data (x, y) with known true w and b plus noise. Plot the data scatter and overlay one example candidate line to make the 'function set' concrete.",
       "inputs": [
-        "networkx, matplotlib from C02"
+        "np, plt from C02",
+        "Global RNG seed from C02"
       ],
       "outputs": [
-        "example_graph object",
-        "node position dictionary",
-        "draw_graph() helper function",
-        "Static rendering of the initial example graph"
+        "Arrays x_train, y_train (and true_w, true_b)",
+        "Scatter plot of data with one candidate line overlaid"
       ],
-      "widget_plan": "None directly, but draw_graph is the visualization primitive reused by interactive cells C09, C10, and C14.",
-      "estimated_lines": 50,
+      "widget_plan": "None (data generation + static plot establishing the example).",
+      "estimated_lines": 20,
       "depends_on": [
         "C02",
         "C03"
@@ -72,13 +65,11 @@
     {
       "cell_id": "C05",
       "cell_type": "markdown",
-      "goal": "Explain Initialize-Single-Source and Relax(u, v, w) with the slide-4 pseudocode; emphasize that relaxation is the atomic update v.d = min(v.d, u.d + w(u,v)) and that it also records the predecessor for path reconstruction.",
+      "goal": "Step 2 - Loss: define L(f) as the aggregated distance between a function's outputs and the correct labels (mean squared error). Connect to the slide example where loss = sum of distances.",
       "inputs": [],
-      "outputs": [
-        "Rendered pseudocode and explanation of relaxation"
-      ],
-      "widget_plan": "None (markdown).",
-      "estimated_lines": 20,
+      "outputs": [],
+      "widget_plan": "None (concept explanation).",
+      "estimated_lines": 14,
       "depends_on": [
         "C03"
       ]
@@ -86,16 +77,17 @@
     {
       "cell_id": "C06",
       "cell_type": "code",
-      "goal": "Implement initialize_single_source(graph, s) and relax(u, v, w, dist, pi) as standalone, testable functions that initialize/update distance and predecessor maps. Keep them dependency-free so they can be reused by the main loop and the empirical timing cell.",
+      "goal": "Implement the MSE loss function L(w, b) over the training data. Interactively let students pick w and b with sliders, draw the resulting line over the data, and display the current loss value.",
       "inputs": [
-        "example_graph from C04"
+        "x_train, y_train from C04",
+        "np, plt, widgets from C02"
       ],
       "outputs": [
-        "initialize_single_source() function",
-        "relax() function",
-        "Printed sanity check of an initialized distance map"
+        "loss(w, b) function definition",
+        "Interactive plot: data + candidate line for chosen (w, b)",
+        "Live-updating loss value text"
       ],
-      "widget_plan": "None (implementation).",
+      "widget_plan": "ipywidgets FloatSliders for w and b wired via interact; updating sliders re-draws the line and recomputes loss so students feel how parameters change quality.",
       "estimated_lines": 30,
       "depends_on": [
         "C04",
@@ -104,172 +96,146 @@
     },
     {
       "cell_id": "C07",
-      "cell_type": "code",
-      "goal": "Interactive relaxation sanity check: let the student pick an edge (u, v) and current estimates and observe whether relaxation updates v.d, reinforcing the if v.d > u.d + w(u,v) condition before seeing the full algorithm.",
-      "inputs": [
-        "relax() from C06"
-      ],
-      "outputs": [
-        "Printed before/after distance for the chosen edge",
-        "Whether the edge was relaxed"
-      ],
-      "widget_plan": "ipywidgets interact with a Dropdown for edge selection and IntSlider for u.d and v.d; live text output. Concept-relevant: isolates the relaxation decision.",
-      "estimated_lines": 28,
+      "cell_type": "markdown",
+      "goal": "Step 3 - Optimization: introduce f* = argmin L(f) and gradient descent as the iterative rule that moves parameters downhill along the gradient. Introduce the learning-rate hyperparameter.",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None (concept explanation).",
+      "estimated_lines": 16,
       "depends_on": [
-        "C06"
+        "C05"
       ]
     },
     {
       "cell_id": "C08",
       "cell_type": "code",
-      "goal": "Implement dijkstra_with_trace(graph, s) using a binary heap (heapq) that records a snapshot (S, current u, dist, pi, frontier) after each Extract-Min and relaxation round, returning the full list of steps for animation.",
+      "goal": "Implement gradient descent for the linear-regression loss: compute analytic gradients of MSE w.r.t. w and b, iterate for N steps, and record the parameter/loss trajectory for visualization.",
       "inputs": [
-        "example_graph from C04",
-        "initialize_single_source() and relax() from C06"
+        "x_train, y_train from C04",
+        "loss(w, b) from C06",
+        "np from C02"
       ],
       "outputs": [
-        "dijkstra_with_trace() function",
-        "trace_steps list for the example graph",
-        "Final distance map printed (expected s=0, y=5, t=8, z=7, x=9)"
+        "gradient_descent(lr, n_steps, w0, b0) function returning trajectory",
+        "Printed final (w, b) and loss compared to true parameters"
       ],
-      "widget_plan": "None directly; produces the step list consumed by the C09 animation slider.",
-      "estimated_lines": 55,
+      "widget_plan": "None (algorithm implementation; reused by the interactive cell C09).",
+      "estimated_lines": 28,
       "depends_on": [
-        "C06"
+        "C06",
+        "C07"
       ]
     },
     {
       "cell_id": "C09",
       "cell_type": "code",
-      "goal": "Animated step-by-step trace of Dijkstra on the example graph: a slider scrubs through trace_steps, redrawing the graph with S/u/Q coloring, live distance labels, and highlighted predecessor edges so students see the greedy choice unfold.",
+      "goal": "Visualize gradient descent interactively: let students vary learning rate and number of steps, then show (a) the descent path on the loss surface contour and (b) the loss-vs-iteration curve, exposing convergence vs divergence vs oscillation.",
       "inputs": [
-        "trace_steps from C08",
-        "draw_graph() from C04"
+        "gradient_descent(...) from C08",
+        "loss(w, b) from C06",
+        "np, plt, widgets from C02"
       ],
       "outputs": [
-        "Interactive figure updating per step",
-        "Per-step caption describing the action (e.g., 'Extract-Min: u = y', 'Relax(y, t)')"
+        "Contour plot of loss surface with descent trajectory overlaid",
+        "Loss-vs-iteration curve",
+        "Interactive controls updating both plots"
       ],
-      "widget_plan": "ipywidgets interact / IntSlider over step index (optionally a Play widget) calling draw_graph for the selected snapshot. Core interactive visualization of the lecture's primary pedagogical trace.",
+      "widget_plan": "ipywidgets FloatLogSlider for learning rate and IntSlider for number of steps via interact; small learning rate shows slow convergence, large shows divergence/oscillation, making the hyperparameter's effect tangible.",
       "estimated_lines": 38,
       "depends_on": [
-        "C08",
-        "C04"
+        "C08"
       ]
     },
     {
       "cell_id": "C10",
-      "cell_type": "code",
-      "goal": "Hands-on practice graph (slide-4 vertices s, a, b, c, d, e): student predicts final distances, then runs the same dijkstra_with_trace to check answers (expected a=8, b=5, c=9, d=7, e=10), reusing the trace animation.",
-      "inputs": [
-        "dijkstra_with_trace() from C08",
-        "draw_graph() from C04"
-      ],
-      "outputs": [
-        "practice_graph object",
-        "Scrubbable trace for the practice graph",
-        "Final distances vs. expected answer key"
-      ],
-      "widget_plan": "ipywidgets IntSlider step scrubber plus a 'reveal answer' Checkbox; encourages active prediction before verification.",
-      "estimated_lines": 45,
+      "cell_type": "markdown",
+      "goal": "Transition to generalization: a low training loss does not guarantee good test performance. Introduce overfitting and the train/test split, motivating the next demo.",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None (concept explanation).",
+      "estimated_lines": 14,
       "depends_on": [
-        "C08",
-        "C04"
+        "C07"
       ]
     },
     {
       "cell_id": "C11",
-      "cell_type": "markdown",
-      "goal": "Explain how total running time depends on the priority-queue implementation: O(V^2) linear array, O(E lg V) binary heap, O(E + V lg V) Fibonacci heap; break down Extract-Min and Decrease-Key costs per the slide-5 analysis.",
-      "inputs": [],
-      "outputs": [
-        "Rendered complexity table and derivation"
+      "cell_type": "code",
+      "goal": "Create a nonlinear synthetic dataset and split it into train and test sets. Plot both splits to set up the polynomial-fitting overfitting demo.",
+      "inputs": [
+        "np, plt from C02",
+        "Global RNG seed from C02"
       ],
-      "widget_plan": "None (markdown).",
+      "outputs": [
+        "x_train2, y_train2, x_test2, y_test2 arrays",
+        "Scatter plot distinguishing train vs test points"
+      ],
+      "widget_plan": "None (data generation + static plot).",
       "estimated_lines": 22,
       "depends_on": [
-        "C03"
+        "C02",
+        "C10"
       ]
     },
     {
       "cell_id": "C12",
       "cell_type": "code",
-      "goal": "Implement an array-based Dijkstra (linear Extract-Min) alongside the heap-based version, then empirically time both on randomly generated non-negative-weight graphs of increasing size to show the O(V^2) vs O(E lg V) trade-off.",
+      "goal": "Interactively fit polynomials of increasing degree and visualize overfitting: show the fitted curve over train and test data plus train vs test error, so high degree drives training error down while test error rises.",
       "inputs": [
-        "initialize_single_source() and relax() from C06",
-        "heap-based Dijkstra structure from C08"
+        "x_train2, y_train2, x_test2, y_test2 from C11",
+        "np, plt, widgets from C02"
       ],
       "outputs": [
-        "dijkstra_array() function",
-        "Timing table and matplotlib plot of runtime vs. graph size for array vs. heap"
+        "Polynomial fit curve overlaid on train and test data",
+        "Reported train error and test error for chosen degree",
+        "Interactive degree control"
       ],
-      "widget_plan": "Optional ipywidgets IntSlider for max graph size / density to let students re-run the experiment; keeps default sizes small for Colab responsiveness.",
-      "estimated_lines": 58,
+      "widget_plan": "ipywidgets IntSlider for polynomial degree via interact; sweeping degree from low to high vividly shows the train/test error gap (the 'memorizing answers' pitfall).",
+      "estimated_lines": 36,
       "depends_on": [
-        "C06",
-        "C08",
         "C11"
       ]
     },
     {
       "cell_id": "C13",
-      "cell_type": "markdown",
-      "goal": "State the loop invariant (for each v in S, v.d = delta(s,v)) and sketch the induction on |S|, emphasizing where non-negative edge weights are used (an alternative path leaving S is already at least as long when it does so).",
-      "inputs": [],
-      "outputs": [
-        "Rendered invariant and proof sketch"
+      "cell_type": "code",
+      "goal": "Demonstrate regularization as a remedy: fit a high-degree polynomial with an L2 (ridge) penalty and let students vary the regularization strength, showing how it tames the wild high-degree fit and improves test error.",
+      "inputs": [
+        "x_train2, y_train2, x_test2, y_test2 from C11",
+        "np, plt, widgets from C02"
       ],
-      "widget_plan": "None (markdown).",
-      "estimated_lines": 24,
+      "outputs": [
+        "Regularized fit curve overlaid on data",
+        "Train/test error as a function of regularization strength",
+        "Interactive regularization-strength control"
+      ],
+      "widget_plan": "ipywidgets FloatLogSlider for regularization strength lambda via interact; increasing lambda smooths the fit and reduces the train/test gap, connecting back to the loss-with-regularization idea from the slides.",
+      "estimated_lines": 38,
       "depends_on": [
-        "C03"
+        "C12"
       ]
     },
     {
       "cell_id": "C14",
-      "cell_type": "code",
-      "goal": "Negative-edge counterexample: construct a small graph with a negative edge, run Dijkstra and compare against a correct (brute-force / Bellman-Ford) shortest path to demonstrate Dijkstra returns a wrong answer, concretely illustrating why the correctness proof requires non-negative weights.",
-      "inputs": [
-        "dijkstra_with_trace() from C08",
-        "draw_graph() from C04"
-      ],
-      "outputs": [
-        "Negative-edge graph drawing",
-        "Side-by-side Dijkstra result vs. true shortest distances",
-        "Printed explanation of the discrepancy"
-      ],
-      "widget_plan": "Optional ipywidgets IntSlider on the offending edge weight so students can push it negative and watch the answer break; concept-relevant to the invariant.",
-      "estimated_lines": 48,
-      "depends_on": [
-        "C08",
-        "C04",
-        "C13"
-      ]
-    },
-    {
-      "cell_id": "C15",
       "cell_type": "markdown",
-      "goal": "Summary and recap: tie objectives back to cells (relaxation, main loop, trace, complexity, correctness), restate the non-negative-weight requirement, and note the optional Dijkstra-vs-Prim connection plus suggested next steps (Bellman-Ford, A*).",
+      "goal": "Wrap-up and recap: restate the three-step framework, summarize what each demo showed (loss landscape, gradient descent + learning rate, overfitting + regularization), and suggest extensions (other optimizers, more features, classification).",
       "inputs": [],
-      "outputs": [
-        "Rendered summary and further-reading list"
-      ],
-      "widget_plan": "None (closing markdown).",
-      "estimated_lines": 18,
+      "outputs": [],
+      "widget_plan": "None (summary).",
+      "estimated_lines": 16,
       "depends_on": [
+        "C01",
         "C09",
-        "C10",
-        "C12",
-        "C14"
+        "C13"
       ]
     }
   ],
-  "global_flow_notes": "The notebook executes strictly top-to-bottom in five movements: setup (C01-C02), problem + relaxation (C03-C07), the traced main loop and interactive visualizations (C08-C10), complexity (C11-C12), and correctness (C13-C14) closed by a summary (C15). C02 centralizes all imports; C04 builds the example graph and the shared draw_graph helper that every visualization cell reuses; C06 defines initialize_single_source and relax as the atomic primitives consumed by the traced main loop (C08) and the array variant (C12). Interactive cells (C07 relaxation, C09 example trace, C10 practice trace, C12 timing, C14 counterexample) each depend only on already-defined functions, so there are no forward references. Markdown explainer cells (C03, C05, C11, C13) always precede their corresponding code cells. ipywidgets is the single interaction library throughout for a consistent Colab UX.",
+  "global_flow_notes": "The notebook follows a single coherent arc tied to the three-step framework: C01-C02 set up narrative and environment; C03-C06 build the Model and Loss using one synthetic linear-regression example (data created once in C04 and reused); C07-C09 cover Optimization with gradient descent, culminating in an interactive learning-rate exploration on the same example; C10-C13 pivot to generalization with a second nonlinear dataset (created once in C11 and reused by C12-C13) to demonstrate overfitting and regularization; C14 recaps. Cells are executable strictly top-to-bottom: every code cell depends only on earlier cells. Two datasets are deliberately separated (linear for the framework/optimization demos, nonlinear for the overfitting demo) and each is generated exactly once to avoid recomputation and keep state predictable.",
   "assumptions": [
-    "ipywidgets-based interaction is supported in the target Colab runtime (google.colab.output enabled); step animations use a slider/Play scrubber rather than FuncAnimation for reliability in Colab.",
-    "networkx and matplotlib are available or pip-installable in C02; if networkx is undesirable, draw_graph can fall back to manual matplotlib drawing using the fixed position dictionary.",
-    "Example-graph final distances (s=0, y=5, t=8, z=7, x=9) and practice-graph final distances (a=8, b=5, c=9, d=7, e=10) from 01_concepts.json are the ground-truth answer keys the implementation must reproduce exactly.",
-    "Empirical timing in C12 uses small, Colab-friendly graph sizes by default so the array-vs-heap trend is visible without long runtimes.",
-    "The Dijkstra-vs-Prim relationship (a candidate, non-selected concept) is mentioned only briefly in the summary and is not given its own code cell."
+    "Runtime is Google Colab (or Jupyter) with numpy, matplotlib, and ipywidgets available by default; no GPU or external datasets are required.",
+    "All data is synthetic and generated in-notebook with a fixed seed for reproducible plots across runs.",
+    "Interactivity is provided via ipywidgets.interact; if widgets are unavailable, each interactive cell can still be run with default parameter values to produce a static plot.",
+    "MSE is used as the loss for the linear demo and squared error (with optional L2 penalty) for the polynomial demo, matching the slides' 'sum of distances' description of loss.",
+    "Polynomial fitting uses NumPy least-squares (np.polyfit / closed-form ridge) rather than gradient descent, keeping the overfitting demo fast and numerically stable."
   ]
 }
