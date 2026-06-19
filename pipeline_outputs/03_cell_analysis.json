@@ -2,231 +2,198 @@
   "cell_specs": [
     {
       "cell_id": "C02",
-      "implementation_plan": "Environment setup and centralized imports. (1) Wrap pip installs in a try/except: attempt 'import networkx, matplotlib, ipywidgets'; on ImportError run '!pip install -q networkx matplotlib ipywidgets' via get_ipython().system, then re-import. (2) Import standard libraries: heapq, math, time, random. (3) Import networkx as nx, matplotlib.pyplot as plt, ipywidgets as widgets plus 'from ipywidgets import interact, IntSlider, Dropdown, Checkbox, Play'. (4) Enable inline plotting via get_ipython().run_line_magic('matplotlib', 'inline') guarded by 'if get_ipython() is not None'. (5) Seed random with a fixed value (random.seed(42)) for reproducible timing graphs. (6) Print a one-line confirmation including the resolved networkx and matplotlib versions.",
+      "cell_type": "code",
+      "implementation_plan": "Setup cell. Import numpy as np, matplotlib.pyplot as plt, and 'from ipywidgets import interact, FloatSlider, IntSlider, FloatLogSlider' guarded by try/except. Attempt inline plotting with get_ipython().run_line_magic('matplotlib', 'inline') wrapped in try/except so the cell still runs outside IPython. Set module-level SEED = 42 and create a seeded generator rng = np.random.default_rng(SEED). Configure default figure styling: plt.rcParams['figure.figsize'] = (8, 4.5) and plt.rcParams['figure.dpi'] = 110. Define a helper style_axes(ax, title=None, xlabel='x', ylabel='y') that sets labels, optional title, and grid(alpha=0.3). Print a one-line confirmation showing numpy/matplotlib versions and the seed. Expose np, plt, rng, SEED, style_axes, WIDGETS_AVAILABLE and the slider/interact names module-wide.",
       "function_signatures": [
-        "ensure_dependencies() -> None"
+        "style_axes(ax, title=None, xlabel='x', ylabel='y') -> matplotlib.axes.Axes"
       ],
       "state_variables": [
-        "heapq, math, time, random (stdlib modules in global namespace)",
-        "nx (networkx module alias)",
-        "plt (matplotlib.pyplot alias)",
-        "widgets (ipywidgets alias) and interact/IntSlider/Dropdown/Checkbox/Play names"
+        "SEED (int constant = 42)",
+        "rng (numpy.random.Generator, shared seeded RNG)",
+        "WIDGETS_AVAILABLE (bool)",
+        "np, plt, interact, FloatSlider, IntSlider, FloatLogSlider (module imports)"
       ],
       "error_handling": [
-        "Catch ImportError around the initial imports and trigger pip install before re-importing.",
-        "Guard the matplotlib inline magic with 'if get_ipython() is not None' so the cell does not crash outside IPython.",
-        "If pip install fails, print an actionable message naming the missing package rather than letting a raw traceback propagate."
+        "Wrap the matplotlib inline magic in try/except so the cell runs outside IPython.",
+        "Wrap 'from ipywidgets import ...' in try/except ImportError; on failure set WIDGETS_AVAILABLE=False and print install hint '!pip install ipywidgets' so later cells fall back to static rendering."
       ],
       "test_checks": [
-        "assert all(m in globals() for m in ['heapq','math','time','random','nx','plt','widgets'])",
-        "Print 'Setup OK - networkx', nx.__version__ to confirm successful import.",
-        "Confirm random.seed(42) was applied (documented) and no exception was raised."
+        "assert 'np' in dir() and 'plt' in dir()",
+        "assert isinstance(rng, np.random.Generator)",
+        "Confirmation print executes without raising."
       ]
     },
     {
       "cell_id": "C04",
-      "implementation_plan": "Build the lecture example graph and the shared drawing primitive. (1) Define example_graph as a networkx.DiGraph (or plain adjacency dict {u: [(v, w), ...]} if nx unavailable) with vertices s,t,x,y,z and the CLRS slide-3 edges: s->t(10), s->y(5), t->x(1), t->y(2), y->t(3), y->x(9), y->z(2), x->z(4), z->x(6), z->s(7). (2) Define POS, a fixed dict of (x,y) coordinates for s,t,x,y,z so layout is stable across redraws. (3) Implement draw_graph(graph, pos, dist=None, pi=None, S=None, u=None, frontier=None, title=None, ax=None): create or reuse an axis; color nodes by state - S members black (white font), active vertex u gray, others (Q) white with black border; draw all edges light gray; if pi is given, highlight predecessor (tree) edges in a bold color; annotate each node with its current dist ('INF' for math.inf); draw edge-weight labels; set the title/caption. (4) Render the initial example graph once to verify the helper.",
-      "function_signatures": [
-        "build_example_graph() -> tuple[graph, dict]",
-        "draw_graph(graph, pos, dist=None, pi=None, S=None, u=None, frontier=None, title=None, ax=None) -> matplotlib.axes.Axes"
-      ],
+      "cell_type": "code",
+      "implementation_plan": "Generate the synthetic linear dataset reused by C06 and C08. Set true_w = 2.0, true_b = -1.0, N = 40, noise_std = 1.0. Draw x_train = np.sort(rng.uniform(-3, 3, size=N)) for a clean left-to-right plot. Compute y_train = true_w * x_train + true_b + rng.normal(0, noise_std, size=N). Create one figure: scatter (x_train, y_train) and overlay a single example candidate line with guess parameters (w_guess=1.0, b_guess=0.0) over a dense grid xs = np.linspace(x_train.min(), x_train.max(), 100). Use style_axes for labels and a legend distinguishing data vs candidate line. plt.show(). Keep arrays at module scope.",
+      "function_signatures": [],
       "state_variables": [
-        "example_graph (networkx.DiGraph or adjacency dict)",
-        "POS (dict vertex -> (x, y) coordinates)"
+        "true_w (float=2.0), true_b (float=-1.0), N (int=40), noise_std (float=1.0)",
+        "x_train (np.ndarray shape (N,)), y_train (np.ndarray shape (N,))"
       ],
       "error_handling": [
-        "If a node in S/u/frontier is absent from graph, skip it defensively rather than raising KeyError.",
-        "Render math.inf distances as the string 'INF' to avoid matplotlib label errors.",
-        "If networkx is unavailable, fall back to manual matplotlib drawing using POS and the adjacency dict.",
-        "When ax is None create a fresh figure/axis; when provided, ax.clear() so animation redraws do not stack artists."
+        "Assert x_train and y_train have equal length before plotting.",
+        "Use rng (not the np.random global) so re-running after C02 reproduces the same data."
       ],
       "test_checks": [
-        "assert set of example_graph nodes == {'s','t','x','y','z'}",
-        "assert example_graph edge count == 10 (sum of adjacency list lengths == 10 in dict form)",
-        "assert set(POS.keys()) == set of example_graph nodes",
-        "Call draw_graph once and assert it returns an Axes without raising."
+        "assert x_train.shape == y_train.shape == (N,)",
+        "assert np.all(np.diff(x_train) >= 0)  # sorted",
+        "Figure displays a scatter plus one candidate line."
       ]
     },
     {
       "cell_id": "C06",
-      "implementation_plan": "Implement the two atomic shortest-path primitives as pure, reusable functions. (1) initialize_single_source(graph, s): return (dist, pi) where dist maps every vertex to math.inf except dist[s]=0, and pi maps every vertex to None; iterate vertices via a representation-agnostic helper get_vertices(graph). (2) relax(u, v, w, dist, pi): if dist[u] + w < dist[v], set dist[v] = dist[u] + w, pi[v] = u, return True; else return False (inf + finite == inf in Python, which is safe). (3) Print a sanity check: initialize on example_graph from s and show dist with s=0 and all others INF.",
+      "cell_type": "code",
+      "implementation_plan": "Define loss(w, b) returning MSE over x_train, y_train: preds = w*x_train + b; return float(np.mean((preds - y_train)**2)). Build an interactive explorer plot_line(w, b) that computes preds on a dense grid, plots data scatter + candidate line, sets title to f'Loss L(w,b) = {loss(w,b):.3f}', uses style_axes and fixed y-limits (computed once from the data range, padded) so the view does not jump while sliders move. Wire with interact(plot_line, w=FloatSlider(min=-1, max=5, step=0.1, value=1.0), b=FloatSlider(min=-5, max=5, step=0.1, value=0.0)). If WIDGETS_AVAILABLE is False, call plot_line(true_w, true_b) once for a static fallback.",
       "function_signatures": [
-        "get_vertices(graph) -> list",
-        "initialize_single_source(graph, s) -> tuple[dict, dict]",
-        "relax(u, v, w, dist, pi) -> bool"
+        "loss(w: float, b: float) -> float",
+        "plot_line(w: float, b: float) -> None"
       ],
       "state_variables": [
-        "dist (dict vertex -> float distance estimate, sanity-check instance)",
-        "pi (dict vertex -> predecessor or None, sanity-check instance)"
+        "loss (function, reused by C08 and C09)",
+        "Fixed axis limits derived from x_train/y_train for a stable interactive view"
       ],
       "error_handling": [
-        "Raise a clear ValueError if s is not in the graph's vertex set.",
-        "In relax, treat missing keys as a programming error - assert u in dist and v in dist with an explanatory message.",
-        "relax itself is weight-sign agnostic; non-negativity is enforced by algorithm assumptions and exercised in C14 (documented here)."
+        "loss casts the result to float to avoid numpy scalar display quirks in the title.",
+        "Guard interact behind WIDGETS_AVAILABLE; provide a static call fallback so the cell never errors when ipywidgets is missing.",
+        "Fix y-axis limits so rapid slider changes do not cause flickering rescale."
       ],
       "test_checks": [
-        "d, p = initialize_single_source(example_graph, 's'); assert d['s'] == 0 and all(d[v] == math.inf for v in get_vertices(example_graph) if v != 's')",
-        "assert all(p[v] is None for v in get_vertices(example_graph))",
-        "dist={'a':0,'b':math.inf}; pi={'a':None,'b':None}; assert relax('a','b',3,dist,pi) is True and dist['b'] == 3 and pi['b'] == 'a'",
-        "assert relax('a','b',5,dist,pi) is False (no update when 0+5 > existing 3)"
-      ]
-    },
-    {
-      "cell_id": "C07",
-      "implementation_plan": "Interactive single-edge relaxation sanity check. (1) Build labeled edge options 'u->v (w=W)' mapped to (u, v, w) tuples from example_graph for a Dropdown. (2) Define relaxation_demo(edge_label, ud, vd): look up (u, v, w); build temporary dist={u: ud, v: vd}, pi={v: None}; capture before value vd; call relax(u, v, w, dist, pi); print before/after v.d, whether the condition ud + w < vd held, and the resulting predecessor. (3) Wire with interact: Dropdown(options=edge_labels), IntSlider(min=0, max=20) for u.d, IntSlider(min=0, max=30) for v.d. Keep output as plain printed text for Colab reliability.",
-      "function_signatures": [
-        "relaxation_demo(edge_label: str, ud: int, vd: int) -> None"
-      ],
-      "state_variables": [
-        "edge_options (dict label -> (u, v, w)) derived from example_graph"
-      ],
-      "error_handling": [
-        "If get_ipython() is None or ipywidgets unavailable, fall back to a single non-interactive call with default arguments plus a printed note.",
-        "Sliders enforce min=0 so values stay non-negative, within Dijkstra's assumptions.",
-        "Support a large sentinel value for v.d to mimic an unrelaxed vertex and label it clearly."
-      ],
-      "test_checks": [
-        "Call relaxation_demo(first_edge_label, 0, 100) and confirm relaxation occurs (after < before).",
-        "Call relaxation_demo(first_edge_label, 100, 0) and confirm no relaxation (after == before).",
-        "assert len(edge_options) == 10 (all example-graph edges available)."
+        "assert loss(true_w, true_b) < loss(0.0, 0.0)  # truth fits better than the zero line",
+        "assert loss(true_w, true_b) >= 0.0",
+        "plot_line(1.0, 0.0) runs without error."
       ]
     },
     {
       "cell_id": "C08",
-      "implementation_plan": "Implement traced Dijkstra over a binary heap. (1) dijkstra_with_trace(graph, s): dist, pi = initialize_single_source(graph, s); S=set(); steps=[]; pq=[(0, s)]. Use lazy deletion since heapq lacks decrease-key. (2) Main loop: while pq, heappop (d, u); if u in S continue; add u to S; record a snapshot AFTER extract-min with caption f'Extract-Min: u = {u} (d={d})'. (3) For each neighbor v with weight w of u: did = relax(u, v, w, dist, pi); if did: heappush(pq, (dist[v], v)) and record a snapshot caption f'Relax({u}, {v}): {v}.d = {dist[v]}'. (4) Each snapshot is {'S': set(S), 'u': u, 'dist': dict(dist), 'pi': dict(pi), 'frontier': sorted vertices in pq not in S, 'caption': caption}; deep-copy per snapshot. (5) Return (steps, dist, pi). (6) Run on example_graph, print final dist and assert it equals the answer key.",
+      "cell_type": "code",
+      "implementation_plan": "Implement gradient_descent(lr, n_steps, w0=0.0, b0=0.0). Use analytic MSE gradients: with preds=w*x_train+b, err=preds-y_train, dL/dw = (2/N)*np.sum(err*x_train), dL/db = (2/N)*np.sum(err). Loop n_steps times updating w,b and appending (w, b, loss(w,b)) to a trajectory each iteration (include the initial point). Return trajectory as a dict of numpy arrays {'w':..., 'b':..., 'loss':...}. After defining, run one example (lr=0.05, n_steps=50) and print final (w,b) and final loss alongside (true_w, true_b) and loss(true_w,true_b) for comparison.",
       "function_signatures": [
-        "neighbors(graph, u) -> list[tuple[vertex, weight]]",
-        "dijkstra_with_trace(graph, s) -> tuple[list[dict], dict, dict]"
+        "gradient_descent(lr: float, n_steps: int, w0: float = 0.0, b0: float = 0.0) -> dict"
       ],
       "state_variables": [
-        "trace_steps (list of snapshot dicts for the example graph)",
-        "final_dist, final_pi (dicts from the example-graph run)",
-        "pq (heap list of (distance, vertex)), S (set of finalized vertices)"
+        "gradient_descent (function, reused by C09)",
+        "N reused from C04 for gradient normalization"
       ],
       "error_handling": [
-        "Use lazy deletion ('if u in S: continue') to handle stale/duplicate heap entries safely instead of a non-existent decrease-key.",
-        "Deep-copy (dict(dist), dict(pi), set(S)) into every snapshot so animation frames are immutable and independent.",
-        "Raise ValueError if s not in graph before starting.",
-        "Heap tuples are (distance, vertex) so equal distances tie-break deterministically on the comparable vertex label and never raise."
+        "Cast n_steps to int and guard n_steps >= 1.",
+        "Detect numeric blow-up: if loss is not finite, break early and still return the partial trajectory so C09 can visualize divergence without raising.",
+        "Use float arrays in the trajectory to keep matplotlib happy."
       ],
       "test_checks": [
-        "steps, d, _ = dijkstra_with_trace(example_graph, 's'); assert d == {'s':0,'y':5,'t':8,'z':7,'x':9}",
-        "assert len(steps) > 0 and all({'S','u','dist','pi','frontier','caption'} <= set(snap) for snap in steps)",
-        "assert steps[0]['u'] == 's' (source extracted first)",
-        "assert len(steps[-1]['S']) == 5 (all vertices finalized by the end)"
+        "traj = gradient_descent(0.05, 200); assert traj['loss'][-1] < traj['loss'][0]",
+        "assert abs(traj['w'][-1]-true_w) < 0.5 and abs(traj['b'][-1]-true_b) < 0.5  # converges near truth",
+        "assert len(traj['w']) == len(traj['loss'])"
       ]
     },
     {
       "cell_id": "C09",
-      "implementation_plan": "Animated scrubber over the example-graph trace. (1) Define show_step(i): fetch snap = trace_steps[i], ax.clear(), call draw_graph(example_graph, POS, dist=snap['dist'], pi=snap['pi'], S=snap['S'], u=snap['u'], frontier=snap['frontier'], title=f\"Step {i+1}/{len(trace_steps)}: {snap['caption']}\"), then display. (2) Wire interact(show_step, i=IntSlider(min=0, max=len(trace_steps)-1, step=1, value=0)); optionally link a Play widget to the same IntSlider via widgets.jslink for auto-advance. (3) Create fig, ax once and reuse them so Colab is not flooded with images.",
+      "cell_type": "code",
+      "implementation_plan": "Interactive GD visualizer. Precompute a loss surface grid once at module scope: W = np.linspace(-1,5,80), B = np.linspace(-5,5,80), WW,BB = np.meshgrid(W,B), and ZZ where ZZ[i,j] = loss(WW[i,j], BB[i,j]) (vectorize or small loop over the grid). Define show_descent(lr, n_steps): call gradient_descent(lr, n_steps), then make a 1x2 figure: (left) contourf/contour of ZZ over (W,B) with the trajectory path drawn as line+markers and the true (true_w,true_b) marked with a star; (right) loss-vs-iteration curve (semilogy when all finite and positive). Title reflects final loss or 'diverged' if non-finite. Wire interact(show_descent, lr=FloatLogSlider(base=10, min=-3, max=0.5, step=0.1, value=0.05), n_steps=IntSlider(min=5, max=300, step=5, value=50)). Static fallback calls show_descent(0.05, 50) if widgets unavailable.",
       "function_signatures": [
-        "show_step(i: int) -> None"
+        "show_descent(lr: float, n_steps: int) -> None"
       ],
       "state_variables": [
-        "step_slider (IntSlider bound to trace_steps index)",
-        "fig, ax (single reused matplotlib figure/axis for redraws)"
+        "W, B, WW, BB, ZZ (precomputed loss-surface grid arrays, computed once)"
       ],
       "error_handling": [
-        "Clamp i into [0, len(trace_steps)-1] before indexing.",
-        "If trace_steps is empty, print a message to run C08 first instead of indexing.",
-        "ax.clear() each frame to prevent artist accumulation; if ipywidgets unavailable, render the final step statically with a note."
+        "If the trajectory contains non-finite values, clip/skip them when plotting the path and label the figure 'diverged (try a smaller learning rate)'.",
+        "Right plot: only use semilogy when all loss values are finite and > 0; otherwise use a linear plot to avoid log errors.",
+        "Compute ZZ once outside show_descent to keep slider updates responsive.",
+        "Guard interact behind WIDGETS_AVAILABLE with a static fallback call."
       ],
       "test_checks": [
-        "assert len(trace_steps) >= 1 before building the slider.",
-        "Call show_step(0) and show_step(len(trace_steps)-1) and assert neither raises.",
-        "assert step_slider.max == len(trace_steps) - 1"
+        "assert ZZ.shape == WW.shape == BB.shape",
+        "show_descent(0.05, 50) runs without error (convergent case)",
+        "show_descent(1.5, 50) runs without error and is labeled as diverging (large lr)"
       ]
     },
     {
-      "cell_id": "C10",
-      "implementation_plan": "Practice graph with predict-then-verify flow. (1) Build practice_graph (slide-4 vertices s,a,b,c,d,e) as a DiGraph/adjacency dict with weights chosen so the answer key holds: final distances a=8, b=5, c=9, d=7, e=10 from source s. Define PRACTICE_POS fixed coordinates. (2) Define EXPECTED_PRACTICE = {'s':0,'a':8,'b':5,'c':9,'d':7,'e':10}. (3) practice_steps, practice_dist, _ = dijkstra_with_trace(practice_graph, 's'). (4) Build show_practice_step(i) analogous to C09 over practice_steps reusing draw_graph. (5) Add a reveal_answers(reveal) Checkbox handler: unchecked prompts the student to predict; checked prints practice_dist alongside EXPECTED_PRACTICE with a per-vertex match table. Wire interact(reveal=Checkbox(value=False)) and an IntSlider over practice steps.",
+      "cell_id": "C11",
+      "cell_type": "code",
+      "implementation_plan": "Create a nonlinear dataset for the overfitting demo and split into train/test. Define a true function g(x)=np.sin(1.5*x). Sample M=30 points x_all = np.sort(rng.uniform(-3,3,size=M)); y_all = g(x_all) + rng.normal(0, 0.25, size=M). Split via a shuffled index: idx = rng.permutation(M); cut at ~60% train; produce x_train2,y_train2,x_test2,y_test2, each re-sorted by x for clean plotting. Scatter train vs test points in different colors/markers and overlay the true function curve (light dashed) over a dense grid. Use style_axes + legend. Keep arrays at module scope.",
       "function_signatures": [
-        "build_practice_graph() -> tuple[graph, dict]",
-        "show_practice_step(i: int) -> None",
-        "reveal_answers(reveal: bool) -> None"
+        "g(x: np.ndarray) -> np.ndarray  # true nonlinear function"
       ],
       "state_variables": [
-        "practice_graph, PRACTICE_POS",
-        "practice_steps (snapshot list), practice_dist (final distances)",
-        "EXPECTED_PRACTICE (answer-key dict)"
+        "M (int=30)",
+        "x_train2, y_train2, x_test2, y_test2 (np.ndarrays)"
       ],
       "error_handling": [
-        "Assert at build time that practice_graph reproduces EXPECTED_PRACTICE; raise AssertionError with a diff if weights were mis-entered.",
-        "Clamp slider index; guard empty practice_steps.",
-        "Fall back to static final-state render plus printed answer key if ipywidgets unavailable."
+        "Assert train and test sets are non-empty and disjoint by index.",
+        "Re-sort each split by x before plotting/overlay to avoid zig-zag lines.",
+        "Use rng for reproducibility."
       ],
       "test_checks": [
-        "assert practice_dist == EXPECTED_PRACTICE",
-        "assert set of practice_graph nodes == {'s','a','b','c','d','e'}",
-        "Call show_practice_step(0) and reveal_answers(True) and assert neither raises."
+        "assert len(x_train2) + len(x_test2) == M",
+        "assert len(x_train2) > 0 and len(x_test2) > 0",
+        "Figure shows distinguishable train vs test points."
       ]
     },
     {
       "cell_id": "C12",
-      "implementation_plan": "Empirical array-vs-heap timing. (1) dijkstra_array(graph, s): dist, pi = initialize_single_source; S=set(); while |S| < |V|: linear scan over V-S to find u with minimum dist (Extract-Min in O(V)); if the min is math.inf break (unreachable remainder); add u to S; relax all neighbors. Return dist. (2) dijkstra_heap(graph, s): same core as C08 without snapshot recording, returning only dist. (3) make_random_graph(n, density, max_w, seed): DiGraph on n vertices with random non-negative integer weights in [1, max_w], adding a random spanning path first to guarantee reachability from source 0. (4) For n in a small list (e.g., [10,25,50,100,150]): build a graph, time each algorithm with time.perf_counter over a few repeats, record averages. (5) Print a timing table and plot runtime vs n for array (O(V^2)) and heap (O(E lg V)) on shared matplotlib axes with a legend. (6) Optional IntSlider to set max n / density and re-run.",
+      "cell_type": "code",
+      "implementation_plan": "Interactive polynomial overfitting demo. Define a helper mse(y_true, y_pred)=float(np.mean((y_true-y_pred)**2)). plot_poly(degree): fit coeffs = np.polyfit(x_train2, y_train2, degree), evaluate train MSE and test MSE via np.polyval, plot a dense smooth fitted curve over the padded x-range, scatter train and test points, set title f'degree={degree}  train MSE={tr:.3f}  test MSE={te:.3f}', and clamp y-limits to a sensible range based on data so high-degree blow-ups do not destroy the view. interact(plot_poly, degree=IntSlider(min=1, max=15, step=1, value=1)). Static fallback calls plot_poly(9).",
       "function_signatures": [
-        "dijkstra_array(graph, s) -> dict",
-        "dijkstra_heap(graph, s) -> dict",
-        "make_random_graph(n: int, density: float, max_w: int = 20, seed: int | None = None) -> graph",
-        "time_algorithm(fn, graph, s, repeats: int = 3) -> float",
-        "run_timing_experiment(sizes: list[int], density: float) -> dict"
+        "mse(y_true: np.ndarray, y_pred: np.ndarray) -> float",
+        "plot_poly(degree: int) -> None"
       ],
       "state_variables": [
-        "sizes (list of vertex counts to benchmark)",
-        "timings (dict size -> {'array': sec, 'heap': sec})"
+        "mse (helper, reused by C13)",
+        "Fixed y-limits derived from the data range to bound high-degree curves"
       ],
       "error_handling": [
-        "Keep default sizes small and density moderate so Colab stays responsive; cap n to avoid runaway O(V^2) cost.",
-        "Add a spanning path so the source reaches all vertices, preventing timings dominated by early INF breaks.",
-        "Seed graph generation for reproducibility and pass the SAME generated graph to both algorithms for a fair comparison.",
-        "Wrap each timed run in try/except to skip a failing size rather than aborting the whole sweep."
+        "Suppress np.polyfit RankWarning via warnings and cap degree at len(x_train2)-1 if degree is too large; wrap polyfit in try/except np.linalg.LinAlgError.",
+        "Clamp plot y-limits so an exploding high-degree fit does not make the figure unreadable.",
+        "Cast degree to int."
       ],
       "test_checks": [
-        "g = make_random_graph(20, 0.3, seed=1); assert dijkstra_array(g, 0) == dijkstra_heap(g, 0) (algorithms agree on a shared graph)",
-        "assert all(timings[n]['array'] >= 0 and timings[n]['heap'] >= 0 for n in sizes)",
-        "assert dijkstra_heap(example_graph, 's') == {'s':0,'y':5,'t':8,'z':7,'x':9} (non-tracing heap matches the traced result)."
+        "tr1 = mse(y_train2, np.polyval(np.polyfit(x_train2,y_train2,1), x_train2)); tr9 = mse(y_train2, np.polyval(np.polyfit(x_train2,y_train2,9), x_train2)); assert tr9 <= tr1 + 1e-9  # higher degree lowers train error",
+        "plot_poly(1) and plot_poly(12) run without error",
+        "Train MSE and test MSE are both shown in the title."
       ]
     },
     {
-      "cell_id": "C14",
-      "implementation_plan": "Negative-edge counterexample. (1) Build neg_graph, a small cycle-free graph where a negative edge makes Dijkstra err (classic: s->u(1), s->v(2), v->u(-2): true dist[u]=0 via s->v->u, but Dijkstra finalizes u at 1). Hard-code with a comment proving the discrepancy and define NEG_POS. (2) bellman_ford(graph, s): V-1 relaxation passes over all edges returning correct shortest distances as ground truth. (3) Run dijkstra_heap and bellman_ford on neg_graph; print a side-by-side table of vertex, Dijkstra dist, true dist, and a 'WRONG' flag where they differ. (4) Draw neg_graph with draw_graph highlighting the negative edge. (5) Optional compare_on_weight(w) with an IntSlider on the offending edge weight from positive down through negative so students see exactly when the answer breaks.",
+      "cell_id": "C13",
+      "cell_type": "code",
+      "implementation_plan": "Regularization (ridge) remedy demo at a fixed high degree DEG=12. Build polynomial design matrices via np.vander(x, DEG+1). Implement ridge_fit(X, y, lam): theta = np.linalg.solve(X.T@X + lam*I, X.T@y) with I an identity whose intercept-column diagonal entry is set to 0 (do not penalize the bias). plot_ridge(log_lambda): lam = 10**log_lambda, fit on train, compute train/test MSE (reusing mse from C12), plot the fitted curve + train/test scatter with bounded y-limits, title shows lambda and both errors. interact(plot_ridge, log_lambda=FloatSlider(min=-6, max=3, step=0.5, value=-3)) with lam derived as 10**log_lambda. Static fallback calls plot_ridge(-3).",
       "function_signatures": [
-        "build_negative_graph() -> tuple[graph, dict]",
-        "bellman_ford(graph, s) -> dict",
-        "compare_on_weight(w: int) -> None"
+        "ridge_fit(X: np.ndarray, y: np.ndarray, lam: float) -> np.ndarray  # returns theta",
+        "plot_ridge(log_lambda: float) -> None"
       ],
       "state_variables": [
-        "neg_graph, NEG_POS",
-        "dijkstra_result, true_result (distance dicts being compared)"
+        "DEG (int=12)",
+        "Design matrix via np.vander; identity mask excluding the intercept from the penalty",
+        "Reuses mse from C12 and the C11 datasets"
       ],
       "error_handling": [
-        "bellman_ford runs a V-th pass and warns if any edge still relaxes (negative cycle), keeping the demo graph cycle-free by construction.",
-        "When the slider sets the offending edge non-negative, the demo shows Dijkstra and Bellman-Ford agreeing, making the breaking point explicit.",
-        "Reuse draw_graph defensively; the negative-weight label is finite and must render (not 'INF')."
+        "Use np.linalg.solve on the regularized normal equations; if singular (np.linalg.LinAlgError), fall back to np.linalg.lstsq.",
+        "Do not penalize the intercept column (zero that diagonal entry) to avoid bias-shrinkage artifacts.",
+        "Clamp plot y-limits; compute lam = 10**log_lambda safely."
       ],
       "test_checks": [
-        "true = bellman_ford(neg_graph, 's'); dij = dijkstra_heap(neg_graph, 's'); assert any(true[v] != dij[v] for v in true) (the counterexample exhibits a real discrepancy).",
-        "With the offending edge set non-negative, assert bellman_ford and dijkstra_heap agree (failure is specifically due to negativity).",
-        "A V-th Bellman-Ford pass produces no further relaxation (no negative cycle)."
+        "X = np.vander(x_train2, DEG+1); t_small = ridge_fit(X, y_train2, 1e-6); t_big = ridge_fit(X, y_train2, 1e3); assert np.linalg.norm(t_big) < np.linalg.norm(t_small)  # larger lambda shrinks coefficients",
+        "plot_ridge(-6) and plot_ridge(2) run without error",
+        "Increasing lambda visibly smooths the fitted curve."
       ]
     }
   ],
   "cross_cell_invariants": [
-    "All cells run strictly top-to-bottom; every function a cell uses is defined in an earlier cell (C02 imports, C04 graph+draw_graph, C06 primitives, C08 traced Dijkstra) with no forward references.",
-    "Graphs are represented consistently (networkx.DiGraph or fallback adjacency dict {u: [(v, w)]}) and accessed only through representation-agnostic helpers get_vertices(graph) and neighbors(graph, u).",
-    "Distance maps use math.inf for unreached vertices and 0 for the source; predecessor maps use None for no predecessor; draw_graph renders math.inf as 'INF'.",
-    "draw_graph is the single visualization primitive reused by C09, C10, and C14; its node-coloring contract is fixed: S=black, active u=gray, Q/frontier=white.",
-    "Every trace snapshot is an independent deep copy (set(S), dict(dist), dict(pi)) so scrubbing forward/backward never mutates earlier frames.",
-    "The example-graph answer key {s:0,y:5,t:8,z:7,x:9} and practice-graph answer key {s:0,a:8,b:5,c:9,d:7,e:10} are the authoritative correctness targets reproduced by C08/C10.",
-    "All graphs except the C14 counterexample have non-negative edge weights, satisfying Dijkstra's correctness precondition.",
-    "ipywidgets is the only interaction library; every interactive cell (C07, C09, C10, C12, C14) degrades to a static default render when get_ipython() is None or ipywidgets is unavailable."
+    "A single seeded RNG (rng, SEED=42 from C02) is the only randomness source; all data-generating cells (C04, C11) draw from it so results are reproducible top-to-bottom.",
+    "x_train, y_train, true_w, true_b, N are created exactly once in C04 and reused unchanged by C06, C08, and C09.",
+    "x_train2, y_train2, x_test2, y_test2 are created exactly once in C11 and reused unchanged by C12 and C13.",
+    "loss(w, b) is defined once in C06 and reused by C08 (validation/printout) and C09 (surface + curve).",
+    "gradient_descent is defined in C08 and reused by C09; mse is defined in C12 and reused by C13.",
+    "Every code cell depends only on earlier cells; the notebook must execute strictly top-to-bottom with no forward references.",
+    "WIDGETS_AVAILABLE from C02 gates every interact() call; each interactive cell (C06, C09, C12, C13) has a static fallback so the notebook never errors when ipywidgets is missing.",
+    "All interactive plotting callbacks use fixed/bounded axis limits so slider changes do not cause distracting rescaling or unreadable blow-ups."
   ],
   "assumptions": [
-    "The target Colab/IPython runtime supports ipywidgets interaction; static fallbacks are provided for non-interactive execution (CI or plain Jupyter without widget support).",
-    "networkx and matplotlib are importable or pip-installable in C02; draw_graph falls back to manual matplotlib drawing on the fixed position dictionaries if networkx is unavailable.",
-    "The edge weights of the example and practice graphs are those that yield the answer keys from 01_concepts.json; build functions assert the keys at construction time to catch transcription errors.",
-    "C12 uses small, Colab-friendly graph sizes and a fixed random seed so the O(V^2) vs O(E lg V) trend is visible and reproducible without long runtimes.",
-    "The negative-edge graph in C14 is deliberately cycle-free so Bellman-Ford yields a well-defined ground truth for comparison.",
-    "Heap entries are (distance, vertex) tuples with deterministic vertex tie-breaking, and stale entries are handled by lazy deletion since heapq provides no decrease-key operation."
+    "numpy, matplotlib, and ipywidgets are importable in the runtime (Colab/Jupyter); a guarded fallback handles missing ipywidgets.",
+    "np.random.default_rng is available (NumPy >= 1.17) and is used instead of legacy np.random for reproducibility.",
+    "Polynomial fitting uses np.polyfit/np.vander closed-form least squares (and closed-form ridge), not gradient descent, for speed and numerical stability, matching the Stage 2 assumption.",
+    "The true linear parameters (true_w=2.0, true_b=-1.0) and nonlinear function g(x)=sin(1.5x) are illustrative; exact constants may be tuned by demo-coder as long as the invariants and test checks above still hold.",
+    "Interactive cells rely on ipywidgets.interact; '%matplotlib inline' (or the Colab default) provides static-image rendering of each interaction frame."
   ]
 }

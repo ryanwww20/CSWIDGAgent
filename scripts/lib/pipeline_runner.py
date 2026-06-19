@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from notebook_assembler import AssemblyError, assemble_notebook, expected_notebook_path as assembler_notebook_path
+from notebook_verifier import VerificationError, build_execution_report, verify_notebook
 from pipeline_validator import (
     ValidationError,
     validate_cell_sources,
@@ -90,6 +91,13 @@ def make_prompt(agent_instructions: str, task: str, *, response_mode: str = "jso
             "Return ONLY the 04_generation_report.json content as valid JSON. "
             "Do not include markdown fences or extra commentary."
         )
+    elif response_mode == "stage5_fix":
+        suffix = (
+            "Edit pipeline_outputs/04_cell_sources.json in place to fix the failing cells. "
+            "Do NOT write the .ipynb file — the pipeline re-assembles and re-verifies it. "
+            "Return ONLY the fix report content as valid JSON. "
+            "Do not include markdown fences or extra commentary."
+        )
     else:
         die(f"unknown response_mode: {response_mode}")
 
@@ -130,6 +138,121 @@ def run_stage4_assembly(
         return validate_demo_coder_outputs(report, structure, root_dir)
     except ValidationError as exc:
         die(f"demo-coder report/notebook gate failed: {exc}")
+
+
+def run_stage5_verification(
+    structure: dict[str, Any],
+    notebook_path: Path,
+    cell_sources_path: Path,
+    structure_path: Path,
+    analysis_path: Path,
+    execution_report_path: Path,
+    *,
+    claude_bin: str,
+    autofix: bool,
+    max_fix_attempts: int,
+    cell_timeout: int,
+    startup_timeout: int,
+    kernel_name: str = "python3",
+) -> dict[str, Any]:
+    """Stage 5: verify the assembled notebook, then optionally repair + re-verify."""
+    fixer_agent = structure_path.parent.parent / ".claude" / "agents" / "notebook-fixer.md"
+    fix_attempts: list[dict[str, Any]] = []
+
+    def _verify():
+        try:
+            return verify_notebook(
+                notebook_path,
+                structure,
+                execute=True,
+                cell_timeout=cell_timeout,
+                startup_timeout=startup_timeout,
+                kernel_name=kernel_name,
+            )
+        except VerificationError as exc:
+            die(f"notebook verification could not run: {exc}")
+
+    def _write_report(result) -> dict[str, Any]:
+        timestamp_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        report = build_execution_report(
+            result,
+            kernel_name=kernel_name,
+            timestamp_utc=timestamp_utc,
+            fix_attempts=fix_attempts,
+        )
+        try:
+            validate_stage_output("notebook-verifier", report)
+        except ValidationError as exc:
+            die(f"05_execution_report.json failed validation: {exc}")
+        write_json(execution_report_path, report, dry_run=False)
+        return report
+
+    def _log_result(result) -> None:
+        syntax_n = len(result.syntax_failures)
+        exec_n = len(result.execution_failures)
+        log(
+            f"Stage 5 verify: syntax_ok={result.syntax_ok} runnable={result.runnable} "
+            f"(syntax_failures={syntax_n}, execution_failures={exec_n}, "
+            f"{result.duration_seconds:.1f}s)"
+        )
+
+    result = _verify()
+    _log_result(result)
+    report = _write_report(result)
+
+    attempt = 0
+    while not result.ok and autofix and attempt < max_fix_attempts:
+        attempt += 1
+        if not cell_sources_path.exists():
+            log(f"Stage 5: cannot autofix, {cell_sources_path.name} missing; reporting failures only")
+            break
+        log(f"Stage 5: notebook not runnable; running notebook-fixer (attempt {attempt}/{max_fix_attempts})")
+
+        agent_instructions = load_agent_instructions(fixer_agent)
+        task = (
+            f"Read '{execution_report_path}' for the failing cells. "
+            f"Read '{cell_sources_path}', '{structure_path}', and '{analysis_path}'. "
+            f"Fix the failing cells in '{cell_sources_path}' in place, preserving cell count, "
+            "ids, order, and types."
+        )
+        prompt = make_prompt(agent_instructions, task, response_mode="stage5_fix")
+        stdout = run_claude_prompt(claude_bin, prompt, dry_run=False)
+
+        fixed_ids: list[str] = []
+        notes = ""
+        try:
+            fix_report = extract_json(stdout)
+            if isinstance(fix_report, dict):
+                fixed_ids = fix_report.get("fixed_cell_ids", []) or []
+                notes = fix_report.get("notes", "") or ""
+        except ValueError:
+            notes = "notebook-fixer returned no parseable report"
+
+        cell_sources = load_json(cell_sources_path)
+        try:
+            validate_cell_sources(cell_sources, structure)
+            assemble_notebook(structure, cell_sources, notebook_path)
+        except (ValidationError, AssemblyError) as exc:
+            die(f"notebook-fixer attempt {attempt} produced invalid cell sources: {exc}")
+
+        result = _verify()
+        fix_attempts.append({
+            "attempt": attempt,
+            "fixed_cell_ids": fixed_ids,
+            "notes": notes,
+            "syntax_ok_after": result.syntax_ok,
+            "runnable_after": result.runnable,
+        })
+        _log_result(result)
+        report = _write_report(result)
+
+    status = "completed" if result.ok else ("repaired" if fix_attempts else "failed")
+    log(
+        f"Stage 5 complete ({status}): syntax_ok={result.syntax_ok}, "
+        f"runnable={result.runnable}, fix_attempts={len(fix_attempts)}"
+    )
+    log(f"Wrote {execution_report_path}")
+    return report
 
 
 def run_assemble_only(root_dir: Path, topic: str, source_path: Path | None) -> None:
@@ -180,6 +303,26 @@ def run_assemble_only(root_dir: Path, topic: str, source_path: Path | None) -> N
     code_cells = sum(1 for cell in structure_cells if cell.get("cell_type") == "code")
     runnable = bool(report.get("execution_status", {}).get("top_to_bottom_runnable", False))
 
+    # Report-only verification (assemble-only is the no-agent path, so no autofix).
+    execution_report_path = pipeline_dir / "05_execution_report.json"
+    syntax_ok: bool | None = None
+    verified = False
+    try:
+        verify_result = verify_notebook(notebook_path, structure, execute=True)
+        exec_report = build_execution_report(
+            verify_result, kernel_name="python3", timestamp_utc=timestamp_utc,
+        )
+        write_json(execution_report_path, exec_report, dry_run=False)
+        runnable = bool(verify_result.runnable)
+        syntax_ok = bool(verify_result.syntax_ok)
+        verified = True
+        log(
+            f"Assemble-only verify: syntax_ok={syntax_ok}, runnable={runnable} "
+            f"({verify_result.duration_seconds:.1f}s)"
+        )
+    except VerificationError as exc:
+        log(f"Assemble-only verification skipped: {exc}")
+
     run_log = {
         "run_id": f"assemble-only-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
         "timestamp_utc": timestamp_utc,
@@ -191,6 +334,7 @@ def run_assemble_only(root_dir: Path, topic: str, source_path: Path | None) -> N
             "notebook_architect": "skipped",
             "cell_analyzer": "skipped",
             "demo_coder": "assemble_only",
+            "notebook_verifier": "completed" if verified else "skipped",
         },
         "artifacts": {
             "concepts": "pipeline_outputs/01_concepts.json",
@@ -198,10 +342,13 @@ def run_assemble_only(root_dir: Path, topic: str, source_path: Path | None) -> N
             "analysis": "pipeline_outputs/03_cell_analysis.json",
             "cell_sources": "pipeline_outputs/04_cell_sources.json",
             "generation_report": "pipeline_outputs/04_generation_report.json",
+            "execution_report": "pipeline_outputs/05_execution_report.json",
             "final_notebook": notebook_target,
         },
         "summary": {
             "top_to_bottom_runnable": runnable,
+            "syntax_ok": syntax_ok,
+            "verified_by_execution": verified,
             "total_cells": len(structure_cells),
             "code_cells": code_cells,
             "markdown_cells": len(structure_cells) - code_cells,
@@ -222,7 +369,17 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--assemble-only", action="store_true")
     parser.add_argument("--claude-bin", default="claude")
-    parser.add_argument("--from-stage", type=int, default=1, choices=[1, 2, 3, 4])
+    parser.add_argument("--from-stage", type=int, default=1, choices=[1, 2, 3, 4, 5])
+    parser.add_argument("--skip-verify", action="store_true",
+                        help="skip Stage 5 (notebook execution verification)")
+    parser.add_argument("--no-autofix", action="store_true",
+                        help="Stage 5 reports failures but does not run notebook-fixer")
+    parser.add_argument("--max-fix-attempts", type=int, default=2,
+                        help="max notebook-fixer rounds in Stage 5 (default 2)")
+    parser.add_argument("--cell-timeout", type=int, default=120,
+                        help="per-cell execution timeout in seconds (Stage 5)")
+    parser.add_argument("--startup-timeout", type=int, default=60,
+                        help="kernel startup timeout in seconds (Stage 5)")
     args = parser.parse_args()
 
     root_dir = Path(args.root_dir).resolve()
@@ -334,15 +491,25 @@ def main() -> None:
                 log(f"[dry-run] would assemble notebook at {notebook_path}")
             continue
 
-        try:
-            payload = extract_json(stdout)
-        except ValueError:
-            output_path = stage["output"]
-            if Path(output_path).exists():
-                log(f"{stage['name']} stdout not JSON; reading from {output_path}")
-                payload = load_json(Path(output_path))
-            else:
-                die(f"{stage['name']} did not return parseable JSON and no output file found")
+        # Prefer the artifact the agent WROTE to disk over any JSON echoed inline
+        # on stdout. Stages 1-3 are told to write their output file; their chatty
+        # stdout sometimes carries only a partial JSON preview (e.g. missing
+        # top-level keys) that would spuriously fail validation even though the
+        # file on disk is complete and correct. demo-coder returns its report on
+        # stdout (cell sources are its on-disk artifact), so keep stdout-first.
+        output_path = Path(stage["output"])
+        if stage["name"] != "demo-coder" and output_path.exists():
+            log(f"{stage['name']}: validating artifact written to {output_path.name}")
+            payload = load_json(output_path)
+        else:
+            try:
+                payload = extract_json(stdout)
+            except ValueError:
+                if output_path.exists():
+                    log(f"{stage['name']} stdout not JSON; reading from {output_path}")
+                    payload = load_json(output_path)
+                else:
+                    die(f"{stage['name']} did not return parseable JSON and no output file found")
 
         if not isinstance(payload, dict):
             die(f"{stage['name']} must return a JSON object")
@@ -391,6 +558,11 @@ def main() -> None:
         log(f"Wrote {stage['output']}")
 
     if args.dry_run:
+        if not args.skip_verify:
+            log(
+                f"[dry-run] would verify {notebook_path} "
+                f"(autofix={not args.no_autofix}, max_attempts={args.max_fix_attempts})"
+            )
         log("Dry-run complete.")
         return
 
@@ -401,6 +573,32 @@ def main() -> None:
     structure_cells = structure.get("cells", [])
     code_cells = sum(1 for cell in structure_cells if cell.get("cell_type") == "code")
     markdown_cells = len(structure_cells) - code_cells
+
+    execution_report_path = pipeline_dir / "05_execution_report.json"
+    verify_report: dict[str, Any] | None = None
+    if args.skip_verify:
+        log("Stage 5 (notebook-verifier) skipped via --skip-verify")
+        verifier_status = "skipped"
+        syntax_ok: bool | None = None
+    else:
+        log("Running stage: notebook-verifier")
+        verify_report = run_stage5_verification(
+            structure,
+            notebook_path,
+            cell_sources_path,
+            structure_path,
+            analysis_path,
+            execution_report_path,
+            claude_bin=args.claude_bin,
+            autofix=not args.no_autofix,
+            max_fix_attempts=args.max_fix_attempts,
+            cell_timeout=args.cell_timeout,
+            startup_timeout=args.startup_timeout,
+        )
+        final_status = verify_report["final_status"]
+        runnable = bool(final_status["runnable"])  # authoritative: real kernel execution
+        syntax_ok = bool(final_status["syntax_ok"])
+        verifier_status = "completed" if (runnable and syntax_ok) else "failed"
 
     run_log = {
         "run_id": run_id,
@@ -413,6 +611,7 @@ def main() -> None:
             "notebook_architect": "completed",
             "cell_analyzer": "completed",
             "demo_coder": "completed",
+            "notebook_verifier": verifier_status,
         },
         "artifacts": {
             "concepts": "pipeline_outputs/01_concepts.json",
@@ -420,10 +619,13 @@ def main() -> None:
             "analysis": "pipeline_outputs/03_cell_analysis.json",
             "cell_sources": "pipeline_outputs/04_cell_sources.json",
             "generation_report": "pipeline_outputs/04_generation_report.json",
+            "execution_report": "pipeline_outputs/05_execution_report.json",
             "final_notebook": final_notebook,
         },
         "summary": {
             "top_to_bottom_runnable": runnable,
+            "syntax_ok": syntax_ok,
+            "verified_by_execution": verify_report is not None,
             "total_cells": len(structure_cells),
             "code_cells": code_cells,
             "markdown_cells": markdown_cells,

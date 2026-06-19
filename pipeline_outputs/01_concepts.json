@@ -1,90 +1,84 @@
 {
-  "course": "Algorithms (EE4033-01), 113-2 (Spring 2025), Lecture 11 — Dijkstra's Algorithm, Shao-Hua Sun, EE @ NTU",
-  "source_path": "/Users/justin/Desktop/NTU/CSWIDGAgent/course_source/Dijkstra.pdf",
+  "course": "Machine Learning (Basic Concepts) 2023 — Hung-yi Lee",
+  "source_path": "/Users/justin/Desktop/NTU/CSWIDGAgent/course_source/ML_basic2023.pdf",
   "candidates": [
     {
-      "concept": "Dijkstra's single-source shortest-path algorithm (main loop)",
+      "concept": "Machine Learning as Function Finding (Three-Step Framework: Model, Loss, Optimization)",
       "importance_score": 10,
-      "demo_feasibility_score": 10,
+      "demo_feasibility_score": 9,
       "prerequisites": [
-        "Weighted directed graphs and adjacency-list representation",
-        "Min-priority queue (Extract-Min)",
-        "Single-source shortest-path problem"
+        "Basic algebra",
+        "Functions and inputs/outputs"
       ],
-      "why_it_matters": "Core topic of the lecture: computes minimum-weight paths from a source s to every other vertex in a graph with non-negative edge weights by maintaining a set S of finalized vertices, repeatedly extracting the minimum-estimate vertex from Q, adding it to S, and relaxing its outgoing edges.",
-      "transcript_summary": "Pseudocode (slide 2): Initialize-Single-Source(G,s); S=Φ; Q=G.V; while Q≠Φ: u=Extract-Min(Q); S=S∪{u}; for each v∈Adj[u]: Relax(u,v,w). Greedy choice: always pick the vertex nearest the source; stated to execute essentially the same as Prim's algorithm."
+      "why_it_matters": "The unifying mental model of the entire lecture: ML ≈ a machine automatically finding a function f. The three steps — (1) define a candidate function set (Model/H), (2) define a loss to score function quality (Loss), (3) optimize to pick f* = argmin L(f) — structure every later topic (CNN, Transformer, RL, gradient descent).",
+      "transcript_summary": "Pages 2, 6, 8, 11, 14, 17, 25: ML defined as a machine automatically finding a function. Three steps repeated as a recurring scaffold: 設定範圍 (set scope = Model), 設定標準 (set standard = Loss), 達成目標 (achieve goal = Optimization). The summary slide maps each step to concrete techniques (Deep Learning, Supervised/RL, Gradient Descent)."
     },
     {
-      "concept": "Edge relaxation and Initialize-Single-Source",
+      "concept": "Gradient Descent Optimization (finding f* = argmin L(f))",
       "importance_score": 9,
       "demo_feasibility_score": 10,
       "prerequisites": [
-        "Distance estimate v.d and predecessor v.π",
-        "Edge weight function w(u, v)"
+        "Loss function",
+        "Derivatives/slope",
+        "Three-step framework"
       ],
-      "why_it_matters": "Relaxation is the atomic update that drives shortest-path estimates monotonically downward: if v.d > u.d + w(u,v), set v.d = u.d + w(u,v) and v.π = u. Initialization sets all v.d = ∞, v.π = NIL, and s.d = 0. Mastering relaxation is essential to understanding the whole algorithm and reconstructing paths via predecessors.",
-      "transcript_summary": "Relax(u,v,w) (slide 4): 1. if v.d > u.d + w(u,v) 2. v.d = u.d + w(u,v) 3. v.π = u. Initialize-Single-Source(G,s): v.d=∞, v.π=NIL for all v; s.d=0."
+      "why_it_matters": "Step 3 of the framework: how the best function is actually found. Gradient descent (and variants Adam/AdamW) is the workhorse optimizer of deep learning. It is highly visualizable — iterating down a loss curve toward a minimum makes the abstract argmin concrete and exposes hyperparameters like learning rate.",
+      "transcript_summary": "Pages 15, 17, 18: f* = argmin_{f∈H} L(f). Optimization algorithms listed as Gradient Descent (Adam, AdamW), Genetic Algorithm. Page 18 stresses hyperparameters (learning rate, batch size, initialization) and goals: lower L(f*), faster, insensitive to hyperparameters."
     },
     {
-      "concept": "Step-by-step execution trace on an example graph",
-      "importance_score": 9,
-      "demo_feasibility_score": 10,
-      "prerequisites": [
-        "Dijkstra's main loop",
-        "Edge relaxation"
-      ],
-      "why_it_matters": "Two full slides (Example and Practice) trace the algorithm vertex-by-vertex, visualizing S (explored, black), the vertex u being processed (gray), vertices still in Q = V−S (white), distance labels, and predecessor edges. This trace is the primary pedagogical vehicle and is ideal for an interactive, animated visualization.",
-      "transcript_summary": "Example graph (slide 3): vertices s,t,x,y,z with weights 10,5,2,3,1,9,7,4,6,2; distances evolve from ∞ to final s=0, y=5, t=8, z=7, x=9, with predecessor edges highlighted. Practice graph (slide 4): vertices s,a,b,c,d,e for hands-on tracing, final labels a=8,b=5,c=9,d=7,e=10."
-    },
-    {
-      "concept": "Time complexity by priority-queue implementation",
+      "concept": "Loss Functions and Supervised vs Semi-supervised Learning",
       "importance_score": 8,
       "demo_feasibility_score": 8,
       "prerequisites": [
-        "Dijkstra's main loop",
-        "Linear array, binary heap, and Fibonacci heap",
-        "Asymptotic (big-O) analysis"
+        "Three-step framework",
+        "Labeled data concept"
       ],
-      "why_it_matters": "The running time depends entirely on the priority-queue implementation: O(V^2) with a linear array, O(E lg V) with a binary heap, and O(E + V lg V) amortized with a Fibonacci heap. This ties algorithm design to data-structure choice and can be demonstrated empirically by timing array- vs. heap-based runs on growing graphs.",
-      "transcript_summary": "Slide 5: linear array — Extract-Min O(V) → O(V^2) over the loop, relaxation O(E)×O(1). Binary heap — Extract-Min O(lg V) → O(V lg V), relaxation O(E)×O(lg V) for Decrease-Key → O(E lg V). Fibonacci heap — amortized O(E + V lg V)."
+      "why_it_matters": "Step 2 of the framework: the loss L(f) quantifies how far a function's outputs are from the correct answers, defining what 'good' means. It depends on training data and labels, which distinguishes supervised, semi-supervised, and reinforcement learning. Without a loss there is nothing to optimize.",
+      "transcript_summary": "Pages 11-13: L(f1) = sum of distances between f1's outputs and correct labels (worked example total = 15). Loss depends on training data. Supervised Learning uses labels; Semi-supervised Learning adds constraints from unlabeled data (e.g. similar-looking Pokémon should have similar battle power)."
     },
     {
-      "concept": "Correctness proof (loop invariant and induction on |S|)",
-      "importance_score": 7,
-      "demo_feasibility_score": 5,
+      "concept": "Regression vs Classification vs Structured/Generative Learning",
+      "importance_score": 8,
+      "demo_feasibility_score": 8,
       "prerequisites": [
-        "Loop invariants",
-        "Proof by induction",
-        "Shortest-path distance δ(s,v)",
-        "Non-negative edge weight assumption"
+        "Functions and outputs"
       ],
-      "why_it_matters": "Establishes why the greedy choice is correct: the loop invariant says that for every v ∈ S, v.d = δ(s,v). The inductive argument depends critically on non-negative edge weights — any alternative path P must leave S and is already at least as long as P_v by the time it does. This also explains why Dijkstra fails with negative edges.",
-      "transcript_summary": "Slide 6: loop invariant 'for each v∈S, v.d=δ(s,v)'. Induction on |S|: basis |S|=1; inductive step grows S by v via final edge (u,v); P_u is shortest s-u path; any other s-v path P leaves S at first non-S node y (with x∈S just before); w(P_v)=v.d=u.d+w(u,v) ≤ x.d+w(x,y) ≤ w(P)."
+      "why_it_matters": "Classifying ML tasks by the type of function output is the first practical decision when framing a problem: regression outputs a number, classification outputs a category, structured/generative learning outputs a structured object (image, sentence). It frames where modern systems like ChatGPT fit.",
+      "transcript_summary": "Pages 3-5: Regression = numeric output (e.g. predict tomorrow's PM2.5); Classification = category output (e.g. spam Yes/No). Structured/Generative Learning produces structured objects. ChatGPT framed as generative learning decomposed into many classification problems."
     },
     {
-      "concept": "Relationship between Dijkstra's and Prim's algorithms",
-      "importance_score": 5,
+      "concept": "Overfitting: Training vs Testing and Regularization",
+      "importance_score": 8,
+      "demo_feasibility_score": 9,
+      "prerequisites": [
+        "Loss function",
+        "Optimization",
+        "Model/candidate function set"
+      ],
+      "why_it_matters": "A low training loss does not guarantee good test performance — the model may 'memorize answers' (overfit). Understanding the train/test gap and remedies like regularization is essential for building models that generalize, and is one of the most demonstrable pitfalls in practice.",
+      "transcript_summary": "Pages 19-20: A small L(f) on training data does not imply good test performance. Page 19 adds extra considerations to the loss (e.g. Regularization). Page 20 contrasts 'L small, tests well' vs 'L small, tests badly (memorizing answers)' — i.e. overfitting."
+    },
+    {
+      "concept": "Model Architectures as Candidate Function Sets (Fully-connected, CNN, Self-attention/Transformer)",
+      "importance_score": 7,
       "demo_feasibility_score": 6,
       "prerequisites": [
-        "Dijkstra's main loop",
-        "Minimum spanning tree / Prim's algorithm"
+        "Model/candidate function set",
+        "Three-step framework"
       ],
-      "why_it_matters": "Both are greedy, both use a min-priority queue with Extract-Min and key updates, and differ only in the update rule (path distance u.d + w(u,v) vs. raw edge weight w(u,v)). Contrasting them deepens understanding of greedy graph algorithms.",
-      "transcript_summary": "Slide 2 shows MST-Prim(G,w,r) pseudocode beside Dijkstra and states Dijkstra 'executes essentially the same as Prim's algorithm.' Prim sets v.key = w(u,v); Dijkstra relaxes v.d = u.d + w(u,v)."
+      "why_it_matters": "Network architectures (CNN, RNN, Transformer) are concrete instantiations of the 'candidate function set' H from Step 1; the choice is driven by task characteristics. This connects the abstract framework to the named architectures students encounter throughout deep learning.",
+      "transcript_summary": "Pages 9, 20-24: A neural network's structure is the candidate function set H. Architecture is chosen by task characteristics. CNN vs Fully-connected and CNN vs Self-attention are shown. Cross-cutting techniques (Residual Connection, Batch Normalization, Cross-entropy loss) can support multiple steps."
     }
   ],
   "selected_concepts": [
-    "Dijkstra's single-source shortest-path algorithm (main loop)",
-    "Edge relaxation and Initialize-Single-Source",
-    "Step-by-step execution trace on an example graph",
-    "Time complexity by priority-queue implementation",
-    "Correctness proof (loop invariant and induction on |S|)"
+    "Machine Learning as Function Finding (Three-Step Framework: Model, Loss, Optimization)",
+    "Gradient Descent Optimization (finding f* = argmin L(f))",
+    "Overfitting: Training vs Testing and Regularization"
   ],
-  "selection_rationale": "Selection follows the lecture's own structure and the project's quality priorities (executability, concept correctness, interactivity, visualization). The main loop, relaxation, and the worked execution trace form the irreducible core and are maximally demo-feasible: a Colab notebook can implement Dijkstra and animate the example/practice graphs (distance labels, S vs. Q, predecessor edges) for high interactivity and visualization value. Time complexity is selected because it is a full slide and supports an executable empirical comparison of linear-array vs. binary-heap implementations, linking algorithm to data structure. The correctness proof is selected for pedagogical completeness — it explains the non-negative-weight requirement and can be illustrated with a negative-edge counterexample — though its demo feasibility is lower since it is primarily mathematical. The Dijkstra-vs-Prim relationship remains a candidate only: a single contrasting remark of lower importance that would dilute focus, recorded for optional inclusion.",
+  "selection_rationale": "Selected for the strongest combination of pedagogical centrality and demo feasibility. (1) The three-step framework is the spine of the entire lecture (importance 10) and can be demonstrated end-to-end with a simple linear-regression example that touches Model, Loss, and Optimization in one notebook. (2) Gradient Descent (demo feasibility 10) is the most visualizable concept — animating iterates descending a loss curve makes argmin L(f) concrete and naturally introduces the learning-rate hyperparameter. (3) Overfitting (demo feasibility 9) is a high-impact, interactive cautionary concept: fitting polynomials of increasing degree and comparing train vs test error vividly shows that low training loss can fail to generalize, motivating regularization. Together these three form a coherent narrative arc (framework → how we optimize → why optimization alone is not enough) ideal for a single classroom-ready interactive notebook. Regression/Classification and architecture topics are excellent context but are either more conceptual (taxonomy) or less self-contained for an executable demo, so they are retained as candidates rather than selected.",
   "assumptions": [
-    "The single PDF (6 slides) is the complete source material for this run; no separate instructor transcript was provided, so transcript_summary fields are derived from slide text and figures.",
-    "Handwritten annotations in the Example/Practice figures (e.g., 'Relax(s,y,w)', '5+3=8') are instructor working notes confirming the trace, not additional concepts.",
-    "Final example distances are read from the figures as s=0, y=5, t=8, z=7, x=9, and are intended to be reproduced exactly by the demo implementation.",
-    "Graphs are directed with non-negative weights, consistent with the stated goal and the correctness proof."
+    "Source PDF is the slide deck for Hung-yi Lee's 2023 'Machine Learning — Basic Concepts' introductory lecture; slides are primarily in Traditional Chinese with English technical terms, and no separate instructor transcript was provided.",
+    "Demo feasibility scores favor concepts that can be illustrated with synthetic data and lightweight Python (NumPy/Matplotlib) without large datasets or GPUs, suiting a Colab classroom setting.",
+    "Pokémon battle-power (CP) regression and image examples in the slides are illustrative analogies; demos may substitute equivalent synthetic numeric examples for executability."
   ]
 }

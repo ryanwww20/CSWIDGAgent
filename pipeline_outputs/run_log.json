@@ -1,14 +1,15 @@
 {
-  "run_id": "assemble-only-20260607T135306Z",
-  "timestamp_utc": "2026-06-07T13:53:06Z",
-  "topic": "kvcache",
-  "course_source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/KVcahce.pdf",
+  "run_id": "run-20260619T062733Z",
+  "timestamp_utc": "2026-06-19T06:27:33Z",
+  "topic": "ml_basic",
+  "course_source_path": "/Users/justin/Desktop/NTU/CSWIDGAgent/course_source/ML_basic2023.pdf",
   "generation_mode": "artifact_driven",
   "stage_status": {
-    "concept_extractor": "skipped",
-    "notebook_architect": "skipped",
-    "cell_analyzer": "skipped",
-    "demo_coder": "assemble_only"
+    "concept_extractor": "completed",
+    "notebook_architect": "completed",
+    "cell_analyzer": "completed",
+    "demo_coder": "completed",
+    "notebook_verifier": "completed"
   },
   "artifacts": {
     "concepts": "pipeline_outputs/01_concepts.json",
@@ -16,13 +17,16 @@
     "analysis": "pipeline_outputs/03_cell_analysis.json",
     "cell_sources": "pipeline_outputs/04_cell_sources.json",
     "generation_report": "pipeline_outputs/04_generation_report.json",
-    "final_notebook": "notebooks/kvcache_interactive_skill.ipynb"
+    "execution_report": "pipeline_outputs/05_execution_report.json",
+    "final_notebook": "notebooks/ml_basic_interactive_skill.ipynb"
   },
   "summary": {
     "top_to_bottom_runnable": true,
-    "total_cells": 23,
-    "code_cells": 16,
-    "markdown_cells": 7
+    "syntax_ok": true,
+    "verified_by_execution": true,
+    "total_cells": 14,
+    "code_cells": 8,
+    "markdown_cells": 6
   },
   "legacy_notes": null,
   "errors": []
