@@ -27,22 +27,26 @@ set -uo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PYTHON_BIN="${PYTHON_BIN:-$ROOT_DIR/.venv/bin/python}"
+# Export so run_pipeline.sh runs pipeline_runner.py under the venv — it now
+# imports notebook_verifier (nbformat/nbclient), absent from the system python3.
+export PYTHON_BIN
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
 RUNNER="$ROOT_DIR/scripts/run_pipeline.sh"
 RUNS_DIR="$ROOT_DIR/runs"
 DRY_RUN="${DRY_RUN:-}"
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN="--dry-run"
+# Kernel for stage-5 verification (default 'colab' kernelspec is absent locally).
+KERNEL_NAME="${KERNEL_NAME:-python3}"
 
 # topic:pdf pairs (pdf is relative to course_source/). Defaults span algorithm,
 # basic ML, generative, robustness, and architecture topics — all API-free.
-TOPICS="${TOPICS:-dijkstra:Dijkstra.pdf MLBasic:MLBasic.pdf autoencoder:autoencoder.pdf adversarial_attack:Adversarial_attack.pdf xformer:xformer.pdf}"
+TOPICS="${TOPICS:-MLBasic:MLBasic.pdf autoencoder:autoencoder.pdf gan:gan.pdf adversarial_attack:Adversarial_attack.pdf xformer:xformer.pdf}"
 CONDITIONS="${CONDITIONS:-S0 ablate-concept-extractor ablate-notebook-architect ablate-cell-analyzer B B+bug_solver}"
 SEEDS="${SEEDS:-3}"
 # Judging is OFF by default (JUDGES=0): evaluation is handled downstream by a
 # separate (senior's) scorer. Set JUDGES>0 to also run the built-in LLM judge.
 JUDGES="${JUDGES:-0}"
 PER_CELL_TIMEOUT="${PER_CELL_TIMEOUT:-300}"
-BUG_SOLVER_HOOK="$ROOT_DIR/scripts/lib/bug_solver_hook.sh"
 
 note() { echo "[ablation] $*"; }
 
@@ -82,7 +86,11 @@ Create any parent directories. Do not print the notebook; just write the file."
     echo "[dry-run] single-shot -> $nb"
     return 0
   fi
-  ( cd "$ROOT_DIR" && "$CLAUDE_BIN" -p "$prompt" >/dev/null )
+  # Same claude -p invocation as the pipeline stages (run_claude_prompt): the
+  # prompt asks claude to WRITE the notebook file, which needs the tool +
+  # permission flags to work in non-interactive -p mode.
+  ( cd "$ROOT_DIR" && "$CLAUDE_BIN" -p "$prompt" \
+      --allowedTools "Read,Write,Bash" --dangerously-skip-permissions >/dev/null )
 }
 
 processed=0; generated=0; skipped=0
@@ -102,13 +110,6 @@ for cond in $CONDITIONS; do
         skipped=$((skipped+1)); continue
       fi
 
-      # bug_solver condition needs the teammate's hook; skip cleanly until it lands.
-      if [[ "$cond" == "B+bug_solver" && ! -x "$BUG_SOLVER_HOOK" && -z "$DRY_RUN" ]]; then
-        note "SKIP $tag (no bug_solver hook at $BUG_SOLVER_HOOK)"
-        skipped=$((skipped+1))
-        continue
-      fi
-
       mkdir -p "$run_dir"
       ok=1
       if [[ "$cond" == "S0" ]]; then
@@ -117,12 +118,16 @@ for cond in $CONDITIONS; do
         flag="$(ablate_flag "$cond")"
         args=(--source "course_source/${pdf}" --topic "$topic" --run-tag "$tag" --claude-bin "$CLAUDE_BIN")
         [[ -n "$flag" ]] && args+=(--ablate "$flag")
+        # notebook_verifier (stage 5) IS the bug_solver: it executes + autofixes
+        # the notebook. Enable it only for B+bug_solver; generation conditions
+        # skip it so the ablation measures raw generation, not post-hoc autofix.
+        if [[ "$cond" == "B+bug_solver" ]]; then
+          args+=(--kernel-name "$KERNEL_NAME")
+        else
+          args+=(--skip-verify)
+        fi
         [[ -n "$DRY_RUN" ]] && args+=(--dry-run)
         "$RUNNER" "${args[@]}" || ok=0
-        # bug_solver runs on the assembled notebook, in place.
-        if [[ "$cond" == "B+bug_solver" && -x "$BUG_SOLVER_HOOK" && -z "$DRY_RUN" ]]; then
-          "$BUG_SOLVER_HOOK" "$nb" "$run_dir" || note "bug_solver hook failed for $tag"
-        fi
       fi
 
       # meta.json (consumed by aggregate_results.py)
