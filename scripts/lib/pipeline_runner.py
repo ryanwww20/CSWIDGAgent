@@ -257,7 +257,7 @@ def run_stage4_assembly(
     cell_sources_path: Path,
     notebook_path: Path,
     report: dict[str, Any],
-    root_dir: Path,
+    base_dir: Path,
 ) -> dict[str, int]:
     cell_sources = load_json(cell_sources_path)
     try:
@@ -278,7 +278,7 @@ def run_stage4_assembly(
 
     try:
         validate_stage_output("demo-coder", report)
-        return validate_demo_coder_outputs(report, structure, root_dir)
+        return validate_demo_coder_outputs(report, structure, base_dir)
     except ValidationError as exc:
         die(f"demo-coder report/notebook gate failed: {exc}")
 
@@ -399,13 +399,13 @@ def run_stage5_verification(
     return report
 
 
-def run_assemble_only(root_dir: Path, topic: str, source_path: Path | None) -> None:
-    pipeline_dir = root_dir / "pipeline_outputs"
+def run_assemble_only(root_dir: Path, work_dir: Path, topic: str, source_path: Path | None) -> None:
+    pipeline_dir = work_dir / "pipeline_outputs"
     structure_path = pipeline_dir / "02_notebook_structure.json"
     cell_sources_path = pipeline_dir / "04_cell_sources.json"
     report_path = pipeline_dir / "04_generation_report.json"
     notebook_target = assembler_notebook_path(topic)
-    notebook_path = root_dir / notebook_target
+    notebook_path = work_dir / notebook_target
 
     structure = load_json(structure_path)
     if not cell_sources_path.exists():
@@ -429,7 +429,7 @@ def run_assemble_only(root_dir: Path, topic: str, source_path: Path | None) -> N
             "assumptions": ["Notebook assembled from existing 04_cell_sources.json"],
         }
 
-    cell_counts = run_stage4_assembly(structure, cell_sources_path, notebook_path, report, root_dir)
+    cell_counts = run_stage4_assembly(structure, cell_sources_path, notebook_path, report, work_dir)
     log(
         "Assemble-only complete: "
         f"{cell_counts['total_cells']} cells "
@@ -527,6 +527,17 @@ def main() -> None:
     parser.add_argument("--kernel-name", default=COLAB_KERNEL,
                         help=f"Stage 5 execution kernel (default '{COLAB_KERNEL}', the "
                              "Colab-matching runtime; falls back to python3 if not installed)")
+    parser.add_argument(
+        "--run-tag",
+        default="",
+        help="isolate this run's outputs under runs/<tag>/ instead of the repo root",
+    )
+    parser.add_argument(
+        "--ablate",
+        default="",
+        choices=["", "concept-extractor", "notebook-architect", "cell-analyzer"],
+        help="merge-mode ablation: drop this agent and fold its job into the downstream neighbor",
+    )
     args = parser.parse_args()
 
     root_dir = Path(args.root_dir).resolve()
@@ -537,15 +548,17 @@ def main() -> None:
         if not source_path.exists():
             die(f"source path does not exist: {source_path}")
 
+    work_dir = (root_dir / "runs" / args.run_tag) if args.run_tag else root_dir
+
     if args.assemble_only:
-        run_assemble_only(root_dir, args.topic, source_path)
+        run_assemble_only(root_dir, work_dir, args.topic, source_path)
         return
 
     if not args.source:
         die("--source is required unless --assemble-only is set")
 
-    pipeline_dir = root_dir / "pipeline_outputs"
-    notebook_dir = root_dir / "notebooks"
+    pipeline_dir = work_dir / "pipeline_outputs"
+    notebook_dir = work_dir / "notebooks"
     agents_dir = root_dir / ".claude" / "agents"
     pipeline_dir.mkdir(parents=True, exist_ok=True)
     notebook_dir.mkdir(parents=True, exist_ok=True)
@@ -553,7 +566,7 @@ def main() -> None:
     run_id = args.run_id or f"run-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
     timestamp_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     notebook_target = assembler_notebook_path(args.topic)
-    notebook_path = root_dir / notebook_target
+    notebook_path = work_dir / notebook_target
 
     concepts_path = pipeline_dir / "01_concepts.json"
     structure_path = pipeline_dir / "02_notebook_structure.json"
@@ -561,50 +574,84 @@ def main() -> None:
     cell_sources_path = pipeline_dir / "04_cell_sources.json"
     report_path = pipeline_dir / "04_generation_report.json"
 
-    stages = [
-        {
-            "name": "concept-extractor",
-            "agent_file": agents_dir / "concept-extractor.md",
-            "output": concepts_path,
-            "response_mode": "json_only",
-            "task": (
-                f"Analyze course source at '{source_path}' and produce the Stage 1 artifact. "
-                f"Write the result to '{concepts_path}'."
-            ),
-        },
-        {
-            "name": "notebook-architect",
-            "agent_file": agents_dir / "notebook-architect.md",
-            "output": structure_path,
-            "response_mode": "json_only",
-            "task": (
-                f"Read input artifact '{concepts_path}' and produce Stage 2 output. "
-                f"Write the result to '{structure_path}'."
-            ),
-        },
-        {
-            "name": "cell-analyzer",
-            "agent_file": agents_dir / "cell-analyzer.md",
-            "output": analysis_path,
-            "response_mode": "json_only",
-            "task": (
-                f"Read input artifact '{structure_path}' and produce Stage 3 output. "
-                f"Write the result to '{analysis_path}'."
-            ),
-        },
-        {
-            "name": "demo-coder",
-            "agent_file": agents_dir / "demo-coder.md",
-            "output": report_path,
-            "response_mode": "stage4_report",
-            "task": (
-                f"Read '{structure_path}' and '{analysis_path}'. "
-                f"Generate topic '{args.topic}'. "
-                f"Write cell sources to '{cell_sources_path}'. "
-                f"Set final_notebook_path to '{notebook_target}' in the report."
-            ),
-        },
-    ]
+    concept_stage = {
+        "name": "concept-extractor",
+        "agent_file": agents_dir / "concept-extractor.md",
+        "output": concepts_path,
+        "response_mode": "json_only",
+        "task": (
+            f"Analyze course source at '{source_path}' and produce the Stage 1 artifact. "
+            f"Write the result to '{concepts_path}'."
+        ),
+    }
+    architect_stage = {
+        "name": "notebook-architect",
+        "agent_file": agents_dir / "notebook-architect.md",
+        "output": structure_path,
+        "response_mode": "json_only",
+        "task": (
+            f"Read input artifact '{concepts_path}' and produce Stage 2 output. "
+            f"Write the result to '{structure_path}'."
+        ),
+    }
+    analyzer_stage = {
+        "name": "cell-analyzer",
+        "agent_file": agents_dir / "cell-analyzer.md",
+        "output": analysis_path,
+        "response_mode": "json_only",
+        "task": (
+            f"Read input artifact '{structure_path}' and produce Stage 3 output. "
+            f"Write the result to '{analysis_path}'."
+        ),
+    }
+    demo_stage = {
+        "name": "demo-coder",
+        "agent_file": agents_dir / "demo-coder.md",
+        "output": report_path,
+        "response_mode": "stage4_report",
+        "task": (
+            f"Read '{structure_path}' and '{analysis_path}'. "
+            f"Generate topic '{args.topic}'. "
+            f"Write cell sources to '{cell_sources_path}'. "
+            f"Set final_notebook_path to '{notebook_target}' in the report."
+        ),
+    }
+
+    # Ablation routing (merge mode): drop one agent and fold its responsibility
+    # into the downstream neighbor, keeping the artifact chain intact.
+    if args.ablate == "concept-extractor":
+        architect_stage["task"] = (
+            f"No upstream concepts file exists. Read the course source at '{source_path}' "
+            f"directly, identify and prioritize the key teachable concepts yourself, then "
+            f"produce the Stage 2 notebook structure. Write the result to '{structure_path}'."
+        )
+        stages = [architect_stage, analyzer_stage, demo_stage]
+    elif args.ablate == "notebook-architect":
+        # The cell-analyzer now designs the structure (02) AND the analysis (03).
+        analyzer_stage["task"] = (
+            f"No 02_notebook_structure.json exists. Read '{concepts_path}'. "
+            f"FIRST design the notebook structure following the notebook-architect contract "
+            f"(top-level keys: notebook_title, learning_objectives, cells, global_flow_notes, "
+            f"assumptions; every cell has cell_id, cell_type, goal, inputs, outputs, widget_plan, "
+            f"estimated_lines, depends_on) and WRITE it to '{structure_path}'. "
+            f"THEN produce your Stage 3 cell analysis and WRITE it to '{analysis_path}'. "
+            f"Return ONLY the cell analysis JSON on stdout."
+        )
+        analyzer_stage["also_writes_structure"] = True
+        stages = [concept_stage, analyzer_stage, demo_stage]
+    elif args.ablate == "cell-analyzer":
+        demo_stage["task"] = (
+            f"Read '{structure_path}'. No 03_cell_analysis.json exists — derive each code "
+            f"cell's implementation details yourself from the structure. "
+            f"Generate topic '{args.topic}'. Write cell sources to '{cell_sources_path}'. "
+            f"Set final_notebook_path to '{notebook_target}' in the report."
+        )
+        stages = [concept_stage, architect_stage, demo_stage]
+    else:
+        stages = [concept_stage, architect_stage, analyzer_stage, demo_stage]
+
+    if args.ablate:
+        log(f"Ablation: dropping '{args.ablate}' (merge mode)")
 
     structure_payload: dict[str, Any] | None = None
 
@@ -660,7 +707,7 @@ def main() -> None:
                 cell_sources_path,
                 notebook_path,
                 payload,
-                root_dir,
+                work_dir,
             )
             log(
                 "Stage 4 complete: "
@@ -677,7 +724,15 @@ def main() -> None:
         payload = parse_stage_payload(stage["name"], stdout, stage["output"])
 
         try:
-            if stage["name"] == "cell-analyzer":
+            if stage.get("also_writes_structure"):
+                # notebook-architect ablated: this merged stage wrote 02 to disk too,
+                # so validate the structure it produced and adopt it downstream.
+                if not structure_path.exists():
+                    die(f"{stage['name']} (merged) did not write {structure_path}")
+                structure_payload = load_json(structure_path)
+                validate_stage_output("notebook-architect", structure_payload)
+                validate_stage_output(stage["name"], payload, structure=structure_payload)
+            elif stage["name"] == "cell-analyzer":
                 if structure_payload is None:
                     structure_payload = load_json(structure_path)
                 validate_stage_output(stage["name"], payload, structure=structure_payload)
@@ -740,19 +795,24 @@ def main() -> None:
         colab_match = bool(verify_report.get("colab_runtime_match", False))
         verifier_status = "completed" if (runnable and syntax_ok) else "failed"
 
+    ran_names = {s["name"] for s in stages}
+    stage_status = {
+        "concept_extractor": "completed" if "concept-extractor" in ran_names else "ablated",
+        "notebook_architect": "completed" if "notebook-architect" in ran_names else "ablated",
+        "cell_analyzer": "completed" if "cell-analyzer" in ran_names else "ablated",
+        "demo_coder": "completed" if "demo-coder" in ran_names else "ablated",
+        "notebook_verifier": verifier_status,
+    }
+
     run_log = {
         "run_id": run_id,
         "timestamp_utc": timestamp_utc,
         "topic": args.topic,
         "course_source_path": str(source_path),
         "generation_mode": "artifact_driven",
-        "stage_status": {
-            "concept_extractor": "completed",
-            "notebook_architect": "completed",
-            "cell_analyzer": "completed",
-            "demo_coder": "completed",
-            "notebook_verifier": verifier_status,
-        },
+        "run_tag": args.run_tag or None,
+        "ablation": args.ablate or None,
+        "stage_status": stage_status,
         "artifacts": {
             "concepts": "pipeline_outputs/01_concepts.json",
             "structure": "pipeline_outputs/02_notebook_structure.json",

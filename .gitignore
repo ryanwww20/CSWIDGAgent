@@ -2,3 +2,11 @@
 .DS_Store
 Paper2Code
 __pycache__/
+
+# Ablation-study generated outputs
+runs/
+results/
+executed.ipynb
+logs/ablation_*.log
+logs/.latest_ablation
+__MACOSX/
