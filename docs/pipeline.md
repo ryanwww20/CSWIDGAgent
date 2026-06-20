@@ -16,6 +16,10 @@ flowchart LR
   S2 --> ASM[notebook_assembler.py]
   CS --> ASM
   ASM --> NB[notebooks/topic_interactive_skill.ipynb]
+  NB --> VER[notebook_verifier.py]
+  VER -->|fail| FIX[notebook-fixer]
+  FIX --> CS
+  VER --> ER[05_execution_report.json]
 ```
 
 ## Official Entry Point
@@ -29,7 +33,8 @@ This invokes `scripts/lib/pipeline_runner.py`, which:
 1. Embeds each agent's `.md` instructions in the prompt (not just the file path).
 2. Validates minimum required JSON fields after stages 1–3.
 3. After demo-coder: validates `04_cell_sources.json`, runs `notebook_assembler.py`, verifies the notebook.
-4. Writes `pipeline_outputs/run_log.json` with a `generation_mode` field.
+4. Stage 5: runs `notebook_verifier.py` (syntax + execution); on failure, invokes `notebook-fixer`, re-assembles, and re-verifies (up to `--max-fix-attempts`).
+5. Writes `pipeline_outputs/run_log.json` with a `generation_mode` field.
 
 Assemble-only (no agents; for regression):
 
@@ -46,6 +51,75 @@ Assemble-only (no agents; for regression):
 | 3 | cell-analyzer | `02_notebook_structure.json` | `03_cell_analysis.json` |
 | 4a | demo-coder | `02` + `03` | `04_cell_sources.json` + `04_generation_report.json` |
 | 4b | notebook_assembler | `02` + `04_cell_sources.json` | `notebooks/<topic>_interactive_skill.ipynb` |
+| 5a | notebook_verifier | `notebook` + `02` | `05_execution_report.json` |
+| 5b | notebook-fixer (on failure) | `05` + `04_cell_sources.json` + `02` + `03` | repaired `04_cell_sources.json` (re-assembled + re-verified) |
+
+## Stage 5: Verification + Auto-fix
+
+`notebook_verifier.py` is a pure-Python component (mirrors `notebook_assembler.py`):
+
+1. **Syntax check** — each code cell is run through IPython's `TransformerManager` (so
+   `%magic` / `!shell` lines don't false-positive) then `compile()`-checked.
+2. **Execution** — the whole notebook runs top-to-bottom under `nbclient` (`allow_errors=True`
+   so every failing cell is reported, not just the first). Errors are mapped back to
+   `cell_id` by structure order.
+
+If verification fails and auto-fix is enabled, the `notebook-fixer` agent repairs the
+failing cells in `04_cell_sources.json`; the runner re-assembles and re-verifies, looping
+up to `--max-fix-attempts` (default 2).
+
+### Colab-matched runtime
+
+The whole point of Stage 5 is to catch what will break **on Colab**, so it executes on a
+dedicated `colab` Jupyter kernel pinned to the Google Colab runtime — not whatever numpy
+happens to be on the local `python3` kernel. (A stale local kernel gives false confidence:
+e.g. numpy 1.26 still has `np.RankWarning`, but Colab's numpy 2.0.2 removed it, so a
+numpy-2-incompatible notebook would pass on the old kernel and fail on Colab.)
+
+Build the kernel once (creates a Python 3.12 venv at `~/.colab-runtime-venv` and registers
+the `colab` kernelspec):
+
+```bash
+bash scripts/lib/colab_env/setup_colab_kernel.sh
+```
+
+Pinned spec lives in `scripts/lib/colab_env/colab-runtime-requirements.txt`. Confirmed from
+the Colab release notes (runtime 2026.04): **Python 3.12.13, numpy 2.0.2**. The rest of the
+scientific stack is best-effort for that generation.
+
+If the `colab` kernel is not installed, Stage 5 falls back to `python3`, records
+`colab_runtime_match: false` in `05_execution_report.json`, and prints a loud warning — so a
+"runnable" result is never silently non-Colab-faithful.
+
+#### Colab runtime sync
+
+Package versions on Colab drift. To make the pins exact, run `!pip list` (or
+`!pip freeze`) in a fresh Colab notebook, update the versions in
+`scripts/lib/colab_env/colab-runtime-requirements.txt`, and re-run
+`setup_colab_kernel.sh` (delete `~/.colab-runtime-venv` first to rebuild clean).
+
+> **Note:** the local interpreter is Python 3.12.1 while Colab pins 3.12.13 — same minor
+> series, so API behaviour matches; only the patch differs. Use a 3.12.13 interpreter via
+> `PYTHON_BIN` if you need an exact patch match.
+
+Stage 5 flags: `--skip-verify`, `--no-autofix`, `--max-fix-attempts N`, `--cell-timeout`,
+`--startup-timeout`, `--kernel-name` (default `colab`). Re-verify an existing notebook with
+`--from-stage 5`. Standalone:
+
+```bash
+python3 scripts/lib/notebook_verifier.py \
+  --notebook notebooks/<topic>_interactive_skill.ipynb \
+  --structure pipeline_outputs/02_notebook_structure.json \
+  --output pipeline_outputs/05_execution_report.json
+```
+
+`05_execution_report.json` is the authoritative source of `summary.top_to_bottom_runnable`
+in `run_log.json` (real kernel execution, not the demo-coder self-report).
+
+**Dependencies:** Stage 5 execution requires `nbclient`, `nbformat`, and an `ipykernel`
+(`python3`) kernel. If the notebook imports heavy third-party packages, they must be
+installed (or the notebook must `!pip install` them) for execution to pass; otherwise
+the verifier reports the import failure and `notebook-fixer` is asked to repair it.
 
 ## Generation Modes (`run_log.json`)
 
@@ -88,7 +162,8 @@ Artifacts from that run remain valid inputs for a proper artifact-driven re-run 
     "concept_extractor": "completed",
     "notebook_architect": "completed",
     "cell_analyzer": "completed",
-    "demo_coder": "completed"
+    "demo_coder": "completed",
+    "notebook_verifier": "completed"
   },
   "artifacts": {
     "concepts": "pipeline_outputs/01_concepts.json",
@@ -96,10 +171,14 @@ Artifacts from that run remain valid inputs for a proper artifact-driven re-run 
     "analysis": "pipeline_outputs/03_cell_analysis.json",
     "cell_sources": "pipeline_outputs/04_cell_sources.json",
     "generation_report": "pipeline_outputs/04_generation_report.json",
+    "execution_report": "pipeline_outputs/05_execution_report.json",
     "final_notebook": "notebooks/kvcache_interactive_skill.ipynb"
   },
   "summary": {
     "top_to_bottom_runnable": false,
+    "syntax_ok": false,
+    "verified_by_execution": true,
+    "colab_runtime_match": true,
     "total_cells": 0,
     "code_cells": 0,
     "markdown_cells": 0

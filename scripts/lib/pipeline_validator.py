@@ -76,6 +76,14 @@ EXECUTION_STATUS_REQUIRED = {"top_to_bottom_runnable", "failed_cell_ids"}
 CELL_SOURCE_REQUIRED = {"cell_id", "cell_type", "source", "generation_notes"}
 CELL_SOURCES_TOP_LEVEL = {"topic", "notebook_title", "source_artifacts", "cells", "assumptions"}
 
+EXECUTION_REPORT_TOP_LEVEL = {
+    "notebook_path",
+    "syntax_check",
+    "execution",
+    "final_status",
+}
+FINAL_STATUS_REQUIRED = {"syntax_ok", "runnable", "fix_attempts_used"}
+
 
 def _require_keys(obj: dict[str, Any], required: set[str], label: str) -> None:
     missing = required - set(obj.keys())
@@ -197,6 +205,26 @@ def validate_generation_report(payload: dict[str, Any]) -> None:
     _require_keys(status, EXECUTION_STATUS_REQUIRED, "execution_status")
 
 
+def validate_execution_report(payload: dict[str, Any]) -> None:
+    """Validate 05_execution_report.json (Stage 5 notebook-verifier output)."""
+    _require_keys(payload, EXECUTION_REPORT_TOP_LEVEL, "05_execution_report.json")
+
+    syntax_check = payload["syntax_check"]
+    if not isinstance(syntax_check, dict) or "passed" not in syntax_check:
+        raise ValidationError("syntax_check must be an object with a 'passed' key")
+    _require_list(syntax_check.get("failures", []), "syntax_check.failures")
+
+    execution = payload["execution"]
+    if not isinstance(execution, dict) or "runnable" not in execution:
+        raise ValidationError("execution must be an object with a 'runnable' key")
+    _require_list(execution.get("failures", []), "execution.failures")
+
+    final_status = payload["final_status"]
+    if not isinstance(final_status, dict):
+        raise ValidationError("final_status must be an object")
+    _require_keys(final_status, FINAL_STATUS_REQUIRED, "final_status")
+
+
 def validate_stage_output(stage_name: str, payload: dict[str, Any], structure: dict[str, Any] | None = None) -> None:
     if stage_name == "concept-extractor":
         validate_concept_extractor(payload)
@@ -206,6 +234,8 @@ def validate_stage_output(stage_name: str, payload: dict[str, Any], structure: d
         validate_cell_analyzer(payload, structure=structure)
     elif stage_name == "demo-coder":
         validate_generation_report(payload)
+    elif stage_name == "notebook-verifier":
+        validate_execution_report(payload)
     else:
         raise ValidationError(f"unknown stage: {stage_name}")
 

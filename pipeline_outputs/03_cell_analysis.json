@@ -2,375 +2,193 @@
   "cell_specs": [
     {
       "cell_id": "C02",
-      "implementation_plan": "Run '!pip install -q numpy torch matplotlib ipywidgets anthropic' in a shell line. Then import: numpy as np, torch, torch.nn as nn, torch.nn.functional as F, matplotlib.pyplot as plt, ipywidgets as widgets, from ipywidgets import interact, from IPython.display import display HTML clear_output, import hashlib os time. Print versions: np.__version__, torch.__version__, widgets.__version__. Set matplotlib inline backend with '%matplotlib inline'.",
-      "function_signatures": [],
+      "implementation_plan": "Environment setup cell. (1) Import numpy as np, matplotlib, matplotlib.pyplot as plt, and ipywidgets as widgets; also import IPython.display.display. Wrap the ipywidgets import in a try/except so a missing widget backend does not abort the notebook: on ImportError set a module-level flag WIDGETS_AVAILABLE=False and print a warning, else WIDGETS_AVAILABLE=True. (2) Define set_seed(seed=0) that calls np.random.seed(seed) and returns seed. (3) Define softmax(x, axis=-1): subtract np.max(x, axis=axis, keepdims=True) for numerical stability, exponentiate, divide by np.sum(exp, axis=axis, keepdims=True). Operate on float64. (4) Rely on the inline backend (Colab/Jupyter default); do not call get_ipython() magics in raw Python. Set plt.rcParams figure size to a legible default. (5) Print a one-line confirmation listing numpy and matplotlib versions so the cell produces visible output under Run-all.",
+      "function_signatures": [
+        "set_seed(seed: int = 0) -> int",
+        "softmax(x: np.ndarray, axis: int = -1) -> np.ndarray"
+      ],
       "state_variables": [
-        "np (numpy module)",
-        "torch (torch module)",
-        "nn (torch.nn module)",
-        "F (torch.nn.functional module)",
-        "plt (matplotlib.pyplot module)",
-        "widgets (ipywidgets module)",
-        "interact (ipywidgets.interact function)",
-        "display, HTML, clear_output (IPython.display)",
-        "hashlib (stdlib module)",
-        "os (stdlib module)",
-        "time (stdlib module)"
+        "WIDGETS_AVAILABLE: bool flag set during ipywidgets import",
+        "np, plt, widgets, display module handles used by all later cells"
       ],
       "error_handling": [
-        "If pip install fails for 'anthropic', catch the ImportError in C20 only — all other cells work without it.",
-        "Print a clear warning if torch is CPU-only ('CUDA not available — all attention ops will run on CPU, which is fine for this notebook')."
+        "try/except ImportError around ipywidgets; set WIDGETS_AVAILABLE=False and print a warning instead of raising",
+        "softmax subtracts the per-axis max before exp to avoid overflow on large scores"
       ],
       "test_checks": [
-        "assert int(np.__version__.split('.')[0]) >= 1, 'numpy >= 1.x required'",
-        "print('All imports OK')"
+        "assert np.allclose(softmax(np.zeros((1, 4)), axis=-1), 0.25)",
+        "assert np.allclose(softmax(np.array([[1.0, 2.0, 3.0]]), axis=-1).sum(), 1.0)",
+        "print('Imports OK | numpy', np.__version__, '| matplotlib', matplotlib.__version__)"
       ]
     },
     {
-      "cell_id": "C04",
-      "implementation_plan": "Define naive_attention_decode(token_embeddings, W_q, W_k, W_v). token_embeddings is np.ndarray (T, d), W_q/W_k/W_v are np.ndarray (d, d). Loop t in range(T): (1) Recompute K = token_embeddings[:t+1] @ W_k shape (t+1, d) and V = token_embeddings[:t+1] @ W_v shape (t+1, d) — this is the expensive recomputation. (2) q = token_embeddings[t] @ W_q shape (d,). (3) scores = q @ K.T / np.sqrt(d) shape (t+1,). (4) Apply max-subtraction for numerical stability: scores -= scores.max(). (5) weights = np.exp(scores); weights /= weights.sum() shape (t+1,). (6) output = weights @ V shape (d,). Append output. (7) Count ops: cumulative_ops += 2*(t+1) (2 full projection matmuls — K and V — each over t+1 tokens). Append cumulative_ops. Return (outputs, op_counts). After definition, run a demo with T=8, d=4, random seed 42, identity weights to show it works.",
-      "function_signatures": [
-        "def naive_attention_decode(token_embeddings: np.ndarray, W_q: np.ndarray, W_k: np.ndarray, W_v: np.ndarray) -> tuple[list[np.ndarray], list[int]]"
-      ],
+      "cell_id": "C03",
+      "implementation_plan": "Define the single shared toy problem and document the matrix-shape convention once, in a top comment block: inputs are stored COLUMN-WISE, I has shape [d, N] where column j is input vector a^j; projections map d->d_k (or d->d_v). Steps: (1) set_seed(0). (2) TOKENS = ['the', 'cat', 'sat', 'down']; N = len(TOKENS). (3) Choose d = 4 (model dim) and d_k = 3 (key/query dim); set d_v = d_k and document that O therefore has shape [d_v, N]. (4) Build I as np.random.randn(d, N) cast to float64. (5) Build W_q, W_k each np.random.randn(d_k, d) * 0.5 and W_v np.random.randn(d_v, d) * 0.5 so q/k/v stay small. (6) Print shapes of I, W_q, W_k, W_v and the TOKENS so the shared state is visible. Expose I, TOKENS, W_q, W_k, W_v, d, d_k, d_v, N as module-level names consumed by every later code cell.",
+      "function_signatures": [],
       "state_variables": [
-        "naive_attention_decode (function, referenced by C05, C06, C07)"
+        "TOKENS: list[str] length N",
+        "N: int sequence length",
+        "d: int model dimension, d_k: int key dim, d_v: int value dim",
+        "I: np.ndarray shape [d, N] (columns are input vectors)",
+        "W_q: [d_k, d], W_k: [d_k, d], W_v: [d_v, d]"
       ],
       "error_handling": [
-        "Assert token_embeddings.ndim == 2, 'Expected (T, d) array'",
-        "Assert W_q.shape == W_k.shape == W_v.shape == (token_embeddings.shape[1], token_embeddings.shape[1]), 'Weight matrix shape mismatch'",
-        "Guard against weights summing to zero (should not happen with valid softmax but add assert weights.sum() > 1e-9)"
+        "assert d_k <= d and d_v == d_k to keep the shared convention consistent for later cells",
+        "assert I.shape == (d, N) immediately after construction so any later shape bug surfaces here"
       ],
       "test_checks": [
-        "outputs, ops = naive_attention_decode(np.random.randn(8, 4), np.eye(4), np.eye(4), np.eye(4))",
-        "assert len(outputs) == 8 and len(ops) == 8, 'Output length must equal T'",
-        "assert ops[-1] == 2 * (1+2+3+4+5+6+7+8), f'Expected {2*36}, got {ops[-1]}'",
-        "assert outputs[0].shape == (4,), 'Each output must be shape (d,)'",
-        "print(f'Naive op counts: {ops}')  # Should grow as [2,6,12,20,30,42,56,72]"
+        "assert len(TOKENS) == N",
+        "assert W_q.shape == (d_k, d) and W_k.shape == (d_k, d) and W_v.shape == (d_v, d)",
+        "print I.shape, W_q.shape, W_k.shape, W_v.shape and TOKENS"
       ]
     },
     {
       "cell_id": "C05",
-      "implementation_plan": "Define cached_attention_decode(token_embeddings, W_q, W_k, W_v). Same signature as C04. Initialize kv_cache_k = [] and kv_cache_v = [] (lists of np.ndarray). Loop t in range(T): (1) Compute ONLY the new token's projections: k_t = token_embeddings[t] @ W_k shape (d,), v_t = token_embeddings[t] @ W_v shape (d,). Append to caches. (2) K = np.stack(kv_cache_k) shape (t+1, d), V = np.stack(kv_cache_v) shape (t+1, d). (3) q = token_embeddings[t] @ W_q. (4) scores, weights, output same as C04. (5) cumulative_ops += 2 (only ONE new token projected for K and V). Append. Return (outputs, op_counts, (kv_cache_k, kv_cache_v)). After definition, run with SAME inputs as C04 demo (fix np.random.seed(42) before both), assert np.allclose on all outputs, and print the comparison.",
-      "function_signatures": [
-        "def cached_attention_decode(token_embeddings: np.ndarray, W_q: np.ndarray, W_k: np.ndarray, W_v: np.ndarray) -> tuple[list[np.ndarray], list[int], tuple[list, list]]"
-      ],
+      "implementation_plan": "Compute one output vector b^1 (0-indexed column 0) step by step. (1) Project the whole sequence: Q = W_q @ I, K = W_k @ I, V = W_v @ I, giving Q,K shape [d_k, N] and V shape [d_v, N]; column j holds q^j, k^j, v^j. (2) Take q1 = Q[:, 0]. (3) Raw scores: raw_scores = K.T @ q1 (equivalently np.dot(q1, K[:, j]) for each j), shape [N]. (4) Scaled scores: scaled = raw_scores / np.sqrt(d_k). (5) Weights: alpha1 = softmax(scaled, axis=-1) over the N keys. (6) Output: b1 = V @ alpha1, shape [d_v]. (7) Print, with token labels, q1, every k^j, raw_scores, scaled scores, alpha1 (sums to 1), and b1, formatted with np.round so students can trace each number. Expose Q, K, V, b1, alpha1 for reuse by C06 and C08.",
+      "function_signatures": [],
       "state_variables": [
-        "cached_attention_decode (function, referenced by C06, C07)"
+        "Q: [d_k, N], K: [d_k, N], V: [d_v, N] projected matrices",
+        "q1, raw_scores, scaled, alpha1, b1 intermediates"
       ],
       "error_handling": [
-        "Same shape assertions as C04.",
-        "Assert len(kv_cache_k) == t+1 after each step (cache grows monotonically).",
-        "If np.allclose assertion fails, print both output arrays side by side for debugging before raising AssertionError."
+        "assert Q.shape == (d_k, N) and V.shape == (d_v, N) right after projection",
+        "guard the scale: scale = np.sqrt(d_k); assert scale > 0"
       ],
       "test_checks": [
-        "np.random.seed(42); emb = np.random.randn(8, 4); W = np.eye(4)",
-        "naive_out, naive_ops = naive_attention_decode(emb, W, W, W)",
-        "cached_out, cached_ops, _ = cached_attention_decode(emb, W, W, W)",
-        "for t, (n, c) in enumerate(zip(naive_out, cached_out)): assert np.allclose(n, c, atol=1e-6), f'Mismatch at step {t}'",
-        "assert cached_ops[-1] == 2 * 8, f'Cached total ops should be 2*T=16, got {cached_ops[-1]}'",
-        "print('Outputs match: True')",
-        "print(f'Cached op counts: {cached_ops}')  # Should be [2,4,6,8,10,12,14,16]"
+        "assert np.isclose(alpha1.sum(), 1.0)",
+        "assert np.all(alpha1 >= 0)",
+        "assert b1.shape == (d_v,)",
+        "print round(alpha1, 4) and round(b1, 4) with TOKENS labels"
       ]
     },
     {
       "cell_id": "C06",
-      "implementation_plan": "Fix T=8. Build two 2D grids of shape (T, T) for visualization. naive_grid[step, pos] = 1 if pos <= step (red: recomputed from scratch), else 0 (white: not yet generated). cached_grid[step, pos]: 2 if pos == step (green: newly computed and cached this step), 1 if pos < step (light green: served from cache, no recompute), 0 if pos > step (white: future). Define a custom 3-color ListedColormap(['white', '#ff9999', '#cc0000']) for naive and (['white', '#99ddaa', '#00aa44']) for cached. Use plt.subplots(1, 2, figsize=(12, 5)). For each subplot: imshow with interpolation='nearest', set_xticks/yticks with labels 'Token 0'...'Token T-1' for columns and 'Step 0'...'Step T-1' for rows, add a text label in each colored cell ('R' for red recomputed cells in naive, 'C' for cached light-green cells, 'N' for new dark-green cells). Add colorbars with 3 categories. Title each plot clearly.",
+      "implementation_plan": "Interactive single-position attention demo over the shared Q, K, V. (1) Define attention_for_position(i): given 0-based query index i, compute q_i = Q[:, i], scores = (K.T @ q_i) / np.sqrt(d_k), alpha = softmax(scores, axis=-1), b_i = V @ alpha; return alpha, b_i. (2) Define plot_position(i): create a matplotlib figure, draw a bar chart of alpha over range(N) with TOKENS as xticklabels, title 'Attention weights for query position i=<i> (\"<token>\")', ylabel 'alpha_prime[i,j]', annotate each bar with its value, print b_i rounded, then plt.show(). (3) Default invocation: call plot_position(0) directly so Run-all renders output before any interaction. (4) If WIDGETS_AVAILABLE: build an IntSlider(min=0, max=N-1, value=0, description='query i') (or Dropdown over TOKENS) wired via widgets.interactive_output into an Output area calling plot_position. If widgets unavailable, skip widget wiring (default plot already rendered).",
       "function_signatures": [
-        "def build_naive_grid(T: int) -> np.ndarray",
-        "def build_cached_grid(T: int) -> np.ndarray"
+        "attention_for_position(i: int) -> tuple[np.ndarray, np.ndarray]",
+        "plot_position(i: int) -> None"
       ],
-      "state_variables": [],
+      "state_variables": [
+        "reuses Q, K, V, d_k, TOKENS, N from earlier cells",
+        "optional slider/dropdown widget and Output area"
+      ],
       "error_handling": [
-        "Assert T >= 2 before building grids.",
-        "If matplotlib backend is not inline, call plt.show() explicitly."
+        "clamp/assert 0 <= i < N at the top of attention_for_position",
+        "guard widget construction behind WIDGETS_AVAILABLE so non-interactive Run-all still succeeds",
+        "create a fresh figure and call plt.show() inside plot_position to avoid duplicate axes on repeated slider events"
       ],
       "test_checks": [
-        "naive_grid = build_naive_grid(8); assert naive_grid.shape == (8, 8)",
-        "assert naive_grid[0, 0] == 1 and naive_grid[0, 1] == 0, 'At step 0, only position 0 is colored'",
-        "assert naive_grid[7, 7] == 1 and np.sum(naive_grid[7]) == 8, 'At step 7, all 8 positions are recomputed'",
-        "cached_grid = build_cached_grid(8); assert cached_grid[3, 3] == 2 and cached_grid[3, 2] == 1 and cached_grid[3, 4] == 0"
+        "alpha, _ = attention_for_position(0); assert np.isclose(alpha.sum(), 1.0)",
+        "assert attention_for_position(0)[0].shape == (N,)",
+        "default plot_position(0) produces a visible bar chart under Run-all"
       ]
     },
     {
-      "cell_id": "C07",
-      "implementation_plan": "Define inner function plot_flop_comparison(T). Inside: set np.random.seed(0); d=16 (small for speed); emb = np.random.randn(T, d); W = np.eye(d). Call naive_attention_decode(emb, W, W, W) → naive_ops. Call cached_attention_decode(emb, W, W, W) → cached_ops. Create plt.figure(figsize=(9, 4)). Plot steps=list(range(1,T+1)) on x-axis. Line 1: naive_ops in red with label f'Naive O(T²) — {naive_ops[-1]} total ops'. Line 2: cached_ops in green with label f'KV Cache O(T) — {cached_ops[-1]} total ops'. Fill between the two curves with alpha=0.15 red. Add xlabel 'Generation Step', ylabel 'Cumulative K/V Projection Ops', title f'KV Cache vs Naive at T={T}', legend, tight_layout, plt.show(). Print speedup ratio. Wrap the function in interact() with IntSlider(min=4, max=256, step=4, value=32, description='Sequence length T', continuous_update=False).",
-      "function_signatures": [
-        "def plot_flop_comparison(T: int) -> None"
+      "cell_id": "C08",
+      "implementation_plan": "Vectorized self-attention in one pass and equivalence assertion against C05. (1) Recompute Q = W_q @ I, K = W_k @ I, V = W_v @ I. (2) A = (K.T @ Q) / np.sqrt(d_k), shape [N, N]; document that A[j, i] is the score of key j against query i, so attention for query i lives in COLUMN i. (3) A_prime = softmax(A, axis=0) so each query column (over keys j) sums to 1. (4) O = V @ A_prime, shape [d_v, N]; column i is b^i. (5) Verify: assert np.allclose(O[:, 0], b1) and assert np.allclose(A_prime[:, 0], alpha1), proving per-element and matrix views match. (6) Print A, A_prime (rounded), confirm column sums are 1, print a success message. Expose A, A_prime, O for C09/C11/C13.",
+      "function_signatures": [],
+      "state_variables": [
+        "A: [N, N] scaled scores, A_prime: [N, N] column-softmaxed, O: [d_v, N] outputs",
+        "reuses W_q, W_k, W_v, I, d_k, b1, alpha1 from earlier cells"
       ],
-      "state_variables": [],
       "error_handling": [
-        "Use continuous_update=False on the slider to avoid triggering on every drag tick (which would be slow).",
-        "Wrap plt.close('all') before plt.figure() to prevent figure accumulation in Colab."
+        "assert A.shape == (N, N) and O.shape == (d_v, N)",
+        "use np.allclose with explicit atol (e.g. 1e-8) rather than == when comparing to C05",
+        "if the equivalence assert fails, print both vectors so the convention mismatch is diagnosable"
       ],
       "test_checks": [
-        "plot_flop_comparison(16)  # Run once without interact to confirm no errors",
-        "Visually verify: naive curve is roughly parabolic, cached curve is a straight line with much lower slope."
+        "assert np.allclose(A_prime.sum(axis=0), 1.0)",
+        "assert np.allclose(O[:, 0], b1)",
+        "assert np.allclose(A_prime[:, 0], alpha1)",
+        "print('Matrix view matches per-element b^1:', True)"
       ]
     },
     {
       "cell_id": "C09",
-      "implementation_plan": "Define module-level DTYPE_BYTES = {'FP32': 4, 'FP16': 2, 'INT8': 1, 'BF16': 2}. Define kv_cache_bytes_per_token(num_layers, num_kv_heads, head_dim, dtype_bytes): return num_layers * num_kv_heads * head_dim * dtype_bytes * 2. The factor 2 accounts for both K and V. Define max_tokens(gpu_memory_gb, model_weight_gb, num_layers, num_kv_heads, head_dim, dtype_bytes): available = (gpu_memory_gb - model_weight_gb) * (1024**3); bpt = kv_cache_bytes_per_token(...); return int(available / bpt) if bpt > 0 else 0. Run demonstration: Gemma 2 27B has num_layers=46, num_kv_heads=16, head_dim=128, dtype='FP16'. NOTE: The course slide uses num_heads=32 (query heads) in its worked example to get 753,664 bytes; our formula correctly uses num_kv_heads=16 (the actual KV cache cost for GQA), giving 376,832 bytes. Print both values with explanation. model_weight_gb = 54 (27B params × 2 bytes ≈ 54 GB). max_tok = max_tokens(80, 54, 46, 16, 128, 2).",
+      "implementation_plan": "Interactive attention-matrix heatmap showing the role of scaling/temperature. (1) Define recompute_scores(): raw = K.T @ Q (unscaled, [N, N]); return raw. (2) Define plot_heatmap(apply_scaling: bool, temperature: float): start from raw; divide by np.sqrt(d_k) if apply_scaling; divide by max(temperature, 1e-6); A_vis = softmax(scores, axis=0). Render with plt.imshow(A_vis, aspect='auto'), add colorbar, set xticks/yticks to range(N) with TOKENS labels (xlabel 'query', ylabel 'key'), title noting scaling on/off and temperature, annotate cells with rounded weights, plt.show(). (3) Default invocation: plot_heatmap(apply_scaling=True, temperature=1.0). (4) If WIDGETS_AVAILABLE: Checkbox(value=True, description='apply 1/sqrt(d_k)') and FloatSlider(min=0.1, max=3.0, step=0.1, value=1.0, description='temperature') wired via interactive_output into an Output area. Print pedagogical note: less scaling / lower temperature sharpens attention toward one-hot.",
       "function_signatures": [
-        "def kv_cache_bytes_per_token(num_layers: int, num_kv_heads: int, head_dim: int, dtype_bytes: int) -> int",
-        "def max_tokens(gpu_memory_gb: float, model_weight_gb: float, num_layers: int, num_kv_heads: int, head_dim: int, dtype_bytes: int) -> int"
+        "recompute_scores() -> np.ndarray",
+        "plot_heatmap(apply_scaling: bool, temperature: float) -> None"
       ],
       "state_variables": [
-        "DTYPE_BYTES (dict, used by C10, C11, C15, C16)",
-        "kv_cache_bytes_per_token (function, used by C10, C11, C15, C16)",
-        "max_tokens (function, used by C10, C11)"
+        "raw unscaled score matrix [N, N]",
+        "reuses Q, K, d_k, TOKENS, N; optional Checkbox + FloatSlider + Output"
       ],
       "error_handling": [
-        "Raise ValueError if model_weight_gb >= gpu_memory_gb: 'Model weights exceed GPU memory; no room for KV cache'.",
-        "Return 0 (not error) if dtype_bytes is 0 or any dimension is 0 — caller should check.",
-        "Print a clear note distinguishing num_kv_heads (GQA) from num_q_heads (query heads) to address the slide's different calculation."
+        "clamp temperature to a small positive floor (max(temperature, 1e-6)) to avoid divide-by-zero",
+        "guard widgets behind WIDGETS_AVAILABLE; default heatmap renders regardless",
+        "create a fresh figure and plt.show() inside plot_heatmap to prevent figure accumulation on slider events"
       ],
       "test_checks": [
-        "assert kv_cache_bytes_per_token(1, 1, 1, 2) == 4, 'Minimal case: 1 layer, 1 head, dim=1, FP16 = 2*2=4 bytes'",
-        "gemma_bpt = kv_cache_bytes_per_token(46, 16, 128, 2)",
-        "assert gemma_bpt == 46 * 16 * 128 * 2 * 2, f'Expected {46*16*128*2*2}, got {gemma_bpt}'",
-        "print(f'Gemma 2 27B (GQA, num_kv_heads=16): {gemma_bpt:,} bytes = {gemma_bpt/1024:.1f} KB per token')",
-        "print(f'Max tokens on A100-80GB: {max_tokens(80, 54, 46, 16, 128, 2):,}')"
-      ]
-    },
-    {
-      "cell_id": "C10",
-      "implementation_plan": "Define show_memory_interactive(num_layers, num_kv_heads, head_dim_choice, dtype, gpu_memory_gb_choice). Map dtype string to bytes via DTYPE_BYTES. Map head_dim_choice ('64','128','192','256') to int. Map gpu_memory_gb_choice to int. model_weight_gb_est = 14 (fixed placeholder with note). Call kv_cache_bytes_per_token and max_tokens. Build figure with two subplots side by side: (left) horizontal bar chart — 3 bars for context lengths [10_000, 50_000, 100_000] showing KV size in GB, draw a vertical red dashed line at gpu_memory_gb with label; (right) pie chart showing GPU memory split: 'Model Weights', 'KV Cache @50k tokens', 'Free'. Add suptitle with per-token size and max-token summary. plt.tight_layout(); plt.show(). Wrap in interact() with: IntSlider(num_layers, 1, 80, 1, 32), IntSlider(num_kv_heads, 1, 64, 1, 8), Dropdown(head_dim, ['64','128','192','256'], '128'), Dropdown(dtype, ['FP32','FP16','BF16','INT8'], 'FP16'), Dropdown(gpu_memory_gb, ['24','40','80'], '80'). Use continuous_update=False.",
-      "function_signatures": [
-        "def show_memory_interactive(num_layers: int, num_kv_heads: int, head_dim_choice: str, dtype: str, gpu_memory_gb_choice: str) -> None"
-      ],
-      "state_variables": [],
-      "error_handling": [
-        "If KV cache at 10k tokens already exceeds GPU memory, color that bar red and label 'OOM'.",
-        "Clamp pie chart values to non-negative (model_weight_gb_est could exceed gpu_memory_gb for large GPU choices — show warning text instead of negative slice).",
-        "Call plt.close('all') before creating new figure to avoid accumulation."
-      ],
-      "test_checks": [
-        "show_memory_interactive(32, 8, '128', 'FP16', '40')  # run once without interact",
-        "Verify bar chart shows three bars, red line appears, pie chart has three non-zero slices."
+        "assert np.allclose(A_vis.sum(axis=0), 1.0) for the default render",
+        "print scaled-vs-unscaled max column weight to show they differ",
+        "default plot_heatmap(True, 1.0) yields a visible heatmap under Run-all"
       ]
     },
     {
       "cell_id": "C11",
-      "implementation_plan": "Define MODELS as an ordered dict with four entries: 'Llama-3-8B': {num_layers:32, num_kv_heads:8, head_dim:128, dtype:'FP16', weight_gb:16}, 'Gemma-2-9B': {num_layers:42, num_kv_heads:8, head_dim:256, dtype:'FP16', weight_gb:18}, 'Gemma-2-27B': {num_layers:46, num_kv_heads:16, head_dim:128, dtype:'FP16', weight_gb:54}, 'GPT-3-175B (est)': {num_layers:96, num_kv_heads:96, head_dim:128, dtype:'FP16', weight_gb:350}. GPU_MEMORY_GB=40. Loop over models: compute bpt=kv_cache_bytes_per_token(...) in KB, compute mt=max_tokens(40, weight_gb, ...). Build horizontal bar chart (barh) with model names on y-axis, KB/token on x-axis, bar color 'cornflowerblue'. For each bar: if mt > 0, annotate right of bar with f'{mt//1000}k tokens'; else annotate 'OOM on 40GB' in red. Add xlabel, title, tight_layout, show.",
-      "function_signatures": [],
+      "implementation_plan": "Multi-head self-attention, parameterizable by head count h (default 2). (1) Define multi_head_attention(h): require d_k % h == 0; head_dim = d_k // h (and d_v // h for values). Split Q, K, V along the feature axis into h slices of head_dim rows each (Q_head = Q[head*head_dim:(head+1)*head_dim, :], etc.). (2) Per head: A_head = (K_head.T @ Q_head) / np.sqrt(head_dim); A_head_prime = softmax(A_head, axis=0); O_head = V_head @ A_head_prime, shape [head_dim, N]; collect A_head_prime and O_head. (3) Concatenate O_heads along axis 0 -> O_concat shape [d_v, N]. (4) set_seed for reproducibility then W_O = np.random.randn(d_v, d_v) * 0.5; O_multi = W_O @ O_concat. (5) Return list of per-head A_prime and O_multi. (6) Define plot_heads(h): compute, then draw an h-panel subplot grid (plt.subplots(1, h)) of per-head attention heatmaps with TOKENS labels and a shared title, plt.show(). (7) Default: plot_heads(2). (8) If WIDGETS_AVAILABLE: Dropdown/IntSlider restricted to divisors of d_k wired to plot_heads. Assert O_multi.shape == O.shape from C08.",
+      "function_signatures": [
+        "multi_head_attention(h: int) -> tuple[list[np.ndarray], np.ndarray]",
+        "plot_heads(h: int) -> None"
+      ],
       "state_variables": [
-        "MODELS (dict, available for reference in later cells)"
+        "head_dim, per-head Q/K/V slices, per-head A_prime list, O_concat, W_O, O_multi",
+        "reuses Q, K, V, d_k, d_v, TOKENS, N, set_seed; optional IntSlider/Dropdown + Output"
       ],
       "error_handling": [
-        "If weight_gb >= GPU_MEMORY_GB, set max_tokens to 0 and annotate 'OOM' — do not call max_tokens which would raise ValueError.",
-        "Assert each model config has all five required keys before computing."
+        "assert d_k % h == 0 (raise a clear ValueError naming valid divisors if not)",
+        "restrict the widget to head counts that evenly divide d_k so an invalid split is impossible",
+        "assert O_multi.shape == O.shape to confirm multi-head preserves output dimensionality",
+        "guard widgets behind WIDGETS_AVAILABLE; fresh figure + plt.show() inside plot_heads"
       ],
       "test_checks": [
-        "llama_bpt = kv_cache_bytes_per_token(32, 8, 128, 2)",
-        "assert llama_bpt == 32 * 8 * 128 * 2 * 2, 'Llama-3-8B per-token bytes should be 131072'",
-        "assert llama_bpt / 1024 == 128.0, 'Llama-3-8B: 128 KB per token'",
-        "print('Model comparison chart rendered.')"
+        "for each head assert np.allclose(A_head_prime.sum(axis=0), 1.0)",
+        "assert O_multi.shape == (d_v, N)",
+        "assert len(per_head_A) == h",
+        "default plot_heads(2) renders two heatmap panels under Run-all"
       ]
     },
     {
       "cell_id": "C13",
-      "implementation_plan": "Define three classes inheriting nn.Module. Common config: d_model=64, num_q_heads=8, head_dim=d_model//num_q_heads=8. (1) MultiHeadAttention: W_q=Linear(64,64), W_k=Linear(64,64), W_v=Linear(64,64), W_o=Linear(64,64). forward(x: Tensor shape (T,64)): unsqueeze batch dim → (1,T,64). Q=W_q(x).view(1,T,8,8).transpose(1,2) → (1,8,T,8). Same for K, V with W_k, W_v. scores=Q@K.mT/sqrt(8) → (1,8,T,T). weights=softmax(scores,-1). out=weights@V → (1,8,T,8). Reshape to (1,T,64). W_o(out).squeeze(0) → (T,64). Store self.kv_cache=(K,V). (2) MultiQueryAttention: W_k=Linear(64,8) and W_v=Linear(64,8) (single head dimension). K=W_k(x).unsqueeze(0).unsqueeze(0) → (1,1,T,8) then unsqueeze to match (1,1,T,8). Broadcast against Q (1,8,T,8). (3) GroupedQueryAttention(num_kv_groups=2): W_k=Linear(64, 2*8=16), W_v=Linear(64,16). K=W_k(x).view(1,T,2,8).transpose(1,2) → (1,2,T,8). K_expanded=K.repeat_interleave(4, dim=1) → (1,8,T,8). After all class definitions, instantiate all three with torch.manual_seed(0), run forward on x=torch.randn(6,64), print output.shape and kv_cache shapes.",
+      "implementation_plan": "Sinusoidal positional encoding plus a permutation-equivariance demonstration. (1) Define positional_encoding(seq_len, d): build PE shape [d, seq_len] (column = position) using PE[2i, pos]=sin(pos/10000**(2i/d)), PE[2i+1, pos]=cos(pos/10000**(2i/d)); handle odd d by truncating the last cos term. (2) Define run_attention(I_in): Q=W_q@I_in, K=W_k@I_in, V=W_v@I_in, A=(K.T@Q)/sqrt(d_k), A'=softmax(A, axis=0), O=V@A'; return O. (3) Permutation demo: build perm (e.g. reversed range(N)); compute O = run_attention(I) and show WITHOUT PE that run_attention(I[:, perm]) equals O[:, perm] (permutation-equivariant) via np.allclose; then I_pe = I + positional_encoding(N, d) and show that run_attention(I_pe)[:, perm] != run_attention(I_pe[:, perm]), so adding e^i makes order matter. Print before/after comparison and the boolean results. (4) Define plot_pe(seq_len, add_pe): imshow positional_encoding(seq_len, d) (xlabel position, ylabel dim) with colorbar; title reflects add_pe; plt.show(). (5) Default: plot_pe(N, True). (6) If WIDGETS_AVAILABLE: IntSlider(min=2, max=16, value=N, description='seq_len') and Checkbox(value=True, description='add positional encoding') wired via interactive_output.",
       "function_signatures": [
-        "class MultiHeadAttention(nn.Module): def __init__(self, d_model=64, num_q_heads=8)",
-        "class MultiHeadAttention(nn.Module): def forward(self, x: torch.Tensor) -> torch.Tensor",
-        "class MultiQueryAttention(nn.Module): def __init__(self, d_model=64, num_q_heads=8)",
-        "class MultiQueryAttention(nn.Module): def forward(self, x: torch.Tensor) -> torch.Tensor",
-        "class GroupedQueryAttention(nn.Module): def __init__(self, d_model=64, num_q_heads=8, num_kv_groups=2)",
-        "class GroupedQueryAttention(nn.Module): def forward(self, x: torch.Tensor) -> torch.Tensor"
+        "positional_encoding(seq_len: int, d: int) -> np.ndarray",
+        "run_attention(I_in: np.ndarray) -> np.ndarray",
+        "plot_pe(seq_len: int, add_pe: bool) -> None"
       ],
       "state_variables": [
-        "MultiHeadAttention (class, used by C14, C15)",
-        "MultiQueryAttention (class, used by C14, C15)",
-        "GroupedQueryAttention (class, used by C14, C15)"
+        "PE: [d, seq_len] sinusoidal table",
+        "perm: permutation index array; O, I_pe intermediates",
+        "reuses W_q, W_k, W_v, I, d, d_k, N, softmax, TOKENS; optional IntSlider+Checkbox+Output"
       ],
       "error_handling": [
-        "In GroupedQueryAttention.__init__, assert num_q_heads % num_kv_groups == 0, f'num_q_heads={num_q_heads} must be divisible by num_kv_groups={num_kv_groups}'",
-        "In forward, if x.dim() == 2 add batch dim via x.unsqueeze(0); if x.dim() == 3 use as-is. Always squeeze batch at output.",
-        "Use torch.no_grad() context in forward during demo to avoid grad overhead."
+        "handle odd d in positional_encoding by guarding the cos index (slice to available rows)",
+        "use np.allclose (atol ~1e-8) for the equivariance comparison rather than ==",
+        "clamp seq_len slider to >= 1; PE columns sliced to the requested seq_len",
+        "guard widgets behind WIDGETS_AVAILABLE; fresh figure + plt.show() inside plot_pe"
       ],
       "test_checks": [
-        "torch.manual_seed(0); x = torch.randn(6, 64)",
-        "mha = MultiHeadAttention(); mqa = MultiQueryAttention(); gqa = GroupedQueryAttention()",
-        "with torch.no_grad(): o_mha = mha(x); o_mqa = mqa(x); o_gqa = gqa(x)",
-        "assert o_mha.shape == (6, 64), f'MHA output shape wrong: {o_mha.shape}'",
-        "assert o_mqa.shape == (6, 64), f'MQA output shape wrong: {o_mqa.shape}'",
-        "assert o_gqa.shape == (6, 64), f'GQA output shape wrong: {o_gqa.shape}'",
-        "assert mha.kv_cache[0].shape == (1, 8, 6, 8), 'MHA K cache should be (1, num_q_heads, T, head_dim)'",
-        "assert mqa.kv_cache[0].shape == (1, 1, 6, 8), 'MQA K cache should be (1, 1, T, head_dim)'",
-        "assert gqa.kv_cache[0].shape == (1, 2, 6, 8), 'GQA K cache should be (1, num_kv_groups, T, head_dim)'",
-        "print('All attention variants produce correct output shapes.')"
-      ]
-    },
-    {
-      "cell_id": "C14",
-      "implementation_plan": "Fix num_q_heads=8, seq_len=6. Define three configs: mha_kv=8, mqa_kv=1, gqa_kv=2. For each config build grid: np.zeros((num_q_heads, seq_len)) where grid[q, p] = q // (num_q_heads // num_kv_heads) — the KV head index that query head q reads. Create fig, axes = plt.subplots(1, 3, figsize=(14, 5)). For each ax, config pair: ax.pcolormesh(np.arange(seq_len+1), np.arange(num_q_heads+1), grid, cmap=plt.cm.tab10, vmin=0, vmax=num_kv_heads-0.01). Set ax.set_xlabel('Token Position'), ax.set_ylabel('Query Head Index'), ax.set_title(f'name (num_kv_heads={num_kv_heads})\\nKV cache = {kv_cache_bytes_per_token(32, num_kv_heads, 128, 2)//1024} KB/token'). Add a custom legend using matplotlib Patch for each unique KV head color. After all three panels, add colorbar on last axis. plt.suptitle, plt.tight_layout, plt.show.",
-      "function_signatures": [
-        "def build_head_sharing_grid(num_q_heads: int, num_kv_heads: int, seq_len: int) -> np.ndarray"
-      ],
-      "state_variables": [],
-      "error_handling": [
-        "Assert num_q_heads % num_kv_heads == 0 for each config before building grid.",
-        "Use vmax=num_kv_heads-0.01 in pcolormesh to prevent the last color bleeding into the next tab10 color."
-      ],
-      "test_checks": [
-        "grid_mha = build_head_sharing_grid(8, 8, 6)",
-        "assert grid_mha[0, 0] == 0 and grid_mha[1, 0] == 1, 'MHA: each query head reads its own KV head'",
-        "grid_mqa = build_head_sharing_grid(8, 1, 6)",
-        "assert np.all(grid_mqa == 0), 'MQA: all query heads read KV head 0'",
-        "grid_gqa = build_head_sharing_grid(8, 2, 6)",
-        "assert grid_gqa[0, 0] == 0 and grid_gqa[4, 0] == 1, 'GQA: first 4 heads read KV 0, next 4 read KV 1'"
-      ]
-    },
-    {
-      "cell_id": "C15",
-      "implementation_plan": "Define plot_kv_reduction(num_kv_groups). Fixed config: num_q_heads=8, num_layers=32, head_dim=128, dtype_bytes=2. mha_bytes = kv_cache_bytes_per_token(32, 8, 128, 2). gqa_bytes = kv_cache_bytes_per_token(32, num_kv_groups, 128, 2). ratio = mha_bytes / gqa_bytes. Regime string: if num_kv_groups==1 'MQA'; elif num_kv_groups==8 'MHA (baseline)'; else f'GQA ({8//num_kv_groups} queries share each KV head)'. plt.close('all'); fig, ax = plt.subplots(figsize=(7,4)). Two bars: ['MHA (8 KV heads)', f'Current ({regime})']. Heights: [mha_bytes/1024, gqa_bytes/1024] in KB. Colors: ['salmon', 'steelblue']. Annotate each bar top with KB value. Set ylabel 'KV Cache per Token (KB)', title. Add text box in upper right: f'Reduction: {ratio:.1f}×'. plt.tight_layout(); plt.show(). Print regime string. Wrap in interact with IntSlider(min=1, max=8, step=1, value=4, continuous_update=False).",
-      "function_signatures": [
-        "def plot_kv_reduction(num_kv_groups: int) -> None"
-      ],
-      "state_variables": [],
-      "error_handling": [
-        "If num_kv_groups > num_q_heads, clip to num_q_heads and show a warning text in the plot.",
-        "Ensure 8 % num_kv_groups == 0; if slider yields non-divisor (e.g. 3, 5, 6, 7), display 'Invalid: 8 must be divisible by num_kv_groups' instead of crashing."
-      ],
-      "test_checks": [
-        "plot_kv_reduction(1)  # MQA: expect ratio=8",
-        "plot_kv_reduction(8)  # MHA: expect ratio=1",
-        "plot_kv_reduction(4)  # GQA: expect ratio=2",
-        "assert kv_cache_bytes_per_token(32,1,128,2) * 8 == kv_cache_bytes_per_token(32,8,128,2)"
-      ]
-    },
-    {
-      "cell_id": "C16",
-      "implementation_plan": "Import pandas as pd (it is pre-installed in Colab; add to C02 imports). Define rows as a list of dicts, one per variant. Use num_layers=32, head_dim=128, dtype_bytes=2, num_q_heads=32 (Llama-3-8B-like config with full MHA). Rows: (1) 'MHA': num_kv_heads=32, bytes=kv_cache_bytes_per_token(32,32,128,2), reduction='1.0×', quality='No change (baseline)', retraining='N/A'. (2) 'GQA (8 KV heads)': num_kv_heads=8, reduction=f'{32/8:.1f}×', quality='Minor impact', retraining='Yes'. (3) 'MQA (1 KV head)': num_kv_heads=1, reduction=f'{32/1:.1f}×', quality='May hurt quality', retraining='Yes'. Build DataFrame. Apply styling: .applymap on 'Quality Impact' column — green for 'No change', yellow for 'Minor', red for 'May hurt'. Apply .applymap on 'Needs Retraining' — gray for 'N/A', orange for 'Yes'. Display styled df.",
-      "function_signatures": [],
-      "state_variables": [
-        "import pandas as pd  (add to C02 import block)"
-      ],
-      "error_handling": [
-        "If pandas is not available, fall back to a plain print of the data in tabular format using str.ljust formatting."
-      ],
-      "test_checks": [
-        "assert len(rows) == 3, 'Table must have exactly 3 rows'",
-        "mha_row = next(r for r in rows if r['Variant']=='MHA')",
-        "assert mha_row['KV Cache / Token (KB)'] == 32*32*128*2*2/1024, 'MHA KB wrong'",
-        "print('Comparison table rendered.')"
-      ]
-    },
-    {
-      "cell_id": "C18",
-      "implementation_plan": "Define class PrefixCacheSimulator with class-level constants FRESH_COST = 2.50/1_000_000 and CACHED_COST = 0.25/1_000_000 (dollars per token). __init__: self.cache = {} (maps hashlib.md5(prefix_str).hexdigest() → list of tokens). _tokenize(text): return text.lower().split(). _hash(tokens): return hashlib.md5(' '.join(tokens).encode()).hexdigest(). process(system_prompt, user_message): (1) sys_toks = _tokenize(system_prompt), user_toks = _tokenize(user_message), all_toks = sys_toks + user_toks. (2) Find longest cached prefix: iterate i from len(sys_toks) down to 1; for each prefix = sys_toks[:i], compute h=_hash(prefix); if h in self.cache, set hit_len=i, break; else hit_len=0. (3) Store _hash(sys_toks) → sys_toks in self.cache. (4) miss_len = len(all_toks) - hit_len. cost = hit_len*CACHED_COST + miss_len*FRESH_COST. (5) Return dict: total_tokens, hit_tokens=hit_len, miss_tokens=miss_len, cost, tokens=all_toks, hit_mask=[True]*hit_len+[False]*miss_len. After class definition, create sim=PrefixCacheSimulator(), define SYSTEM_PROMPT and USER1, USER2. Run r1=sim.process(SYSTEM_PROMPT, USER1) and r2=sim.process(SYSTEM_PROMPT, USER2). Print formatted breakdown for both. Print cost saving: r1['cost']+r2_full_cost - r1['cost'] - r2['cost'].",
-      "function_signatures": [
-        "class PrefixCacheSimulator:",
-        "def __init__(self) -> None",
-        "def _tokenize(self, text: str) -> list[str]",
-        "def _hash(self, tokens: list[str]) -> str",
-        "def process(self, system_prompt: str, user_message: str) -> dict"
-      ],
-      "state_variables": [
-        "PrefixCacheSimulator (class, used by C19, C20-simulation path)",
-        "SYSTEM_PROMPT (str, default system prompt, also used as default in C19)",
-        "USER1 (str, default first user message)",
-        "USER2 (str, default second user message)"
-      ],
-      "error_handling": [
-        "If system_prompt is empty string, hit_len=0 and cache entire prompt as miss.",
-        "If user_message is empty, process just the system prompt tokens — do not crash.",
-        "If self.cache is very large (>10k entries), print a warning but do not evict — this is a toy simulator."
-      ],
-      "test_checks": [
-        "sim = PrefixCacheSimulator()",
-        "r1 = sim.process('Hello world from the system', 'user says hi')",
-        "assert r1['hit_tokens'] == 0, 'First call must be all cache miss'",
-        "assert r1['total_tokens'] == len('Hello world from the system user says hi'.split())",
-        "r2 = sim.process('Hello world from the system', 'user says bye')",
-        "assert r2['hit_tokens'] == len('Hello world from the system'.split()), 'Second call: system prompt should be full cache hit'",
-        "assert r2['cost'] < r1['cost'], 'Second call must be cheaper due to cache hit'",
-        "print(f'Test passed. Second call savings: ${(r1[\"cost\"]-r2[\"cost\"])*1e6:.2f} per million calls')"
-      ]
-    },
-    {
-      "cell_id": "C19",
-      "implementation_plan": "Define DEFAULT_SYSTEM as a multi-line string (~5 sentences describing an AI travel agent with tools and instructions). Define DEFAULT_USER1='Book a flight from Taipei to Boston for next Monday' and DEFAULT_USER2='Book a flight from San Francisco to New York for Friday' (matching the slide 25 example). Create widgets: sys_area=widgets.Textarea(value=DEFAULT_SYSTEM, description='System:', layout=Layout(width='95%',height='100px')); user1_area=widgets.Textarea(value=DEFAULT_USER1, description='User 1:', layout=Layout(width='95%')); user2_area=widgets.Textarea(value=DEFAULT_USER2, description='User 2:', layout=Layout(width='95%')); btn=widgets.Button(description='Compute Cache Hits', button_style='primary', icon='search'); out=widgets.Output(). Define on_click(b): fresh PrefixCacheSimulator each click. Run r1=sim.process(sys_area.value, user1_area.value) then r2=sim.process(sys_area.value, user2_area.value). Build HTML for each result: wrap each token in a <span> with background #d4edda (green) if hit_mask[i] else #ffffff (white). Include padded border, monospace font. Below token strip: show hit rate % and estimated cost. Display HTML in out widget. Call display(VBox([sys_area, user1_area, user2_area, btn, out])).",
-      "function_signatures": [
-        "def on_click(b: widgets.Button) -> None",
-        "def tokens_to_html(tokens: list[str], hit_mask: list[bool], label: str, hit_rate: float, cost: float, savings: float) -> str"
-      ],
-      "state_variables": [
-        "DEFAULT_SYSTEM, DEFAULT_USER1, DEFAULT_USER2 (str, default widget values)"
-      ],
-      "error_handling": [
-        "In on_click, wrap entire body in try/except Exception as e: with out: clear_output(); print(f'Error: {e}') to prevent silent widget failures.",
-        "If system prompt textarea is blank, display a red warning HTML message instead of computing.",
-        "Call clear_output(wait=True) before display to prevent output stacking on repeated button clicks."
-      ],
-      "test_checks": [
-        "Manually trigger on_click with default values and verify green tokens appear for the system prompt portion of Request 2.",
-        "Verify hit rate for Request 1 is 0% (cold cache) and Request 2 hit rate equals len(DEFAULT_SYSTEM.split()) / (len(DEFAULT_SYSTEM.split()) + len(DEFAULT_USER2.split())) * 100."
-      ]
-    },
-    {
-      "cell_id": "C20",
-      "implementation_plan": "Define LONG_SYSTEM_PROMPT as a multi-line string of approximately 500 words describing an ML expert assistant (covering topics: transformers, attention, KV cache, inference optimization, hardware). Define SHORT_USER = 'What is the key benefit of KV Cache in one sentence?'. Define measure_ttft(client, system_prompt, user_message) using the Anthropic streaming API: start=time.perf_counter(); open context manager 'with client.messages.stream(model=claude-sonnet-4-6, max_tokens=50, system=system_prompt, messages=[{role:user, content:user_message}]) as stream:'; iterate stream text_stream; on first chunk set first_token_time=time.perf_counter() and break. Return first_token_time - start. Main block: try: import anthropic; api_key=os.environ.get('ANTHROPIC_API_KEY'); if not api_key: raise ValueError('ANTHROPIC_API_KEY not set'). client=anthropic.Anthropic(api_key=api_key). Print 'Measuring cold TTFT...'; ttft_cold=measure_ttft(client, LONG_SYSTEM_PROMPT, SHORT_USER). time.sleep(0.5). Print 'Measuring warm TTFT (cached prefix)...'; ttft_warm=measure_ttft(client, LONG_SYSTEM_PROMPT, SHORT_USER). Print results table. except (ImportError, ValueError) as e: print('API key not set — skipping live demo; see C18–C19 for simulation'). print(f'Reason: {e}').",
-      "function_signatures": [
-        "def measure_ttft(client: 'anthropic.Anthropic', system_prompt: str, user_message: str) -> float"
-      ],
-      "state_variables": [
-        "LONG_SYSTEM_PROMPT (str, ~500 words, stable prefix for caching demo)",
-        "SHORT_USER (str, short query)",
-        "measure_ttft (function)"
-      ],
-      "error_handling": [
-        "Catch anthropic.APIConnectionError and print 'Connection failed — check your network and API key' before skipping.",
-        "Catch anthropic.RateLimitError and print 'Rate limit hit — wait 60s and retry'.",
-        "If ttft_cold or ttft_warm is 0 (stream returned nothing), print warning and skip speedup calculation.",
-        "Add a note that TTFT variance is high in practice; run 3 times and average for reliable measurement."
-      ],
-      "test_checks": [
-        "assert len(LONG_SYSTEM_PROMPT.split()) >= 400, 'System prompt too short to exercise prefix caching'",
-        "If API key is set: assert ttft_cold > 0 and ttft_warm > 0",
-        "If API key is set: assert ttft_cold >= ttft_warm * 0.5, 'Warm TTFT should not be slower than cold (within 2× variance)'",
-        "print('Live API demo complete.' if api_key else 'Live demo skipped — simulation cells C18-C19 demonstrate the concept.')"
-      ]
-    },
-    {
-      "cell_id": "C22",
-      "implementation_plan": "Import pandas as pd (already in C02). Define summary_data as a list of dicts with keys: Method, Approach, Changes_Attention, Needs_Retraining, Other_Cost. Rows: ('Flash Attention', 'Reduce HBM↔SRAM data movement', 'No', 'No', 'Extra compute + implementation complexity'), ('KV Cache', 'Store computed K/V for reuse at each step', 'No', 'No', 'GPU memory usage grows with context'), ('Multi-query Attention', 'All query heads share one K/V pair', 'Yes', 'Yes', 'May significantly hurt model quality'), ('Group-query Attention', 'Groups of queries share K/V pairs', 'Yes', 'Yes', 'Minor quality impact; used in Llama/Gemma'), ('MLA (DeepSeek)', 'Compress K/V to low-rank latent vector', 'Yes', 'Yes', 'Extra projection matrices'), ('Sliding Window Attention', 'Limit attention to W most recent tokens', 'Yes', '?', 'Cannot attend past window boundary'), ('Streaming LLM', 'Window + attention sink tokens', 'Yes', '?', 'Must always keep first few tokens'), ('Pruning KV Cache', 'Evict low-attention K/V entries', 'Yes', 'No', 'May significantly hurt model quality'). df = pd.DataFrame(summary_data). Rename columns to display-friendly names. Define color_yn(val): return green bg+text for 'No', red bg+text for 'Yes', yellow for '?', else ''. Apply .applymap(color_yn, subset=['Changes Attention?','Needs Retraining?']). Apply .set_table_styles with header styling. Display styled df.",
-      "function_signatures": [
-        "def color_yn(val: str) -> str"
-      ],
-      "state_variables": [],
-      "error_handling": [
-        "If pd.io.formats.style is unavailable (rare edge case), fall back to df.to_string() with print.",
-        "Use .applymap (pandas < 2.1) or .map (pandas >= 2.1) — check pd.__version__ and use appropriate method to avoid DeprecationWarning."
-      ],
-      "test_checks": [
-        "assert len(summary_data) == 8, 'Summary table must have 8 rows'",
-        "assert all(k in summary_data[0] for k in ['Method','Approach','Changes_Attention','Needs_Retraining','Other_Cost'])",
-        "kv_row = next(r for r in summary_data if r['Method'] == 'KV Cache')",
-        "assert kv_row['Changes_Attention'] == 'No' and kv_row['Needs_Retraining'] == 'No', 'KV Cache should require no attention changes and no retraining'",
-        "print('Summary table rendered successfully.')"
+        "assert positional_encoding(N, d).shape == (d, N)",
+        "assert np.allclose(run_attention(I)[:, perm], run_attention(I[:, perm])) is True (equivariant without PE)",
+        "assert not np.allclose(run_attention(I + positional_encoding(N, d))[:, perm], run_attention((I + positional_encoding(N, d))[:, perm])) (PE breaks equivariance)",
+        "default plot_pe(N, True) renders the PE heatmap under Run-all"
       ]
     }
   ],
   "cross_cell_invariants": [
-    "All code cells assume C02 has been executed first; any cell run in isolation will raise NameError. Add a guard comment '# Run C02 first' at the top of each code cell.",
-    "numpy random seed must be fixed to np.random.seed(42) before any random array generation in C04/C05/C07 to ensure reproducibility across re-runs.",
-    "kv_cache_bytes_per_token from C09 is the single source of truth for all memory calculations in C10, C11, C15, C16. No cell should reimplement this formula independently.",
-    "The factor of 2 in kv_cache_bytes_per_token (for K and V) must never be 3 (K, Q, V) — Q is not cached.",
-    "All matplotlib figures must call plt.close('all') before plt.figure() or plt.subplots() to prevent figure accumulation in long Colab sessions.",
-    "All widget interact callbacks must use continuous_update=False to avoid triggering expensive computations on every slider tick.",
-    "PrefixCacheSimulator from C18 must be instantiated fresh inside on_click in C19 (not reused across clicks), so cache state reflects exactly the two requests shown — not prior click history.",
-    "C20 is the only cell requiring external credentials; its try/except guard must print a human-readable skip message that references C18–C19 as the fallback.",
-    "pandas must be imported in C02 (add 'import pandas as pd') even though it is only used in C16 and C22 — consistent with the single-import-cell convention.",
-    "All attention implementations in C13 must store kv_cache as an instance attribute (self.kv_cache) set during forward(), not __init__(), so the cache reflects the most recent forward pass."
+    "Matrix-shape convention is fixed in C03 and never changed: inputs are column-wise, I is [d, N] with column j = a^j; Q=W_q@I and K=W_k@I are [d_k, N]; V=W_v@I is [d_v, N]; the attention matrix A=K.T@Q is [N, N] and is softmaxed over axis=0 (keys) so each query column sums to 1; O=V@A' is [d_v, N] with column i = b^i.",
+    "All randomness is seeded via set_seed() (defined in C02, first called in C03) so I, W_q, W_k, W_v, and W_O are identical across reruns and every cell shares the same numbers.",
+    "softmax() from C02 is the only softmax used; scaling is always 1/sqrt(d_k) for single-head and 1/sqrt(head_dim) for multi-head.",
+    "d_v == d_k (set in C03) so single-head O (C08) and multi-head O (C11) share shape [d_v, N] and can be compared by shape.",
+    "Every interactive cell (C06, C09, C11, C13) calls its plotting function once with default arguments BEFORE building any widget, so a non-interactive Run-all (Stage 5 verification) always produces visible output; widget construction is guarded by WIDGETS_AVAILABLE.",
+    "The per-element result b^1 / alpha1 from C05 is the ground truth that the matrix view in C08 asserts against; downstream cells (C09, C11, C13) build on C08's A/A'/O."
   ],
   "assumptions": [
-    "Colab runtime is Python 3.10+ with standard Colab pre-installed packages (numpy, torch, matplotlib, pandas, ipywidgets); only 'anthropic' requires explicit pip install.",
-    "ipywidgets requires '%load_ext widgetsnbextension' or equivalent in Colab — this is already enabled by default in recent Colab; no extra setup cell is needed.",
-    "The word-split tokenizer in C18/C19 is intentionally naive (str.split) — it is sufficient to demonstrate prefix matching without requiring tiktoken or sentencepiece.",
-    "PyTorch attention in C13 uses causal attention (full attention over all T positions) for simplicity — a causal mask is not added, as the pedagogical focus is on KV sharing structure not masking.",
-    "The TTFT measurement in C20 includes network round-trip time; the demo illustrates relative speedup (warm vs cold) rather than absolute TTFT values.",
-    "Gemma 2 27B parameter counts: num_kv_heads=16 is used (GQA correct value), not 32 (query heads); this intentionally differs from the slide's worked example which used query heads — both values are printed and explained.",
-    "The summary table in C22 uses '?' for 'Needs Retraining?' for Sliding Window Attention and Streaming LLM, matching slide 27, because these techniques are sometimes applied via fine-tuning and sometimes via inference-time heuristics only."
+    "NumPy + matplotlib (+ ipywidgets for interactivity) only; small synthetic sequence (N=4, d=4, d_k=d_v=3) runs in seconds on a free Colab CPU runtime with no downloads or API keys.",
+    "ipywidgets may be unavailable under the headless Stage 5 kernel; cells degrade gracefully via the WIDGETS_AVAILABLE flag and a default non-interactive render.",
+    "Target runtime is Google Colab (Python 3.12, numpy 2.0.2); matplotlib uses the inline backend without explicit get_ipython() magics in the Python source.",
+    "Audience knows basic linear algebra and softmax; printed intermediates reinforce rather than re-teach these.",
+    "Exact toy dimensions (d, d_k, N) and token labels are chosen for legibility and may be adjusted in C03 as long as the cross-cell invariants (column-wise convention, d_v==d_k, seeded randomness) hold."
   ]
 }
