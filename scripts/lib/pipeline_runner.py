@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from notebook_assembler import AssemblyError, assemble_notebook, expected_notebook_path as assembler_notebook_path
-from notebook_verifier import VerificationError, build_execution_report, verify_notebook
+from notebook_verifier import COLAB_KERNEL, VerificationError, build_execution_report, verify_notebook
 from pipeline_validator import (
     ValidationError,
     validate_cell_sources,
@@ -153,7 +153,7 @@ def run_stage5_verification(
     max_fix_attempts: int,
     cell_timeout: int,
     startup_timeout: int,
-    kernel_name: str = "python3",
+    kernel_name: str = COLAB_KERNEL,
 ) -> dict[str, Any]:
     """Stage 5: verify the assembled notebook, then optionally repair + re-verify."""
     fixer_agent = structure_path.parent.parent / ".claude" / "agents" / "notebook-fixer.md"
@@ -176,7 +176,6 @@ def run_stage5_verification(
         timestamp_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         report = build_execution_report(
             result,
-            kernel_name=kernel_name,
             timestamp_utc=timestamp_utc,
             fix_attempts=fix_attempts,
         )
@@ -190,8 +189,10 @@ def run_stage5_verification(
     def _log_result(result) -> None:
         syntax_n = len(result.syntax_failures)
         exec_n = len(result.execution_failures)
+        colab = "colab-match" if result.kernel_matches_colab else "NON-colab"
         log(
-            f"Stage 5 verify: syntax_ok={result.syntax_ok} runnable={result.runnable} "
+            f"Stage 5 verify [kernel={result.kernel_used} ({colab})]: "
+            f"syntax_ok={result.syntax_ok} runnable={result.runnable} "
             f"(syntax_failures={syntax_n}, execution_failures={exec_n}, "
             f"{result.duration_seconds:.1f}s)"
         )
@@ -310,7 +311,7 @@ def run_assemble_only(root_dir: Path, topic: str, source_path: Path | None) -> N
     try:
         verify_result = verify_notebook(notebook_path, structure, execute=True)
         exec_report = build_execution_report(
-            verify_result, kernel_name="python3", timestamp_utc=timestamp_utc,
+            verify_result, timestamp_utc=timestamp_utc,
         )
         write_json(execution_report_path, exec_report, dry_run=False)
         runnable = bool(verify_result.runnable)
@@ -380,6 +381,9 @@ def main() -> None:
                         help="per-cell execution timeout in seconds (Stage 5)")
     parser.add_argument("--startup-timeout", type=int, default=60,
                         help="kernel startup timeout in seconds (Stage 5)")
+    parser.add_argument("--kernel-name", default=COLAB_KERNEL,
+                        help=f"Stage 5 execution kernel (default '{COLAB_KERNEL}', the "
+                             "Colab-matching runtime; falls back to python3 if not installed)")
     args = parser.parse_args()
 
     root_dir = Path(args.root_dir).resolve()
@@ -580,6 +584,7 @@ def main() -> None:
         log("Stage 5 (notebook-verifier) skipped via --skip-verify")
         verifier_status = "skipped"
         syntax_ok: bool | None = None
+        colab_match: bool | None = None
     else:
         log("Running stage: notebook-verifier")
         verify_report = run_stage5_verification(
@@ -594,10 +599,12 @@ def main() -> None:
             max_fix_attempts=args.max_fix_attempts,
             cell_timeout=args.cell_timeout,
             startup_timeout=args.startup_timeout,
+            kernel_name=args.kernel_name,
         )
         final_status = verify_report["final_status"]
         runnable = bool(final_status["runnable"])  # authoritative: real kernel execution
         syntax_ok = bool(final_status["syntax_ok"])
+        colab_match = bool(verify_report.get("colab_runtime_match", False))
         verifier_status = "completed" if (runnable and syntax_ok) else "failed"
 
     run_log = {
@@ -626,6 +633,7 @@ def main() -> None:
             "top_to_bottom_runnable": runnable,
             "syntax_ok": syntax_ok,
             "verified_by_execution": verify_report is not None,
+            "colab_runtime_match": colab_match,
             "total_cells": len(structure_cells),
             "code_cells": code_cells,
             "markdown_cells": markdown_cells,

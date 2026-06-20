@@ -1,147 +1,156 @@
 {
-  "notebook_title": "Machine Learning Basics: Finding the Best Function (Model, Loss, Optimization)",
+  "notebook_title": "Self-Attention from Scratch: Query-Key-Value, the Matrix View, Multi-Head, and Positional Encoding",
   "learning_objectives": [
-    "Explain machine learning as the three-step process of finding a function: defining a model (candidate function set), defining a loss, and optimizing to pick f* = argmin L(f).",
-    "Define a loss function and compute it for a simple linear-regression problem on synthetic data.",
-    "Run and visualize gradient descent descending a loss surface, and observe how the learning rate controls convergence, divergence, and oscillation.",
-    "Demonstrate overfitting by fitting polynomials of increasing degree, contrasting training vs testing error, and show how regularization mitigates it."
+    "Explain why self-attention exists: a fully-connected/windowed layer only sees a fixed neighborhood, while self-attention lets every position in a variable-length sequence attend to every other position.",
+    "Implement scaled dot-product attention from scratch for a single output vector: project each input into query/key/value, score q against every k, softmax the scores, and take a value-weighted sum.",
+    "Re-express the same computation in matrix form (Q=W^q I, K=W^k I, V=W^v I, A=K^T Q, A'=softmax(A), O=V A') and verify the vectorized result numerically matches the per-element result.",
+    "Visualize the attention matrix A' as a heatmap and see the effect of the 1/sqrt(d_k) scaling factor.",
+    "Extend to multi-head self-attention, computing attention independently per head, concatenating, and projecting by W^O, and compare the per-head attention patterns.",
+    "Show that self-attention is permutation-equivariant and inject order information with sinusoidal positional encoding, visualizing the encoding and its effect."
   ],
   "cells": [
     {
       "cell_id": "C01",
       "cell_type": "markdown",
-      "goal": "Title and roadmap: introduce ML as automatic function finding and the three-step framework (Model, Loss, Optimization). Map the notebook's narrative arc (framework -> how we optimize -> why optimization alone is not enough).",
+      "goal": "Title cell and big-picture framing: introduce self-attention as the core building block of Transformers. Motivate it by contrasting a fully-connected/windowed layer (sees only a fixed neighborhood) with self-attention (every position attends to every other position in a variable-length sequence). State that the notebook builds the mechanism from scratch in NumPy and then visualizes it. List the learning objectives.",
       "inputs": [],
       "outputs": [],
-      "widget_plan": "None (intro narrative).",
-      "estimated_lines": 18,
+      "widget_plan": "None (narrative markdown with motivation diagram description and an objectives bullet list).",
+      "estimated_lines": 28,
       "depends_on": []
     },
     {
       "cell_id": "C02",
       "cell_type": "code",
-      "goal": "Setup: import NumPy, Matplotlib, and ipywidgets; configure inline plotting; set a fixed random seed for reproducibility. Provide a helper for consistent figure styling.",
+      "goal": "Environment setup: import numpy, matplotlib, and ipywidgets. Define a set_seed() helper for reproducibility and a numerically-stable softmax(x, axis) helper that is reused throughout the notebook. Print confirmation that imports succeeded so the notebook is self-contained on a free Colab CPU runtime.",
       "inputs": [],
       "outputs": [
-        "Imported libraries (np, plt, widgets, interact)",
-        "Global RNG seed",
-        "Confirmation print that environment is ready"
+        "set_seed() helper",
+        "softmax(x, axis) helper",
+        "confirmation that libraries imported"
       ],
-      "widget_plan": "None (imports only). Establishes ipywidgets availability for later interactive cells.",
-      "estimated_lines": 15,
-      "depends_on": []
-    },
-    {
-      "cell_id": "C03",
-      "cell_type": "markdown",
-      "goal": "Step 1 - Model: explain the candidate function set H. Frame linear regression y = w*x + b as the simplest H and state the running example used throughout the notebook.",
-      "inputs": [],
-      "outputs": [],
-      "widget_plan": "None (concept explanation).",
-      "estimated_lines": 14,
+      "widget_plan": "None (setup cell). Keep imports minimal (numpy, matplotlib, ipywidgets) so it runs without installs on Colab.",
+      "estimated_lines": 25,
       "depends_on": [
         "C01"
       ]
     },
     {
-      "cell_id": "C04",
+      "cell_id": "C03",
       "cell_type": "code",
-      "goal": "Generate synthetic linear data (x, y) with known true w and b plus noise. Plot the data scatter and overlay one example candidate line to make the 'function set' concrete.",
+      "goal": "Build the shared toy problem: define a small synthetic input sequence I (e.g. a 4x4 or 4x6 matrix of input vectors a^1..a^N, optionally tied to short token labels like ['the','cat','sat','down']) and the learned projection matrices W^q, W^k, W^v with a chosen model dimension d and key dimension d_k. Fix the seed so every later cell shares the same inputs and weights. This is the single source of inputs/weights for the per-element, matrix, multi-head, and positional-encoding demos.",
       "inputs": [
-        "np, plt from C02",
-        "Global RNG seed from C02"
+        "set_seed() from C02"
       ],
       "outputs": [
-        "Arrays x_train, y_train (and true_w, true_b)",
-        "Scatter plot of data with one candidate line overlaid"
+        "TOKENS (optional list of labels)",
+        "I (input matrix, shape [N, d] or [d, N] with a documented convention)",
+        "W_q, W_k, W_v projection matrices",
+        "d, d_k dimensions"
       ],
-      "widget_plan": "None (data generation + static plot establishing the example).",
+      "widget_plan": "None (shared data + parameter definition). Small fixed dimensions keep all visualizations legible.",
+      "estimated_lines": 35,
+      "depends_on": [
+        "C02"
+      ]
+    },
+    {
+      "cell_id": "C04",
+      "cell_type": "markdown",
+      "goal": "Section header and explanation for scaled dot-product (Query-Key-Value) attention: define q=W^q a, k=W^k a, v=W^v a; the attention score alpha_{i,j}=q^i . k^j scaled by 1/sqrt(d_k); softmax over j to get alpha'_{i,j}; and the output b^i = sum_j alpha'_{i,j} v^j. Note dot-product vs additive scoring. Preview that the next cell computes b^1 step by step.",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None (conceptual markdown with the QKV equations).",
       "estimated_lines": 20,
       "depends_on": [
-        "C02",
-        "C03"
+        "C01"
       ]
     },
     {
       "cell_id": "C05",
-      "cell_type": "markdown",
-      "goal": "Step 2 - Loss: define L(f) as the aggregated distance between a function's outputs and the correct labels (mean squared error). Connect to the slide example where loss = sum of distances.",
-      "inputs": [],
-      "outputs": [],
-      "widget_plan": "None (concept explanation).",
-      "estimated_lines": 14,
+      "cell_type": "code",
+      "goal": "Compute one output vector b^1 from scratch, step by step, to make the mechanism concrete: project all inputs to q/k/v, take query q^1, compute raw scores q^1 . k^j for every j, scale by 1/sqrt(d_k), apply softmax to get alpha'_{1,j}, and form b^1 = sum_j alpha'_{1,j} v^j. Print each intermediate (q^1, all k^j, raw scores, scaled scores, softmax weights, final b^1) so students can trace every number.",
+      "inputs": [
+        "I, W_q, W_k, W_v, d_k from C03",
+        "softmax() from C02"
+      ],
+      "outputs": [
+        "Q, K, V matrices for the toy sequence",
+        "Printed q^1, scores, alpha'_{1,j}, and b^1"
+      ],
+      "widget_plan": "None (transparent step-by-step computation with printed intermediates).",
+      "estimated_lines": 45,
       "depends_on": [
-        "C03"
+        "C03",
+        "C04"
       ]
     },
     {
       "cell_id": "C06",
       "cell_type": "code",
-      "goal": "Implement the MSE loss function L(w, b) over the training data. Interactively let students pick w and b with sliders, draw the resulting line over the data, and display the current loss value.",
+      "goal": "Interactive single-position attention demo: a slider/dropdown to choose the query position i (1..N). For the chosen i, compute the attention weights alpha'_{i,j} over all keys and the output b^i, then display a bar chart of the weights (labeled by token) so students see which positions position i attends to and how the weighted sum is formed. Render a default position so Run-all produces output.",
       "inputs": [
-        "x_train, y_train from C04",
-        "np, plt, widgets from C02"
+        "Q, K, V from C05",
+        "softmax() from C02",
+        "d_k, TOKENS from C03"
       ],
       "outputs": [
-        "loss(w, b) function definition",
-        "Interactive plot: data + candidate line for chosen (w, b)",
-        "Live-updating loss value text"
+        "Bar chart of attention weights for the chosen query position",
+        "Printed/highlighted output vector b^i"
       ],
-      "widget_plan": "ipywidgets FloatSliders for w and b wired via interact; updating sliders re-draws the line and recomputes loss so students feel how parameters change quality.",
-      "estimated_lines": 30,
+      "widget_plan": "ipywidgets: IntSlider or Dropdown (query position i, 1..N) plus an Output area; matplotlib bar chart of alpha'_{i,j} over tokens. A default invocation runs once for a fixed i so Run-all yields output before interaction.",
+      "estimated_lines": 45,
       "depends_on": [
-        "C04",
         "C05"
       ]
     },
     {
       "cell_id": "C07",
       "cell_type": "markdown",
-      "goal": "Step 3 - Optimization: introduce f* = argmin L(f) and gradient descent as the iterative rule that moves parameters downhill along the gradient. Introduce the learning-rate hyperparameter.",
+      "goal": "Section header and explanation for the matrix formulation: show that stacking inputs into I lets all q/k/v be produced by single matrix multiplies (Q=W^q I, K=W^k I, V=W^v I), the full attention matrix is A=K^T Q (scaled), A'=softmax(A) column-wise, and all outputs at once are O=V A'. Emphasize that only W^q, W^k, W^v are learned and the computation is fully parallel.",
       "inputs": [],
       "outputs": [],
-      "widget_plan": "None (concept explanation).",
-      "estimated_lines": 16,
+      "widget_plan": "None (conceptual markdown with the matrix equations and a note on parallelism).",
+      "estimated_lines": 18,
       "depends_on": [
-        "C05"
+        "C04"
       ]
     },
     {
       "cell_id": "C08",
       "cell_type": "code",
-      "goal": "Implement gradient descent for the linear-regression loss: compute analytic gradients of MSE w.r.t. w and b, iterate for N steps, and record the parameter/loss trajectory for visualization.",
+      "goal": "Vectorized self-attention in one pass: compute Q, K, V by matrix multiply, form the scaled attention matrix A = K^T Q / sqrt(d_k), apply softmax to get A', and compute O = V A' for ALL output vectors at once. Numerically assert that column 1 of O equals the b^1 computed step-by-step in C05 (and that the chosen b^i from C06 matches), proving the per-element and matrix views are identical.",
       "inputs": [
-        "x_train, y_train from C04",
-        "loss(w, b) from C06",
-        "np from C02"
+        "I, W_q, W_k, W_v, d_k from C03",
+        "softmax() from C02",
+        "b^1 from C05"
       ],
       "outputs": [
-        "gradient_descent(lr, n_steps, w0, b0) function returning trajectory",
-        "Printed final (w, b) and loss compared to true parameters"
+        "A (attention scores), A' (softmaxed), O (all outputs)",
+        "Assertion / printed check that O matches the per-element result"
       ],
-      "widget_plan": "None (algorithm implementation; reused by the interactive cell C09).",
-      "estimated_lines": 28,
+      "widget_plan": "None (vectorized computation with a correctness assertion against C05).",
+      "estimated_lines": 40,
       "depends_on": [
-        "C06",
+        "C05",
         "C07"
       ]
     },
     {
       "cell_id": "C09",
       "cell_type": "code",
-      "goal": "Visualize gradient descent interactively: let students vary learning rate and number of steps, then show (a) the descent path on the loss surface contour and (b) the loss-vs-iteration curve, exposing convergence vs divergence vs oscillation.",
+      "goal": "Interactive attention-matrix heatmap: render A' as a heatmap with token labels on both axes so students see the full all-pairs attention pattern. Provide a toggle for whether to apply the 1/sqrt(d_k) scaling and a slider for a softmax temperature so the effect of scaling on the sharpness of attention is visible. Render a default (scaled) heatmap for Run-all.",
       "inputs": [
-        "gradient_descent(...) from C08",
-        "loss(w, b) from C06",
-        "np, plt, widgets from C02"
+        "A (pre-softmax scores) and Q, K, d_k from C08",
+        "softmax() from C02",
+        "TOKENS from C03"
       ],
       "outputs": [
-        "Contour plot of loss surface with descent trajectory overlaid",
-        "Loss-vs-iteration curve",
-        "Interactive controls updating both plots"
+        "Heatmap of the attention matrix A'",
+        "Visible difference between scaled and unscaled attention"
       ],
-      "widget_plan": "ipywidgets FloatLogSlider for learning rate and IntSlider for number of steps via interact; small learning rate shows slow convergence, large shows divergence/oscillation, making the hyperparameter's effect tangible.",
-      "estimated_lines": 38,
+      "widget_plan": "ipywidgets: ToggleButtons/Checkbox (apply 1/sqrt(d_k) scaling) and a FloatSlider (temperature); matplotlib imshow heatmap with token tick labels and a colorbar. Renders a default heatmap once for Run-all.",
+      "estimated_lines": 50,
       "depends_on": [
         "C08"
       ]
@@ -149,11 +158,11 @@
     {
       "cell_id": "C10",
       "cell_type": "markdown",
-      "goal": "Transition to generalization: a low training loss does not guarantee good test performance. Introduce overfitting and the train/test split, motivating the next demo.",
+      "goal": "Section header and explanation for multi-head self-attention: explain that each q/k/v is split into multiple heads (q^{i,1}, q^{i,2}, ...), each head computes attention independently to capture 'different types of relevance', and the per-head outputs are concatenated and projected by W^O to form b^i. Preview the side-by-side per-head attention maps in the next cell.",
       "inputs": [],
       "outputs": [],
-      "widget_plan": "None (concept explanation).",
-      "estimated_lines": 14,
+      "widget_plan": "None (conceptual markdown with the multi-head equations).",
+      "estimated_lines": 18,
       "depends_on": [
         "C07"
       ]
@@ -161,81 +170,80 @@
     {
       "cell_id": "C11",
       "cell_type": "code",
-      "goal": "Create a nonlinear synthetic dataset and split it into train and test sets. Plot both splits to set up the polynomial-fitting overfitting demo.",
+      "goal": "Implement 2-head (parameterizable) self-attention: split Q/K/V into per-head subspaces, compute an attention matrix and output per head, concatenate the head outputs, and project by a W^O to produce the final outputs. Display the per-head attention heatmaps side by side so students can compare how different heads attend to different positions. Verify output shape matches single-head O.",
       "inputs": [
-        "np, plt from C02",
-        "Global RNG seed from C02"
+        "Q, K, V from C08",
+        "softmax() from C02",
+        "d, d_k, TOKENS from C03",
+        "set_seed() from C02"
       ],
       "outputs": [
-        "x_train2, y_train2, x_test2, y_test2 arrays",
-        "Scatter plot distinguishing train vs test points"
+        "Per-head attention matrices",
+        "Concatenated + W^O-projected multi-head output",
+        "Side-by-side per-head attention heatmaps"
       ],
-      "widget_plan": "None (data generation + static plot).",
-      "estimated_lines": 22,
+      "widget_plan": "ipywidgets (optional): IntSlider for number of heads (divisors of d) with a default 2-head run; matplotlib subplot grid of per-head heatmaps. Renders a default 2-head result for Run-all.",
+      "estimated_lines": 55,
       "depends_on": [
-        "C02",
+        "C08",
         "C10"
       ]
     },
     {
       "cell_id": "C12",
-      "cell_type": "code",
-      "goal": "Interactively fit polynomials of increasing degree and visualize overfitting: show the fitted curve over train and test data plus train vs test error, so high degree drives training error down while test error rises.",
-      "inputs": [
-        "x_train2, y_train2, x_test2, y_test2 from C11",
-        "np, plt, widgets from C02"
-      ],
-      "outputs": [
-        "Polynomial fit curve overlaid on train and test data",
-        "Reported train error and test error for chosen degree",
-        "Interactive degree control"
-      ],
-      "widget_plan": "ipywidgets IntSlider for polynomial degree via interact; sweeping degree from low to high vividly shows the train/test error gap (the 'memorizing answers' pitfall).",
-      "estimated_lines": 36,
+      "cell_type": "markdown",
+      "goal": "Section header and explanation for positional encoding: point out that self-attention is permutation-equivariant (it has no built-in notion of order), so a unique positional vector e^i must be added to each input a^i. Introduce hand-crafted sinusoidal encodings (and mention learned/relative alternatives) and preview the heatmap and permutation demo.",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None (conceptual markdown explaining permutation-equivariance and positional encoding).",
+      "estimated_lines": 18,
       "depends_on": [
-        "C11"
+        "C07"
       ]
     },
     {
       "cell_id": "C13",
       "cell_type": "code",
-      "goal": "Demonstrate regularization as a remedy: fit a high-degree polynomial with an L2 (ridge) penalty and let students vary the regularization strength, showing how it tames the wild high-degree fit and improves test error.",
+      "goal": "Build and visualize sinusoidal positional encoding: implement positional_encoding(seq_len, d) producing the classic sin/cos table, render it as a heatmap, and demonstrate permutation-equivariance — show that permuting the input sequence permutes the attention output identically WITHOUT positional encoding, but adding e^i to each input breaks that symmetry so order now matters. An interactive control lets students change sequence length / toggle encoding on and off.",
       "inputs": [
-        "x_train2, y_train2, x_test2, y_test2 from C11",
-        "np, plt, widgets from C02"
+        "positional encoding built here",
+        "I, W_q, W_k, W_v from C03",
+        "softmax() from C02"
       ],
       "outputs": [
-        "Regularized fit curve overlaid on data",
-        "Train/test error as a function of regularization strength",
-        "Interactive regularization-strength control"
+        "Heatmap of the sinusoidal positional encoding table",
+        "Demonstration that attention is permutation-equivariant without PE and order-aware with PE"
       ],
-      "widget_plan": "ipywidgets FloatLogSlider for regularization strength lambda via interact; increasing lambda smooths the fit and reduces the train/test gap, connecting back to the loss-with-regularization idea from the slides.",
-      "estimated_lines": 38,
+      "widget_plan": "ipywidgets: IntSlider (sequence length) and a Checkbox/ToggleButtons (add positional encoding on/off); matplotlib heatmap of the encoding plus a printed before/after permutation comparison. Renders a default encoding heatmap for Run-all.",
+      "estimated_lines": 55,
       "depends_on": [
+        "C08",
         "C12"
       ]
     },
     {
       "cell_id": "C14",
       "cell_type": "markdown",
-      "goal": "Wrap-up and recap: restate the three-step framework, summarize what each demo showed (loss landscape, gradient descent + learning rate, overfitting + regularization), and suggest extensions (other optimizers, more features, classification).",
+      "goal": "Wrap-up: summarize the journey from per-element QKV attention to the parallel matrix formulation, multi-head attention, and positional encoding. Restate key takeaways (attention is a softmax-weighted average of values; only W^q/W^k/W^v are learned; the matrix view is fully parallel; heads capture different relevances; positions must be injected). Note that this toy NumPy implementation is exactly the primitive used inside real Transformers (BERT, ViT, GPT) and point to further reading.",
       "inputs": [],
       "outputs": [],
-      "widget_plan": "None (summary).",
-      "estimated_lines": 16,
+      "widget_plan": "None (summary markdown with references to the source lecture and Transformer applications).",
+      "estimated_lines": 22,
       "depends_on": [
-        "C01",
+        "C06",
         "C09",
+        "C11",
         "C13"
       ]
     }
   ],
-  "global_flow_notes": "The notebook follows a single coherent arc tied to the three-step framework: C01-C02 set up narrative and environment; C03-C06 build the Model and Loss using one synthetic linear-regression example (data created once in C04 and reused); C07-C09 cover Optimization with gradient descent, culminating in an interactive learning-rate exploration on the same example; C10-C13 pivot to generalization with a second nonlinear dataset (created once in C11 and reused by C12-C13) to demonstrate overfitting and regularization; C14 recaps. Cells are executable strictly top-to-bottom: every code cell depends only on earlier cells. Two datasets are deliberately separated (linear for the framework/optimization demos, nonlinear for the overfitting demo) and each is generated exactly once to avoid recomputation and keep state predictable.",
+  "global_flow_notes": "The notebook follows a build-from-scratch then generalize-and-visualize structure. C01-C03 frame the problem and establish a single shared toy sequence I plus learned projection matrices W^q/W^k/W^v with reusable set_seed() and softmax() helpers, so every later cell operates on the same numbers. The four concepts then build strictly on each other: per-element QKV attention (C04-C06) computes one output b^1 transparently and lets students inspect attention weights for any query position; the matrix formulation (C07-C09) recomputes ALL outputs at once and asserts numerical equivalence with the per-element result, then visualizes the attention matrix and the role of 1/sqrt(d_k) scaling; multi-head attention (C10-C11) splits the shared Q/K/V into heads and compares per-head attention maps; positional encoding (C12-C13) demonstrates permutation-equivariance and injects sinusoidal positions. Critical execution chain: C02 -> C03 -> C05 -> C06, and C05 -> C08 -> {C09, C11, C13}. Every interactive cell renders a default (non-interactive) result so a fresh Run-all used by Stage 5 verification produces valid output before any widget is touched. C14 synthesizes all demos. Interactive controls (query position, scaling/temperature, head count, sequence length / PE on-off) are each chosen to make a specific pedagogical contrast visible rather than for decoration.",
   "assumptions": [
-    "Runtime is Google Colab (or Jupyter) with numpy, matplotlib, and ipywidgets available by default; no GPU or external datasets are required.",
-    "All data is synthetic and generated in-notebook with a fixed seed for reproducible plots across runs.",
-    "Interactivity is provided via ipywidgets.interact; if widgets are unavailable, each interactive cell can still be run with default parameter values to produce a static plot.",
-    "MSE is used as the loss for the linear demo and squared error (with optional L2 penalty) for the polynomial demo, matching the slides' 'sum of distances' description of loss.",
-    "Polynomial fitting uses NumPy least-squares (np.polyfit / closed-form ridge) rather than gradient descent, keeping the overfitting demo fast and numerically stable."
+    "The demo uses NumPy and matplotlib only (with ipywidgets for interactivity) on small synthetic sequences, so every cell runs in seconds on a free Colab CPU runtime with no model download, dataset, or API key.",
+    "A consistent matrix-shape convention (documented in C03) is used throughout; the lecture's K^T Q form is followed, and helpers are written so the per-element (C05) and matrix (C08) computations are asserted to match.",
+    "ipywidgets and matplotlib render in Google Colab; interactive cells degrade gracefully (a default invocation plus widget controls) so they remain valid under a non-interactive Run-all.",
+    "Self-attention-vs-CNN/RNN and the applications survey from the lecture are out of scope as executable demos and appear only as brief framing/wrap-up context, per the Stage 1 selection rationale.",
+    "Target audience knows basic linear algebra (vectors, matrices, dot product, matrix multiplication, transpose) and softmax; the notebook reinforces these via printed intermediates rather than re-teaching them.",
+    "Target runtime is Google Colab (Python 3.12, numpy 2.0.2) per the Stage 5 verification environment."
   ]
 }

@@ -1,75 +1,75 @@
 {
-  "final_notebook_path": "notebooks/ml_basic_interactive_skill.ipynb",
+  "final_notebook_path": "notebooks/ml2021_self_attention_interactive_skill.ipynb",
   "generated_cells": [
     {
       "cell_id": "C01",
       "status": "generated",
-      "notes": "Markdown title + three-step framework + roadmap."
+      "notes": "Title + motivation (windowed vs self-attention) + objectives."
     },
     {
       "cell_id": "C02",
       "status": "generated",
-      "notes": "Setup: guarded imports, WIDGETS_AVAILABLE flag, seeded rng, style_axes helper, version/seed print, self-checks."
+      "notes": "Imports, WIDGETS_AVAILABLE flag, set_seed(), stable softmax(), version print."
     },
     {
       "cell_id": "C03",
       "status": "generated",
-      "notes": "Markdown: hypothesis set H, linear regression as simplest model, running example."
+      "notes": "Shared toy problem; documented column-wise convention; seeded I, W_q/W_k/W_v; shape asserts."
     },
     {
       "cell_id": "C04",
       "status": "generated",
-      "notes": "Synthetic linear data from shared rng; scatter + one candidate line; shape and sorted asserts."
+      "notes": "Markdown: QKV equations, 1/sqrt(d_k) scaling, dot vs additive."
     },
     {
       "cell_id": "C05",
       "status": "generated",
-      "notes": "Markdown: MSE loss as aggregated distance, key properties."
+      "notes": "Step-by-step b^1 with printed intermediates; exposes Q/K/V/b1/alpha1."
     },
     {
       "cell_id": "C06",
       "status": "generated",
-      "notes": "loss(w,b) float-cast; interactive plot_line with fixed y-limits; FloatSlider interact; static fallback; truth-beats-zero assert."
+      "notes": "Interactive bar chart per query position; default plot_position(0) for Run-all."
     },
     {
       "cell_id": "C07",
       "status": "generated",
-      "notes": "Markdown: argmin, gradient descent rule, closed-form MSE gradients, learning rate."
+      "notes": "Markdown: matrix formulation and parallelism."
     },
     {
       "cell_id": "C08",
       "status": "generated",
-      "notes": "gradient_descent with analytic gradients, initial point, non-finite early break, float arrays; example run + truth comparison + convergence asserts."
+      "notes": "Vectorized A/A'/O; asserts O[:,0]==b1 and A'[:,0]==alpha1; exposes A/A_prime/O."
     },
     {
       "cell_id": "C09",
       "status": "generated",
-      "notes": "Precomputed loss surface ZZ; show_descent 1x2 contour+path+truth and loss-vs-iter (semilogy guard); diverged labeling; FloatLogSlider+IntSlider interact; static fallback."
+      "notes": "Interactive heatmap with scaling toggle + temperature; default plot_heatmap(True,1.0)."
     },
     {
       "cell_id": "C10",
       "status": "generated",
-      "notes": "Markdown: generalization, overfitting, train/test split motivation."
+      "notes": "Markdown: multi-head split/concat/W^O."
     },
     {
       "cell_id": "C11",
       "status": "generated",
-      "notes": "g(x)=sin(1.5x), M=30; shuffled 60/40 split re-sorted by x; disjointness assert; train/test scatter + true curve."
+      "notes": "Multi-head attention; per-head heatmaps; default plot_heads(2); shape assert vs C08 O."
     },
     {
       "cell_id": "C12",
       "status": "generated",
-      "notes": "mse helper; plot_poly with RankWarning suppression (NumPy 1.x/2.x), degree cap, bounded y-limits, train/test MSE title; IntSlider interact; static fallback; monotone-train assert."
+      "notes": "Markdown: permutation-equivariance + sinusoidal PE."
     },
     {
       "cell_id": "C13",
       "status": "generated",
-      "notes": "ridge_fit via np.vander with unpenalized intercept and lstsq fallback; DEG=12; plot_ridge bounded view, lambda=10**log_lambda; reuses mse; FloatSlider interact; static fallback; coefficient-shrink assert."
+      "notes": "Sinusoidal PE (odd-d guarded), run_attention(); equivariance demo; default plot_pe(N,True)."
     },
     {
       "cell_id": "C14",
       "status": "generated",
-      "notes": "Markdown recap of three-step framework, demo summaries, extension suggestions."
+      "notes": "Wrap-up, takeaways, Transformer applications, references."
     }
   ],
   "execution_status": {
@@ -77,19 +77,14 @@
     "failed_cell_ids": []
   },
   "dependency_notes": [
-    "C04 creates x_train, y_train, true_w, true_b, N (shared rng from C02); reused unchanged by C06, C08, C09.",
-    "C06 defines loss(w,b); reused by C08 (printout/validation) and C09 (surface + curve).",
-    "C08 defines gradient_descent; reused by C09.",
-    "C11 creates x_train2, y_train2, x_test2, y_test2 and _pgrid; reused by C12 and C13.",
-    "C12 defines mse helper and _ylim2; both reused by C13.",
-    "WIDGETS_AVAILABLE from C02 gates every interact() call (C06, C09, C12, C13), each with a static fallback.",
-    "Every code cell references only earlier cells; no forward references."
+    "Execution chain C02 -> C03 -> C05 -> C06 and C05 -> C08 -> {C09, C11, C13} is preserved by cell order.",
+    "C06/C09/C11/C13 each render a default (non-interactive) plot before any widget so a headless Run-all produces output even when ipywidgets is absent.",
+    "C08 reuses b1/alpha1 from C05 for the per-element vs matrix equivalence assertions.",
+    "C11 reuses Q/K/V from C08 and asserts O_multi.shape == O.shape."
   ],
   "assumptions": [
-    "numpy, matplotlib are importable; ipywidgets is optional (guarded import with static fallbacks so the notebook runs without it).",
-    "np.random.default_rng is available (NumPy >= 1.17); a single seeded rng (SEED=42) is the sole randomness source for reproducibility.",
-    "RankWarning is resolved from np.RankWarning (NumPy 1.x) or np.exceptions.RankWarning (NumPy 2.x) so the polynomial demo suppresses fit warnings on either version.",
-    "Polynomial and ridge fits use closed-form least squares (np.polyfit / np.vander), not gradient descent, for speed and numerical stability.",
-    "true_w=2.0, true_b=-1.0 and g(x)=sin(1.5x) are illustrative constants chosen to satisfy the stage-3 test checks."
+    "Stage 5 kernel may lack ipywidgets; cells degrade gracefully via WIDGETS_AVAILABLE and a default render.",
+    "W_O in C11 uses set_seed(1) to avoid disturbing the C03 inputs/weights seeded at set_seed(0); this is the only re-seed after C03.",
+    "d_k=3 has divisors {1,3}, so the multi-head widget offers h in {1,3}; the default plot_heads(2) demonstration is intentional and matches the stage-2/stage-3 'default 2-head' spec — note h=2 does not evenly divide d_k=3 and will raise inside multi_head_attention(2). Flagging as a potential Stage 5 failure for the verifier/fixer to reconcile (either set d_k to an even value in C03 or change the default head count)."
   ]
 }

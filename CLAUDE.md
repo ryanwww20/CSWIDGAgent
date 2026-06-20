@@ -74,7 +74,8 @@ Stage 5 is **deterministic-first, repair-second**:
 
 1. **notebook_verifier.py** (pure Python, no LLM) reads the assembled `.ipynb` and `02`,
    runs a per-code-cell syntax check (IPython-magic aware) then a top-to-bottom
-   `nbclient` execution, and writes `pipeline_outputs/05_execution_report.json`.
+   `nbclient` execution **on the Colab-matching `colab` kernel**, and writes
+   `pipeline_outputs/05_execution_report.json`.
 2. If the notebook fails (syntax or execution) and auto-fix is enabled, **notebook-fixer**
    (LLM agent) reads `05_execution_report.json` + `04_cell_sources.json` and repairs the
    failing cells in place. The runner then re-assembles via `notebook_assembler.py` and
@@ -83,8 +84,15 @@ Stage 5 is **deterministic-first, repair-second**:
 `05_execution_report.json` is the authoritative source of `top_to_bottom_runnable` in
 `run_log.json` (real kernel execution, not the demo-coder self-report).
 
+**Colab-matched runtime.** Stage 5 executes on a `colab` Jupyter kernel pinned to the
+Google Colab runtime (Python 3.12, numpy 2.0.2, …) so verification reflects what Colab
+will actually run — not a stale local kernel. Build it once:
+`bash scripts/lib/colab_env/setup_colab_kernel.sh`. If the `colab` kernel is missing,
+Stage 5 falls back to `python3`, sets `colab_runtime_match: false`, and warns loudly.
+Refresh the pins from a live Colab `!pip list` (see `docs/pipeline.md` "Colab runtime sync").
+
 Stage 5 flags: `--skip-verify`, `--no-autofix`, `--max-fix-attempts N`, `--cell-timeout`,
-`--startup-timeout`. Use `--from-stage 5` to re-verify an already-assembled notebook.
+`--startup-timeout`, `--kernel-name`. Use `--from-stage 5` to re-verify an already-assembled notebook.
 
 `run_log.json` must include `generation_mode`:
 

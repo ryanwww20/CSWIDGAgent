@@ -2,198 +2,193 @@
   "cell_specs": [
     {
       "cell_id": "C02",
-      "cell_type": "code",
-      "implementation_plan": "Setup cell. Import numpy as np, matplotlib.pyplot as plt, and 'from ipywidgets import interact, FloatSlider, IntSlider, FloatLogSlider' guarded by try/except. Attempt inline plotting with get_ipython().run_line_magic('matplotlib', 'inline') wrapped in try/except so the cell still runs outside IPython. Set module-level SEED = 42 and create a seeded generator rng = np.random.default_rng(SEED). Configure default figure styling: plt.rcParams['figure.figsize'] = (8, 4.5) and plt.rcParams['figure.dpi'] = 110. Define a helper style_axes(ax, title=None, xlabel='x', ylabel='y') that sets labels, optional title, and grid(alpha=0.3). Print a one-line confirmation showing numpy/matplotlib versions and the seed. Expose np, plt, rng, SEED, style_axes, WIDGETS_AVAILABLE and the slider/interact names module-wide.",
+      "implementation_plan": "Environment setup cell. (1) Import numpy as np, matplotlib, matplotlib.pyplot as plt, and ipywidgets as widgets; also import IPython.display.display. Wrap the ipywidgets import in a try/except so a missing widget backend does not abort the notebook: on ImportError set a module-level flag WIDGETS_AVAILABLE=False and print a warning, else WIDGETS_AVAILABLE=True. (2) Define set_seed(seed=0) that calls np.random.seed(seed) and returns seed. (3) Define softmax(x, axis=-1): subtract np.max(x, axis=axis, keepdims=True) for numerical stability, exponentiate, divide by np.sum(exp, axis=axis, keepdims=True). Operate on float64. (4) Rely on the inline backend (Colab/Jupyter default); do not call get_ipython() magics in raw Python. Set plt.rcParams figure size to a legible default. (5) Print a one-line confirmation listing numpy and matplotlib versions so the cell produces visible output under Run-all.",
       "function_signatures": [
-        "style_axes(ax, title=None, xlabel='x', ylabel='y') -> matplotlib.axes.Axes"
+        "set_seed(seed: int = 0) -> int",
+        "softmax(x: np.ndarray, axis: int = -1) -> np.ndarray"
       ],
       "state_variables": [
-        "SEED (int constant = 42)",
-        "rng (numpy.random.Generator, shared seeded RNG)",
-        "WIDGETS_AVAILABLE (bool)",
-        "np, plt, interact, FloatSlider, IntSlider, FloatLogSlider (module imports)"
+        "WIDGETS_AVAILABLE: bool flag set during ipywidgets import",
+        "np, plt, widgets, display module handles used by all later cells"
       ],
       "error_handling": [
-        "Wrap the matplotlib inline magic in try/except so the cell runs outside IPython.",
-        "Wrap 'from ipywidgets import ...' in try/except ImportError; on failure set WIDGETS_AVAILABLE=False and print install hint '!pip install ipywidgets' so later cells fall back to static rendering."
+        "try/except ImportError around ipywidgets; set WIDGETS_AVAILABLE=False and print a warning instead of raising",
+        "softmax subtracts the per-axis max before exp to avoid overflow on large scores"
       ],
       "test_checks": [
-        "assert 'np' in dir() and 'plt' in dir()",
-        "assert isinstance(rng, np.random.Generator)",
-        "Confirmation print executes without raising."
+        "assert np.allclose(softmax(np.zeros((1, 4)), axis=-1), 0.25)",
+        "assert np.allclose(softmax(np.array([[1.0, 2.0, 3.0]]), axis=-1).sum(), 1.0)",
+        "print('Imports OK | numpy', np.__version__, '| matplotlib', matplotlib.__version__)"
       ]
     },
     {
-      "cell_id": "C04",
-      "cell_type": "code",
-      "implementation_plan": "Generate the synthetic linear dataset reused by C06 and C08. Set true_w = 2.0, true_b = -1.0, N = 40, noise_std = 1.0. Draw x_train = np.sort(rng.uniform(-3, 3, size=N)) for a clean left-to-right plot. Compute y_train = true_w * x_train + true_b + rng.normal(0, noise_std, size=N). Create one figure: scatter (x_train, y_train) and overlay a single example candidate line with guess parameters (w_guess=1.0, b_guess=0.0) over a dense grid xs = np.linspace(x_train.min(), x_train.max(), 100). Use style_axes for labels and a legend distinguishing data vs candidate line. plt.show(). Keep arrays at module scope.",
+      "cell_id": "C03",
+      "implementation_plan": "Define the single shared toy problem and document the matrix-shape convention once, in a top comment block: inputs are stored COLUMN-WISE, I has shape [d, N] where column j is input vector a^j; projections map d->d_k (or d->d_v). Steps: (1) set_seed(0). (2) TOKENS = ['the', 'cat', 'sat', 'down']; N = len(TOKENS). (3) Choose d = 4 (model dim) and d_k = 3 (key/query dim); set d_v = d_k and document that O therefore has shape [d_v, N]. (4) Build I as np.random.randn(d, N) cast to float64. (5) Build W_q, W_k each np.random.randn(d_k, d) * 0.5 and W_v np.random.randn(d_v, d) * 0.5 so q/k/v stay small. (6) Print shapes of I, W_q, W_k, W_v and the TOKENS so the shared state is visible. Expose I, TOKENS, W_q, W_k, W_v, d, d_k, d_v, N as module-level names consumed by every later code cell.",
       "function_signatures": [],
       "state_variables": [
-        "true_w (float=2.0), true_b (float=-1.0), N (int=40), noise_std (float=1.0)",
-        "x_train (np.ndarray shape (N,)), y_train (np.ndarray shape (N,))"
+        "TOKENS: list[str] length N",
+        "N: int sequence length",
+        "d: int model dimension, d_k: int key dim, d_v: int value dim",
+        "I: np.ndarray shape [d, N] (columns are input vectors)",
+        "W_q: [d_k, d], W_k: [d_k, d], W_v: [d_v, d]"
       ],
       "error_handling": [
-        "Assert x_train and y_train have equal length before plotting.",
-        "Use rng (not the np.random global) so re-running after C02 reproduces the same data."
+        "assert d_k <= d and d_v == d_k to keep the shared convention consistent for later cells",
+        "assert I.shape == (d, N) immediately after construction so any later shape bug surfaces here"
       ],
       "test_checks": [
-        "assert x_train.shape == y_train.shape == (N,)",
-        "assert np.all(np.diff(x_train) >= 0)  # sorted",
-        "Figure displays a scatter plus one candidate line."
+        "assert len(TOKENS) == N",
+        "assert W_q.shape == (d_k, d) and W_k.shape == (d_k, d) and W_v.shape == (d_v, d)",
+        "print I.shape, W_q.shape, W_k.shape, W_v.shape and TOKENS"
+      ]
+    },
+    {
+      "cell_id": "C05",
+      "implementation_plan": "Compute one output vector b^1 (0-indexed column 0) step by step. (1) Project the whole sequence: Q = W_q @ I, K = W_k @ I, V = W_v @ I, giving Q,K shape [d_k, N] and V shape [d_v, N]; column j holds q^j, k^j, v^j. (2) Take q1 = Q[:, 0]. (3) Raw scores: raw_scores = K.T @ q1 (equivalently np.dot(q1, K[:, j]) for each j), shape [N]. (4) Scaled scores: scaled = raw_scores / np.sqrt(d_k). (5) Weights: alpha1 = softmax(scaled, axis=-1) over the N keys. (6) Output: b1 = V @ alpha1, shape [d_v]. (7) Print, with token labels, q1, every k^j, raw_scores, scaled scores, alpha1 (sums to 1), and b1, formatted with np.round so students can trace each number. Expose Q, K, V, b1, alpha1 for reuse by C06 and C08.",
+      "function_signatures": [],
+      "state_variables": [
+        "Q: [d_k, N], K: [d_k, N], V: [d_v, N] projected matrices",
+        "q1, raw_scores, scaled, alpha1, b1 intermediates"
+      ],
+      "error_handling": [
+        "assert Q.shape == (d_k, N) and V.shape == (d_v, N) right after projection",
+        "guard the scale: scale = np.sqrt(d_k); assert scale > 0"
+      ],
+      "test_checks": [
+        "assert np.isclose(alpha1.sum(), 1.0)",
+        "assert np.all(alpha1 >= 0)",
+        "assert b1.shape == (d_v,)",
+        "print round(alpha1, 4) and round(b1, 4) with TOKENS labels"
       ]
     },
     {
       "cell_id": "C06",
-      "cell_type": "code",
-      "implementation_plan": "Define loss(w, b) returning MSE over x_train, y_train: preds = w*x_train + b; return float(np.mean((preds - y_train)**2)). Build an interactive explorer plot_line(w, b) that computes preds on a dense grid, plots data scatter + candidate line, sets title to f'Loss L(w,b) = {loss(w,b):.3f}', uses style_axes and fixed y-limits (computed once from the data range, padded) so the view does not jump while sliders move. Wire with interact(plot_line, w=FloatSlider(min=-1, max=5, step=0.1, value=1.0), b=FloatSlider(min=-5, max=5, step=0.1, value=0.0)). If WIDGETS_AVAILABLE is False, call plot_line(true_w, true_b) once for a static fallback.",
+      "implementation_plan": "Interactive single-position attention demo over the shared Q, K, V. (1) Define attention_for_position(i): given 0-based query index i, compute q_i = Q[:, i], scores = (K.T @ q_i) / np.sqrt(d_k), alpha = softmax(scores, axis=-1), b_i = V @ alpha; return alpha, b_i. (2) Define plot_position(i): create a matplotlib figure, draw a bar chart of alpha over range(N) with TOKENS as xticklabels, title 'Attention weights for query position i=<i> (\"<token>\")', ylabel 'alpha_prime[i,j]', annotate each bar with its value, print b_i rounded, then plt.show(). (3) Default invocation: call plot_position(0) directly so Run-all renders output before any interaction. (4) If WIDGETS_AVAILABLE: build an IntSlider(min=0, max=N-1, value=0, description='query i') (or Dropdown over TOKENS) wired via widgets.interactive_output into an Output area calling plot_position. If widgets unavailable, skip widget wiring (default plot already rendered).",
       "function_signatures": [
-        "loss(w: float, b: float) -> float",
-        "plot_line(w: float, b: float) -> None"
+        "attention_for_position(i: int) -> tuple[np.ndarray, np.ndarray]",
+        "plot_position(i: int) -> None"
       ],
       "state_variables": [
-        "loss (function, reused by C08 and C09)",
-        "Fixed axis limits derived from x_train/y_train for a stable interactive view"
+        "reuses Q, K, V, d_k, TOKENS, N from earlier cells",
+        "optional slider/dropdown widget and Output area"
       ],
       "error_handling": [
-        "loss casts the result to float to avoid numpy scalar display quirks in the title.",
-        "Guard interact behind WIDGETS_AVAILABLE; provide a static call fallback so the cell never errors when ipywidgets is missing.",
-        "Fix y-axis limits so rapid slider changes do not cause flickering rescale."
+        "clamp/assert 0 <= i < N at the top of attention_for_position",
+        "guard widget construction behind WIDGETS_AVAILABLE so non-interactive Run-all still succeeds",
+        "create a fresh figure and call plt.show() inside plot_position to avoid duplicate axes on repeated slider events"
       ],
       "test_checks": [
-        "assert loss(true_w, true_b) < loss(0.0, 0.0)  # truth fits better than the zero line",
-        "assert loss(true_w, true_b) >= 0.0",
-        "plot_line(1.0, 0.0) runs without error."
+        "alpha, _ = attention_for_position(0); assert np.isclose(alpha.sum(), 1.0)",
+        "assert attention_for_position(0)[0].shape == (N,)",
+        "default plot_position(0) produces a visible bar chart under Run-all"
       ]
     },
     {
       "cell_id": "C08",
-      "cell_type": "code",
-      "implementation_plan": "Implement gradient_descent(lr, n_steps, w0=0.0, b0=0.0). Use analytic MSE gradients: with preds=w*x_train+b, err=preds-y_train, dL/dw = (2/N)*np.sum(err*x_train), dL/db = (2/N)*np.sum(err). Loop n_steps times updating w,b and appending (w, b, loss(w,b)) to a trajectory each iteration (include the initial point). Return trajectory as a dict of numpy arrays {'w':..., 'b':..., 'loss':...}. After defining, run one example (lr=0.05, n_steps=50) and print final (w,b) and final loss alongside (true_w, true_b) and loss(true_w,true_b) for comparison.",
-      "function_signatures": [
-        "gradient_descent(lr: float, n_steps: int, w0: float = 0.0, b0: float = 0.0) -> dict"
-      ],
+      "implementation_plan": "Vectorized self-attention in one pass and equivalence assertion against C05. (1) Recompute Q = W_q @ I, K = W_k @ I, V = W_v @ I. (2) A = (K.T @ Q) / np.sqrt(d_k), shape [N, N]; document that A[j, i] is the score of key j against query i, so attention for query i lives in COLUMN i. (3) A_prime = softmax(A, axis=0) so each query column (over keys j) sums to 1. (4) O = V @ A_prime, shape [d_v, N]; column i is b^i. (5) Verify: assert np.allclose(O[:, 0], b1) and assert np.allclose(A_prime[:, 0], alpha1), proving per-element and matrix views match. (6) Print A, A_prime (rounded), confirm column sums are 1, print a success message. Expose A, A_prime, O for C09/C11/C13.",
+      "function_signatures": [],
       "state_variables": [
-        "gradient_descent (function, reused by C09)",
-        "N reused from C04 for gradient normalization"
+        "A: [N, N] scaled scores, A_prime: [N, N] column-softmaxed, O: [d_v, N] outputs",
+        "reuses W_q, W_k, W_v, I, d_k, b1, alpha1 from earlier cells"
       ],
       "error_handling": [
-        "Cast n_steps to int and guard n_steps >= 1.",
-        "Detect numeric blow-up: if loss is not finite, break early and still return the partial trajectory so C09 can visualize divergence without raising.",
-        "Use float arrays in the trajectory to keep matplotlib happy."
+        "assert A.shape == (N, N) and O.shape == (d_v, N)",
+        "use np.allclose with explicit atol (e.g. 1e-8) rather than == when comparing to C05",
+        "if the equivalence assert fails, print both vectors so the convention mismatch is diagnosable"
       ],
       "test_checks": [
-        "traj = gradient_descent(0.05, 200); assert traj['loss'][-1] < traj['loss'][0]",
-        "assert abs(traj['w'][-1]-true_w) < 0.5 and abs(traj['b'][-1]-true_b) < 0.5  # converges near truth",
-        "assert len(traj['w']) == len(traj['loss'])"
+        "assert np.allclose(A_prime.sum(axis=0), 1.0)",
+        "assert np.allclose(O[:, 0], b1)",
+        "assert np.allclose(A_prime[:, 0], alpha1)",
+        "print('Matrix view matches per-element b^1:', True)"
       ]
     },
     {
       "cell_id": "C09",
-      "cell_type": "code",
-      "implementation_plan": "Interactive GD visualizer. Precompute a loss surface grid once at module scope: W = np.linspace(-1,5,80), B = np.linspace(-5,5,80), WW,BB = np.meshgrid(W,B), and ZZ where ZZ[i,j] = loss(WW[i,j], BB[i,j]) (vectorize or small loop over the grid). Define show_descent(lr, n_steps): call gradient_descent(lr, n_steps), then make a 1x2 figure: (left) contourf/contour of ZZ over (W,B) with the trajectory path drawn as line+markers and the true (true_w,true_b) marked with a star; (right) loss-vs-iteration curve (semilogy when all finite and positive). Title reflects final loss or 'diverged' if non-finite. Wire interact(show_descent, lr=FloatLogSlider(base=10, min=-3, max=0.5, step=0.1, value=0.05), n_steps=IntSlider(min=5, max=300, step=5, value=50)). Static fallback calls show_descent(0.05, 50) if widgets unavailable.",
+      "implementation_plan": "Interactive attention-matrix heatmap showing the role of scaling/temperature. (1) Define recompute_scores(): raw = K.T @ Q (unscaled, [N, N]); return raw. (2) Define plot_heatmap(apply_scaling: bool, temperature: float): start from raw; divide by np.sqrt(d_k) if apply_scaling; divide by max(temperature, 1e-6); A_vis = softmax(scores, axis=0). Render with plt.imshow(A_vis, aspect='auto'), add colorbar, set xticks/yticks to range(N) with TOKENS labels (xlabel 'query', ylabel 'key'), title noting scaling on/off and temperature, annotate cells with rounded weights, plt.show(). (3) Default invocation: plot_heatmap(apply_scaling=True, temperature=1.0). (4) If WIDGETS_AVAILABLE: Checkbox(value=True, description='apply 1/sqrt(d_k)') and FloatSlider(min=0.1, max=3.0, step=0.1, value=1.0, description='temperature') wired via interactive_output into an Output area. Print pedagogical note: less scaling / lower temperature sharpens attention toward one-hot.",
       "function_signatures": [
-        "show_descent(lr: float, n_steps: int) -> None"
+        "recompute_scores() -> np.ndarray",
+        "plot_heatmap(apply_scaling: bool, temperature: float) -> None"
       ],
       "state_variables": [
-        "W, B, WW, BB, ZZ (precomputed loss-surface grid arrays, computed once)"
+        "raw unscaled score matrix [N, N]",
+        "reuses Q, K, d_k, TOKENS, N; optional Checkbox + FloatSlider + Output"
       ],
       "error_handling": [
-        "If the trajectory contains non-finite values, clip/skip them when plotting the path and label the figure 'diverged (try a smaller learning rate)'.",
-        "Right plot: only use semilogy when all loss values are finite and > 0; otherwise use a linear plot to avoid log errors.",
-        "Compute ZZ once outside show_descent to keep slider updates responsive.",
-        "Guard interact behind WIDGETS_AVAILABLE with a static fallback call."
+        "clamp temperature to a small positive floor (max(temperature, 1e-6)) to avoid divide-by-zero",
+        "guard widgets behind WIDGETS_AVAILABLE; default heatmap renders regardless",
+        "create a fresh figure and plt.show() inside plot_heatmap to prevent figure accumulation on slider events"
       ],
       "test_checks": [
-        "assert ZZ.shape == WW.shape == BB.shape",
-        "show_descent(0.05, 50) runs without error (convergent case)",
-        "show_descent(1.5, 50) runs without error and is labeled as diverging (large lr)"
+        "assert np.allclose(A_vis.sum(axis=0), 1.0) for the default render",
+        "print scaled-vs-unscaled max column weight to show they differ",
+        "default plot_heatmap(True, 1.0) yields a visible heatmap under Run-all"
       ]
     },
     {
       "cell_id": "C11",
-      "cell_type": "code",
-      "implementation_plan": "Create a nonlinear dataset for the overfitting demo and split into train/test. Define a true function g(x)=np.sin(1.5*x). Sample M=30 points x_all = np.sort(rng.uniform(-3,3,size=M)); y_all = g(x_all) + rng.normal(0, 0.25, size=M). Split via a shuffled index: idx = rng.permutation(M); cut at ~60% train; produce x_train2,y_train2,x_test2,y_test2, each re-sorted by x for clean plotting. Scatter train vs test points in different colors/markers and overlay the true function curve (light dashed) over a dense grid. Use style_axes + legend. Keep arrays at module scope.",
+      "implementation_plan": "Multi-head self-attention, parameterizable by head count h (default 2). (1) Define multi_head_attention(h): require d_k % h == 0; head_dim = d_k // h (and d_v // h for values). Split Q, K, V along the feature axis into h slices of head_dim rows each (Q_head = Q[head*head_dim:(head+1)*head_dim, :], etc.). (2) Per head: A_head = (K_head.T @ Q_head) / np.sqrt(head_dim); A_head_prime = softmax(A_head, axis=0); O_head = V_head @ A_head_prime, shape [head_dim, N]; collect A_head_prime and O_head. (3) Concatenate O_heads along axis 0 -> O_concat shape [d_v, N]. (4) set_seed for reproducibility then W_O = np.random.randn(d_v, d_v) * 0.5; O_multi = W_O @ O_concat. (5) Return list of per-head A_prime and O_multi. (6) Define plot_heads(h): compute, then draw an h-panel subplot grid (plt.subplots(1, h)) of per-head attention heatmaps with TOKENS labels and a shared title, plt.show(). (7) Default: plot_heads(2). (8) If WIDGETS_AVAILABLE: Dropdown/IntSlider restricted to divisors of d_k wired to plot_heads. Assert O_multi.shape == O.shape from C08.",
       "function_signatures": [
-        "g(x: np.ndarray) -> np.ndarray  # true nonlinear function"
+        "multi_head_attention(h: int) -> tuple[list[np.ndarray], np.ndarray]",
+        "plot_heads(h: int) -> None"
       ],
       "state_variables": [
-        "M (int=30)",
-        "x_train2, y_train2, x_test2, y_test2 (np.ndarrays)"
+        "head_dim, per-head Q/K/V slices, per-head A_prime list, O_concat, W_O, O_multi",
+        "reuses Q, K, V, d_k, d_v, TOKENS, N, set_seed; optional IntSlider/Dropdown + Output"
       ],
       "error_handling": [
-        "Assert train and test sets are non-empty and disjoint by index.",
-        "Re-sort each split by x before plotting/overlay to avoid zig-zag lines.",
-        "Use rng for reproducibility."
+        "assert d_k % h == 0 (raise a clear ValueError naming valid divisors if not)",
+        "restrict the widget to head counts that evenly divide d_k so an invalid split is impossible",
+        "assert O_multi.shape == O.shape to confirm multi-head preserves output dimensionality",
+        "guard widgets behind WIDGETS_AVAILABLE; fresh figure + plt.show() inside plot_heads"
       ],
       "test_checks": [
-        "assert len(x_train2) + len(x_test2) == M",
-        "assert len(x_train2) > 0 and len(x_test2) > 0",
-        "Figure shows distinguishable train vs test points."
-      ]
-    },
-    {
-      "cell_id": "C12",
-      "cell_type": "code",
-      "implementation_plan": "Interactive polynomial overfitting demo. Define a helper mse(y_true, y_pred)=float(np.mean((y_true-y_pred)**2)). plot_poly(degree): fit coeffs = np.polyfit(x_train2, y_train2, degree), evaluate train MSE and test MSE via np.polyval, plot a dense smooth fitted curve over the padded x-range, scatter train and test points, set title f'degree={degree}  train MSE={tr:.3f}  test MSE={te:.3f}', and clamp y-limits to a sensible range based on data so high-degree blow-ups do not destroy the view. interact(plot_poly, degree=IntSlider(min=1, max=15, step=1, value=1)). Static fallback calls plot_poly(9).",
-      "function_signatures": [
-        "mse(y_true: np.ndarray, y_pred: np.ndarray) -> float",
-        "plot_poly(degree: int) -> None"
-      ],
-      "state_variables": [
-        "mse (helper, reused by C13)",
-        "Fixed y-limits derived from the data range to bound high-degree curves"
-      ],
-      "error_handling": [
-        "Suppress np.polyfit RankWarning via warnings and cap degree at len(x_train2)-1 if degree is too large; wrap polyfit in try/except np.linalg.LinAlgError.",
-        "Clamp plot y-limits so an exploding high-degree fit does not make the figure unreadable.",
-        "Cast degree to int."
-      ],
-      "test_checks": [
-        "tr1 = mse(y_train2, np.polyval(np.polyfit(x_train2,y_train2,1), x_train2)); tr9 = mse(y_train2, np.polyval(np.polyfit(x_train2,y_train2,9), x_train2)); assert tr9 <= tr1 + 1e-9  # higher degree lowers train error",
-        "plot_poly(1) and plot_poly(12) run without error",
-        "Train MSE and test MSE are both shown in the title."
+        "for each head assert np.allclose(A_head_prime.sum(axis=0), 1.0)",
+        "assert O_multi.shape == (d_v, N)",
+        "assert len(per_head_A) == h",
+        "default plot_heads(2) renders two heatmap panels under Run-all"
       ]
     },
     {
       "cell_id": "C13",
-      "cell_type": "code",
-      "implementation_plan": "Regularization (ridge) remedy demo at a fixed high degree DEG=12. Build polynomial design matrices via np.vander(x, DEG+1). Implement ridge_fit(X, y, lam): theta = np.linalg.solve(X.T@X + lam*I, X.T@y) with I an identity whose intercept-column diagonal entry is set to 0 (do not penalize the bias). plot_ridge(log_lambda): lam = 10**log_lambda, fit on train, compute train/test MSE (reusing mse from C12), plot the fitted curve + train/test scatter with bounded y-limits, title shows lambda and both errors. interact(plot_ridge, log_lambda=FloatSlider(min=-6, max=3, step=0.5, value=-3)) with lam derived as 10**log_lambda. Static fallback calls plot_ridge(-3).",
+      "implementation_plan": "Sinusoidal positional encoding plus a permutation-equivariance demonstration. (1) Define positional_encoding(seq_len, d): build PE shape [d, seq_len] (column = position) using PE[2i, pos]=sin(pos/10000**(2i/d)), PE[2i+1, pos]=cos(pos/10000**(2i/d)); handle odd d by truncating the last cos term. (2) Define run_attention(I_in): Q=W_q@I_in, K=W_k@I_in, V=W_v@I_in, A=(K.T@Q)/sqrt(d_k), A'=softmax(A, axis=0), O=V@A'; return O. (3) Permutation demo: build perm (e.g. reversed range(N)); compute O = run_attention(I) and show WITHOUT PE that run_attention(I[:, perm]) equals O[:, perm] (permutation-equivariant) via np.allclose; then I_pe = I + positional_encoding(N, d) and show that run_attention(I_pe)[:, perm] != run_attention(I_pe[:, perm]), so adding e^i makes order matter. Print before/after comparison and the boolean results. (4) Define plot_pe(seq_len, add_pe): imshow positional_encoding(seq_len, d) (xlabel position, ylabel dim) with colorbar; title reflects add_pe; plt.show(). (5) Default: plot_pe(N, True). (6) If WIDGETS_AVAILABLE: IntSlider(min=2, max=16, value=N, description='seq_len') and Checkbox(value=True, description='add positional encoding') wired via interactive_output.",
       "function_signatures": [
-        "ridge_fit(X: np.ndarray, y: np.ndarray, lam: float) -> np.ndarray  # returns theta",
-        "plot_ridge(log_lambda: float) -> None"
+        "positional_encoding(seq_len: int, d: int) -> np.ndarray",
+        "run_attention(I_in: np.ndarray) -> np.ndarray",
+        "plot_pe(seq_len: int, add_pe: bool) -> None"
       ],
       "state_variables": [
-        "DEG (int=12)",
-        "Design matrix via np.vander; identity mask excluding the intercept from the penalty",
-        "Reuses mse from C12 and the C11 datasets"
+        "PE: [d, seq_len] sinusoidal table",
+        "perm: permutation index array; O, I_pe intermediates",
+        "reuses W_q, W_k, W_v, I, d, d_k, N, softmax, TOKENS; optional IntSlider+Checkbox+Output"
       ],
       "error_handling": [
-        "Use np.linalg.solve on the regularized normal equations; if singular (np.linalg.LinAlgError), fall back to np.linalg.lstsq.",
-        "Do not penalize the intercept column (zero that diagonal entry) to avoid bias-shrinkage artifacts.",
-        "Clamp plot y-limits; compute lam = 10**log_lambda safely."
+        "handle odd d in positional_encoding by guarding the cos index (slice to available rows)",
+        "use np.allclose (atol ~1e-8) for the equivariance comparison rather than ==",
+        "clamp seq_len slider to >= 1; PE columns sliced to the requested seq_len",
+        "guard widgets behind WIDGETS_AVAILABLE; fresh figure + plt.show() inside plot_pe"
       ],
       "test_checks": [
-        "X = np.vander(x_train2, DEG+1); t_small = ridge_fit(X, y_train2, 1e-6); t_big = ridge_fit(X, y_train2, 1e3); assert np.linalg.norm(t_big) < np.linalg.norm(t_small)  # larger lambda shrinks coefficients",
-        "plot_ridge(-6) and plot_ridge(2) run without error",
-        "Increasing lambda visibly smooths the fitted curve."
+        "assert positional_encoding(N, d).shape == (d, N)",
+        "assert np.allclose(run_attention(I)[:, perm], run_attention(I[:, perm])) is True (equivariant without PE)",
+        "assert not np.allclose(run_attention(I + positional_encoding(N, d))[:, perm], run_attention((I + positional_encoding(N, d))[:, perm])) (PE breaks equivariance)",
+        "default plot_pe(N, True) renders the PE heatmap under Run-all"
       ]
     }
   ],
   "cross_cell_invariants": [
-    "A single seeded RNG (rng, SEED=42 from C02) is the only randomness source; all data-generating cells (C04, C11) draw from it so results are reproducible top-to-bottom.",
-    "x_train, y_train, true_w, true_b, N are created exactly once in C04 and reused unchanged by C06, C08, and C09.",
-    "x_train2, y_train2, x_test2, y_test2 are created exactly once in C11 and reused unchanged by C12 and C13.",
-    "loss(w, b) is defined once in C06 and reused by C08 (validation/printout) and C09 (surface + curve).",
-    "gradient_descent is defined in C08 and reused by C09; mse is defined in C12 and reused by C13.",
-    "Every code cell depends only on earlier cells; the notebook must execute strictly top-to-bottom with no forward references.",
-    "WIDGETS_AVAILABLE from C02 gates every interact() call; each interactive cell (C06, C09, C12, C13) has a static fallback so the notebook never errors when ipywidgets is missing.",
-    "All interactive plotting callbacks use fixed/bounded axis limits so slider changes do not cause distracting rescaling or unreadable blow-ups."
+    "Matrix-shape convention is fixed in C03 and never changed: inputs are column-wise, I is [d, N] with column j = a^j; Q=W_q@I and K=W_k@I are [d_k, N]; V=W_v@I is [d_v, N]; the attention matrix A=K.T@Q is [N, N] and is softmaxed over axis=0 (keys) so each query column sums to 1; O=V@A' is [d_v, N] with column i = b^i.",
+    "All randomness is seeded via set_seed() (defined in C02, first called in C03) so I, W_q, W_k, W_v, and W_O are identical across reruns and every cell shares the same numbers.",
+    "softmax() from C02 is the only softmax used; scaling is always 1/sqrt(d_k) for single-head and 1/sqrt(head_dim) for multi-head.",
+    "d_v == d_k (set in C03) so single-head O (C08) and multi-head O (C11) share shape [d_v, N] and can be compared by shape.",
+    "Every interactive cell (C06, C09, C11, C13) calls its plotting function once with default arguments BEFORE building any widget, so a non-interactive Run-all (Stage 5 verification) always produces visible output; widget construction is guarded by WIDGETS_AVAILABLE.",
+    "The per-element result b^1 / alpha1 from C05 is the ground truth that the matrix view in C08 asserts against; downstream cells (C09, C11, C13) build on C08's A/A'/O."
   ],
   "assumptions": [
-    "numpy, matplotlib, and ipywidgets are importable in the runtime (Colab/Jupyter); a guarded fallback handles missing ipywidgets.",
-    "np.random.default_rng is available (NumPy >= 1.17) and is used instead of legacy np.random for reproducibility.",
-    "Polynomial fitting uses np.polyfit/np.vander closed-form least squares (and closed-form ridge), not gradient descent, for speed and numerical stability, matching the Stage 2 assumption.",
-    "The true linear parameters (true_w=2.0, true_b=-1.0) and nonlinear function g(x)=sin(1.5x) are illustrative; exact constants may be tuned by demo-coder as long as the invariants and test checks above still hold.",
-    "Interactive cells rely on ipywidgets.interact; '%matplotlib inline' (or the Colab default) provides static-image rendering of each interaction frame."
+    "NumPy + matplotlib (+ ipywidgets for interactivity) only; small synthetic sequence (N=4, d=4, d_k=d_v=3) runs in seconds on a free Colab CPU runtime with no downloads or API keys.",
+    "ipywidgets may be unavailable under the headless Stage 5 kernel; cells degrade gracefully via the WIDGETS_AVAILABLE flag and a default non-interactive render.",
+    "Target runtime is Google Colab (Python 3.12, numpy 2.0.2); matplotlib uses the inline backend without explicit get_ipython() magics in the Python source.",
+    "Audience knows basic linear algebra and softmax; printed intermediates reinforce rather than re-teach these.",
+    "Exact toy dimensions (d, d_k, N) and token labels are chosen for legibility and may be adjusted in C03 as long as the cross-cell invariants (column-wise convention, d_v==d_k, seeded randomness) hold."
   ]
 }
