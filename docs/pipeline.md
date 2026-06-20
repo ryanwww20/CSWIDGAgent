@@ -68,8 +68,43 @@ If verification fails and auto-fix is enabled, the `notebook-fixer` agent repair
 failing cells in `04_cell_sources.json`; the runner re-assembles and re-verifies, looping
 up to `--max-fix-attempts` (default 2).
 
+### Colab-matched runtime
+
+The whole point of Stage 5 is to catch what will break **on Colab**, so it executes on a
+dedicated `colab` Jupyter kernel pinned to the Google Colab runtime — not whatever numpy
+happens to be on the local `python3` kernel. (A stale local kernel gives false confidence:
+e.g. numpy 1.26 still has `np.RankWarning`, but Colab's numpy 2.0.2 removed it, so a
+numpy-2-incompatible notebook would pass on the old kernel and fail on Colab.)
+
+Build the kernel once (creates a Python 3.12 venv at `~/.colab-runtime-venv` and registers
+the `colab` kernelspec):
+
+```bash
+bash scripts/lib/colab_env/setup_colab_kernel.sh
+```
+
+Pinned spec lives in `scripts/lib/colab_env/colab-runtime-requirements.txt`. Confirmed from
+the Colab release notes (runtime 2026.04): **Python 3.12.13, numpy 2.0.2**. The rest of the
+scientific stack is best-effort for that generation.
+
+If the `colab` kernel is not installed, Stage 5 falls back to `python3`, records
+`colab_runtime_match: false` in `05_execution_report.json`, and prints a loud warning — so a
+"runnable" result is never silently non-Colab-faithful.
+
+#### Colab runtime sync
+
+Package versions on Colab drift. To make the pins exact, run `!pip list` (or
+`!pip freeze`) in a fresh Colab notebook, update the versions in
+`scripts/lib/colab_env/colab-runtime-requirements.txt`, and re-run
+`setup_colab_kernel.sh` (delete `~/.colab-runtime-venv` first to rebuild clean).
+
+> **Note:** the local interpreter is Python 3.12.1 while Colab pins 3.12.13 — same minor
+> series, so API behaviour matches; only the patch differs. Use a 3.12.13 interpreter via
+> `PYTHON_BIN` if you need an exact patch match.
+
 Stage 5 flags: `--skip-verify`, `--no-autofix`, `--max-fix-attempts N`, `--cell-timeout`,
-`--startup-timeout`. Re-verify an existing notebook with `--from-stage 5`. Standalone:
+`--startup-timeout`, `--kernel-name` (default `colab`). Re-verify an existing notebook with
+`--from-stage 5`. Standalone:
 
 ```bash
 python3 scripts/lib/notebook_verifier.py \
@@ -143,6 +178,7 @@ Artifacts from that run remain valid inputs for a proper artifact-driven re-run 
     "top_to_bottom_runnable": false,
     "syntax_ok": false,
     "verified_by_execution": true,
+    "colab_runtime_match": true,
     "total_cells": 0,
     "code_cells": 0,
     "markdown_cells": 0

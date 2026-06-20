@@ -1,0 +1,25 @@
+# Google Colab runtime spec — mirrors the Colab default runtime so Stage 5
+# (notebook_verifier) verifies notebooks against what Colab will actually run.
+#
+# CONFIRMED from Colab release notes (runtime 2026.04):
+#   Python 3.12.13, numpy 2.0.2
+# (numpy 2.0 removed APIs like np.RankWarning / np.float_ — exactly the class of
+#  breakage Stage 5 must catch, so numpy is pinned EXACTLY.)
+#
+# BEST-EFFORT for the numpy-2 / py3.12 Colab generation (refresh to exact values
+# by pasting a live Colab `!pip list` — see docs/pipeline.md "Colab runtime sync").
+numpy==2.0.2
+scipy==1.13.1
+pandas==2.2.2
+matplotlib==3.9.2
+scikit-learn==1.5.2
+ipywidgets==8.1.5
+ipykernel>=6.29
+
+# Deep-learning stack that Colab ships PRE-INSTALLED (notebooks `import torch`
+# directly, they do not pip-install it). Colab runtime 2026.04 ~ torch 2.8.
+# CPU build is fine for verification; demo notebooks auto-detect the device.
+# (transformers / diffusers / gymnasium are NOT preinstalled on Colab — those
+#  come from each notebook's own `!pip install`, repaired by notebook-fixer.)
+torch
+torchvision

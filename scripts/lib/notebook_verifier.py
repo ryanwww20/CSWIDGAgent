@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -29,8 +30,38 @@ class VerificationError(Exception):
     """Raised when verification cannot run (bad inputs, missing notebook)."""
 
 
+# Stage 5 verifies against a kernel that mirrors the Google Colab runtime so the
+# result reflects what Colab will actually run (e.g. numpy 2.x removed APIs).
+# Build it with scripts/lib/colab_env/setup_colab_kernel.sh.
+COLAB_KERNEL = "colab"
+FALLBACK_KERNEL = "python3"
+
+
 def _strip_ansi(text: str) -> str:
     return _ANSI_ESCAPE.sub("", text)
+
+
+def _kernel_available(name: str) -> bool:
+    try:
+        from jupyter_client.kernelspec import KernelSpecManager
+
+        return name in KernelSpecManager().find_kernel_specs()
+    except Exception:
+        return False
+
+
+def resolve_kernel(preferred: str, fallback: str = FALLBACK_KERNEL) -> tuple[str, bool]:
+    """Return (kernel_to_use, matches_preferred).
+
+    If the preferred (Colab-matching) kernel is not installed, fall back and flag
+    that the run is NOT Colab-faithful so the report can say so loudly.
+    """
+    if _kernel_available(preferred):
+        return preferred, True
+    if _kernel_available(fallback):
+        return fallback, False
+    # Last resort: let nbclient try the preferred name and surface its own error.
+    return preferred, False
 
 
 @dataclass
@@ -61,6 +92,8 @@ class VerifyResult:
     runnable: bool
     code_cell_count: int
     duration_seconds: float
+    kernel_used: str = FALLBACK_KERNEL
+    kernel_matches_colab: bool = False
     syntax_failures: list[CellFailure] = field(default_factory=list)
     execution_failures: list[CellFailure] = field(default_factory=list)
     error_message: str | None = None
@@ -164,9 +197,14 @@ def verify_notebook(
     execute: bool = True,
     cell_timeout: int = 120,
     startup_timeout: int = 60,
-    kernel_name: str = "python3",
+    kernel_name: str = COLAB_KERNEL,
 ) -> VerifyResult:
-    """Run syntax check and (optionally) top-to-bottom execution on a notebook."""
+    """Run syntax check and (optionally) top-to-bottom execution on a notebook.
+
+    Execution defaults to the Colab-matching kernel (see COLAB_KERNEL) so the
+    result reflects the real deployment runtime. If that kernel is not installed
+    the run falls back to ``python3`` and flags ``kernel_matches_colab=False``.
+    """
     if not notebook_path.exists():
         raise VerificationError(f"notebook does not exist: {notebook_path}")
 
@@ -181,6 +219,15 @@ def verify_notebook(
     id_by_index = _id_by_index(structure)
     code_cell_count = sum(1 for c in notebook.cells if c.get("cell_type") == "code")
 
+    kernel_used, matches_colab = resolve_kernel(kernel_name)
+    if not matches_colab and kernel_name == COLAB_KERNEL:
+        print(
+            f"[notebook_verifier] WARNING: '{COLAB_KERNEL}' kernel not installed; "
+            f"verifying with '{kernel_used}' instead. Results may NOT reflect the "
+            "Colab runtime. Build it: scripts/lib/colab_env/setup_colab_kernel.sh",
+            file=sys.stderr,
+        )
+
     syntax_failures = check_syntax(notebook, id_by_index)
     syntax_ok = not syntax_failures
 
@@ -194,6 +241,8 @@ def verify_notebook(
             runnable=False,
             code_cell_count=code_cell_count,
             duration_seconds=0.0,
+            kernel_used=kernel_used,
+            kernel_matches_colab=matches_colab,
             syntax_failures=syntax_failures,
             execution_failures=[],
             error_message=None if syntax_ok else "syntax errors present; execution skipped",
@@ -205,7 +254,7 @@ def verify_notebook(
         notebook,
         timeout=cell_timeout,
         startup_timeout=startup_timeout,
-        kernel_name=kernel_name,
+        kernel_name=kernel_used,
         allow_errors=True,  # run all cells so we can report every failure at once
     )
     try:
@@ -226,6 +275,8 @@ def verify_notebook(
         runnable=runnable,
         code_cell_count=code_cell_count,
         duration_seconds=round(duration_seconds, 4),
+        kernel_used=kernel_used,
+        kernel_matches_colab=matches_colab,
         syntax_failures=[],
         execution_failures=execution_failures,
         error_message=error_message,
@@ -235,8 +286,8 @@ def verify_notebook(
 def build_execution_report(
     result: VerifyResult,
     *,
-    kernel_name: str,
     timestamp_utc: str,
+    kernel_name: str | None = None,
     fix_attempts: list[dict[str, Any]] | None = None,
     assumptions: list[str] | None = None,
 ) -> dict[str, Any]:
@@ -245,7 +296,8 @@ def build_execution_report(
     return {
         "notebook_path": str(result.notebook_path),
         "verified_at_utc": timestamp_utc,
-        "kernel_name": kernel_name,
+        "kernel_name": kernel_name or result.kernel_used,
+        "colab_runtime_match": result.kernel_matches_colab,
         "code_cell_count": result.code_cell_count,
         "syntax_check": {
             "passed": result.syntax_ok,
@@ -279,7 +331,9 @@ def main() -> int:
                         help="static syntax check only; do not run the kernel")
     parser.add_argument("--cell-timeout", type=int, default=120)
     parser.add_argument("--startup-timeout", type=int, default=60)
-    parser.add_argument("--kernel-name", default="python3")
+    parser.add_argument("--kernel-name", default=COLAB_KERNEL,
+                        help=f"Jupyter kernel to execute with (default '{COLAB_KERNEL}', "
+                             "the Colab-matching runtime; falls back to python3 if absent)")
     parser.add_argument("--strict", action="store_true",
                         help="exit non-zero if the notebook is not runnable")
     args = parser.parse_args()
@@ -300,7 +354,7 @@ def main() -> int:
     from datetime import datetime, timezone
 
     timestamp_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    report = build_execution_report(result, kernel_name=args.kernel_name, timestamp_utc=timestamp_utc)
+    report = build_execution_report(result, timestamp_utc=timestamp_utc)
 
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

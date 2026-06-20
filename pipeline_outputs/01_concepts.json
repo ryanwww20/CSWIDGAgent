@@ -1,84 +1,84 @@
 {
-  "course": "Machine Learning (Basic Concepts) 2023 — Hung-yi Lee",
-  "source_path": "/Users/justin/Desktop/NTU/CSWIDGAgent/course_source/ML_basic2023.pdf",
+  "course": "ML 2023 (Hung-yi Lee) — Prompting / How to Harness Large Language Models (Finetune vs. Prompt)",
+  "source_path": "/Users/justin/Desktop/NTU/CSWIDGAgent/course_source/ml2023_prompt.pdf",
   "candidates": [
     {
-      "concept": "Machine Learning as Function Finding (Three-Step Framework: Model, Loss, Optimization)",
+      "concept": "In-context Learning (few-shot prompting with demonstrations)",
       "importance_score": 10,
       "demo_feasibility_score": 9,
       "prerequisites": [
-        "Basic algebra",
-        "Functions and inputs/outputs"
+        "Language model basics (text completion)",
+        "Tokenization intuition"
       ],
-      "why_it_matters": "The unifying mental model of the entire lecture: ML ≈ a machine automatically finding a function f. The three steps — (1) define a candidate function set (Model/H), (2) define a loss to score function quality (Loss), (3) optimize to pick f* = argmin L(f) — structure every later topic (CNN, Transformer, RL, gradient descent).",
-      "transcript_summary": "Pages 2, 6, 8, 11, 14, 17, 25: ML defined as a machine automatically finding a function. Three steps repeated as a recurring scaffold: 設定範圍 (set scope = Model), 設定標準 (set standard = Loss), 達成目標 (achieve goal = Optimization). The summary slide maps each step to concrete techniques (Deep Learning, Supervised/RL, Gradient Descent)."
+      "why_it_matters": "Core mechanism behind treating an LLM as a generalist: the model performs a new task from a few in-prompt examples without weight updates. The lecture devotes ~15 slides to it, including the surprising 'Rethinking the Role of Demonstrations' finding that label correctness matters less than the label space and input/format distribution.",
+      "transcript_summary": "Slides 20-34: machine learns to read task examples. Sentiment-analysis demonstrations are shown; experiments deliberately use wrong labels and irrelevant inputs (arxiv 2202.12837) showing performance barely drops — the demonstrations mostly tell the model the label space and that it should do that task, rather than teaching it from scratch. Later work (2303.03846) shows larger models can actually learn from flipped labels."
     },
     {
-      "concept": "Gradient Descent Optimization (finding f* = argmin L(f))",
+      "concept": "Chain-of-Thought (CoT) prompting and its variants (zero-shot CoT, self-consistency, least-to-most)",
       "importance_score": 9,
-      "demo_feasibility_score": 10,
-      "prerequisites": [
-        "Loss function",
-        "Derivatives/slope",
-        "Three-step framework"
-      ],
-      "why_it_matters": "Step 3 of the framework: how the best function is actually found. Gradient descent (and variants Adam/AdamW) is the workhorse optimizer of deep learning. It is highly visualizable — iterating down a loss curve toward a minimum makes the abstract argmin concrete and exposes hyperparameters like learning rate.",
-      "transcript_summary": "Pages 15, 17, 18: f* = argmin_{f∈H} L(f). Optimization algorithms listed as Gradient Descent (Adam, AdamW), Genetic Algorithm. Page 18 stresses hyperparameters (learning rate, batch size, initialization) and goals: lower L(f*), faster, insensitive to hyperparameters."
-    },
-    {
-      "concept": "Loss Functions and Supervised vs Semi-supervised Learning",
-      "importance_score": 8,
-      "demo_feasibility_score": 8,
-      "prerequisites": [
-        "Three-step framework",
-        "Labeled data concept"
-      ],
-      "why_it_matters": "Step 2 of the framework: the loss L(f) quantifies how far a function's outputs are from the correct answers, defining what 'good' means. It depends on training data and labels, which distinguishes supervised, semi-supervised, and reinforcement learning. Without a loss there is nothing to optimize.",
-      "transcript_summary": "Pages 11-13: L(f1) = sum of distances between f1's outputs and correct labels (worked example total = 15). Loss depends on training data. Supervised Learning uses labels; Semi-supervised Learning adds constraints from unlabeled data (e.g. similar-looking Pokémon should have similar battle power)."
-    },
-    {
-      "concept": "Regression vs Classification vs Structured/Generative Learning",
-      "importance_score": 8,
-      "demo_feasibility_score": 8,
-      "prerequisites": [
-        "Functions and outputs"
-      ],
-      "why_it_matters": "Classifying ML tasks by the type of function output is the first practical decision when framing a problem: regression outputs a number, classification outputs a category, structured/generative learning outputs a structured object (image, sentence). It frames where modern systems like ChatGPT fit.",
-      "transcript_summary": "Pages 3-5: Regression = numeric output (e.g. predict tomorrow's PM2.5); Classification = category output (e.g. spam Yes/No). Structured/Generative Learning produces structured objects. ChatGPT framed as generative learning decomposed into many classification problems."
-    },
-    {
-      "concept": "Overfitting: Training vs Testing and Regularization",
-      "importance_score": 8,
       "demo_feasibility_score": 9,
       "prerequisites": [
-        "Loss function",
-        "Optimization",
-        "Model/candidate function set"
+        "In-context Learning",
+        "Prompt formatting"
       ],
-      "why_it_matters": "A low training loss does not guarantee good test performance — the model may 'memorize answers' (overfit). Understanding the train/test gap and remedies like regularization is essential for building models that generalize, and is one of the most demonstrable pitfalls in practice.",
-      "transcript_summary": "Pages 19-20: A small L(f) on training data does not imply good test performance. Page 19 adds extra considerations to the loss (e.g. Regularization). Page 20 contrasts 'L small, tests well' vs 'L small, tests badly (memorizing answers)' — i.e. overfitting."
+      "why_it_matters": "CoT dramatically improves multi-step reasoning (arithmetic, word problems) by asking the model to produce intermediate reasoning steps. Variants — zero-shot 'Let's think step by step', self-consistency (sample multiple chains and majority-vote), and least-to-most decomposition — are practical, widely used prompting techniques students can directly apply.",
+      "transcript_summary": "Slides 41-47: CoT prompting (2201.11903) adds reasoning steps to demonstrations; zero-shot CoT (2205.11916) just appends 'think step by step'; self-consistency (2203.11171) samples several reasoning paths and votes (chicken-rabbit example: 5 sampled answers, majority correct); least-to-most prompting (2205.10625) decomposes a hard problem into sub-problems."
     },
     {
-      "concept": "Model Architectures as Candidate Function Sets (Fully-connected, CNN, Self-attention/Transformer)",
+      "concept": "Specialist vs. Generalist: Finetune vs. Prompt as two ways to use an LLM",
+      "importance_score": 9,
+      "demo_feasibility_score": 7,
+      "prerequisites": [
+        "Pretrained language models",
+        "Supervised learning basics"
+      ],
+      "why_it_matters": "The organizing framework of the whole lecture: expectation one (a specialist that beats generalists on a single task via finetuning) vs. expectation two (a generalist steered purely by prompts, the ChatGPT route). Understanding this trade-off frames every other technique in the course.",
+      "transcript_summary": "Slides 1-11: two expectations for LLMs — become a specialist (solve one task, can win on that single task, e.g. ChatGPT-as-translator studies 2301.08745 / 2302.09210) vs. become a generalist (do everything, just redesign the prompt, no coding). These map to two usage paradigms."
+    },
+    {
+      "concept": "Instruction tuning / Instruction learning (e.g., FLAN)",
+      "importance_score": 8,
+      "demo_feasibility_score": 6,
+      "prerequisites": [
+        "Finetuning",
+        "In-context Learning"
+      ],
+      "why_it_matters": "Explains how a generalist model is trained to follow natural-language instructions across many tasks (FLAN), enabling zero-shot generalization to unseen instructions — the training-side counterpart to prompting that underlies modern instruction-following models.",
+      "transcript_summary": "Slides 35-40: instruction-tuning trains on (instruction, input, output) triples over many tasks (translate/summarize/edit) and tests on held-out instructions; FLAN (Finetuned Language Net, 2109.01652) and 2110.08207 cited as key examples."
+    },
+    {
+      "concept": "Adapting pretrained models: Head, Finetune, and Adapter (parameter-efficient finetuning)",
       "importance_score": 7,
       "demo_feasibility_score": 6,
       "prerequisites": [
-        "Model/candidate function set",
-        "Three-step framework"
+        "Pretrained language models",
+        "Gradient descent / backprop"
       ],
-      "why_it_matters": "Network architectures (CNN, RNN, Transformer) are concrete instantiations of the 'candidate function set' H from Step 1; the choice is driven by task characteristics. This connects the abstract framework to the named architectures students encounter throughout deep learning.",
-      "transcript_summary": "Pages 9, 20-24: A neural network's structure is the candidate function set H. Architecture is chosen by task characteristics. CNN vs Fully-connected and CNN vs Self-attention are shown. Cross-cutting techniques (Residual Connection, Batch Normalization, Cross-entropy loss) can support multiple steps."
+      "why_it_matters": "Shows the specialist route in detail: add a task head, finetune all weights, or insert small Adapter modules so you store one big model plus many tiny adapters instead of 100 full copies — the foundational idea behind today's parameter-efficient finetuning (PEFT/LoRA).",
+      "transcript_summary": "Slides 12-18: reshape a pretrained model by adding a head, full finetuning, or Adapters; with adapters you keep 1 large model + 100 small adapters instead of 100 large models (adapter survey 2210.06175)."
+    },
+    {
+      "concept": "Automatic prompt search: Hard prompt vs. Soft prompt (RL-based and LM-based, e.g. APE)",
+      "importance_score": 6,
+      "demo_feasibility_score": 5,
+      "prerequisites": [
+        "In-context Learning",
+        "Reinforcement learning basics (for RL-based search)"
+      ],
+      "why_it_matters": "Frames prompts as something that can be optimized rather than hand-written: hard prompts (discrete tokens, optionally found via RL) vs. soft prompts (trainable continuous embeddings, an 'adapter at the input'), and using an LLM itself to generate prompts (Automatic Prompt Engineer).",
+      "transcript_summary": "Slides 48-52: hard vs. soft prompt; soft prompt is a trainable input embedding learned from task-specific data; RL-based prompt search (2206.03931) and using an LM to generate prompts / APE (2211.01910) which can rediscover instructions like 'decide if this sentence is positive or negative'."
     }
   ],
   "selected_concepts": [
-    "Machine Learning as Function Finding (Three-Step Framework: Model, Loss, Optimization)",
-    "Gradient Descent Optimization (finding f* = argmin L(f))",
-    "Overfitting: Training vs Testing and Regularization"
+    "In-context Learning (few-shot prompting with demonstrations)",
+    "Chain-of-Thought (CoT) prompting and its variants (zero-shot CoT, self-consistency, least-to-most)",
+    "Specialist vs. Generalist: Finetune vs. Prompt as two ways to use an LLM"
   ],
-  "selection_rationale": "Selected for the strongest combination of pedagogical centrality and demo feasibility. (1) The three-step framework is the spine of the entire lecture (importance 10) and can be demonstrated end-to-end with a simple linear-regression example that touches Model, Loss, and Optimization in one notebook. (2) Gradient Descent (demo feasibility 10) is the most visualizable concept — animating iterates descending a loss curve makes argmin L(f) concrete and naturally introduces the learning-rate hyperparameter. (3) Overfitting (demo feasibility 9) is a high-impact, interactive cautionary concept: fitting polynomials of increasing degree and comparing train vs test error vividly shows that low training loss can fail to generalize, motivating regularization. Together these three form a coherent narrative arc (framework → how we optimize → why optimization alone is not enough) ideal for a single classroom-ready interactive notebook. Regression/Classification and architecture topics are excellent context but are either more conceptual (taxonomy) or less self-contained for an executable demo, so they are retained as candidates rather than selected.",
+  "selection_rationale": "Selected for the best joint score on importance and demo feasibility while covering the lecture's spine. In-context Learning is the central concept and is highly demoable: a small notebook can build few-shot prompts, then reproduce the 'wrong labels / irrelevant inputs' ablation to show that the label space and format — not example correctness — drive most of the effect. Chain-of-Thought is the lecture's most practically actionable technique and is trivially interactive (compare direct answer vs. step-by-step vs. self-consistency majority vote on arithmetic/word problems). Specialist-vs-Generalist (Finetune vs. Prompt) is the framing that makes the other two coherent and can be illustrated with a lightweight conceptual plus zero-shot-vs-few-shot comparison. Instruction tuning, Adapters, and automatic prompt search are important but require heavier training infrastructure or model access, lowering demo feasibility for a classroom Colab; they remain strong follow-up candidates.",
   "assumptions": [
-    "Source PDF is the slide deck for Hung-yi Lee's 2023 'Machine Learning — Basic Concepts' introductory lecture; slides are primarily in Traditional Chinese with English technical terms, and no separate instructor transcript was provided.",
-    "Demo feasibility scores favor concepts that can be illustrated with synthetic data and lightweight Python (NumPy/Matplotlib) without large datasets or GPUs, suiting a Colab classroom setting.",
-    "Pokémon battle-power (CP) regression and image examples in the slides are illustrative analogies; demos may substitute equivalent synthetic numeric examples for executability."
+    "Notebook will run in Google Colab (Python 3.12) and should prefer small/hosted models or a configurable LLM API so demos stay executable without large GPUs.",
+    "Demos should degrade gracefully (e.g., use a small open model like GPT-2 / Flan-T5-small, or mock/cached responses) when no API key is available, to preserve executability — the top quality priority.",
+    "Source is lecture slides (Traditional Chinese with English terms); no instructor transcript was provided, so transcript_summary fields are derived from slide content and cited papers.",
+    "Reproducing the exact 'Rethinking the Role of Demonstrations' numbers is out of scope; the demo will illustrate the qualitative phenomenon on a small scale."
   ]
 }
