@@ -1,0 +1,76 @@
+Batch start: Fri Jun 19 01:50:11 CST 2026
+Topics: whydeeplearning autoencoder gan self_supervised xformer
+
+======================== RUN whydeeplearning @ 01:50:11 ========================
+[run_pipeline] Running stage: concept-extractor
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[run_pipeline] Assembled notebook: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/notebooks/whydeeplearning_interactive_skill.ipynb (23 cells, 45100 bytes)
+[run_pipeline] Stage 4 complete: 23 cells (14 code, 9 markdown)
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/04_generation_report.json
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260618T175011Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/run_log.json
+======================== DONE whydeeplearning @ 02:24:26 ========================
+
+======================== RUN autoencoder @ 02:24:26 ========================
+[run_pipeline] Running stage: concept-extractor
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[run_pipeline] Assembled notebook: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/notebooks/autoencoder_interactive_skill.ipynb (19 cells, 38896 bytes)
+[run_pipeline] Stage 4 complete: 19 cells (13 code, 6 markdown)
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/04_generation_report.json
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260618T182426Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/run_log.json
+======================== DONE autoencoder @ 02:53:29 ========================
+
+======================== RUN gan @ 02:53:29 ========================
+[run_pipeline][ERROR] cell-analyzer did not return parseable JSON: no valid JSON payload found in model output
+[run_pipeline] Running stage: concept-extractor
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+======================== FAIL gan (exit 1) @ 03:09:02 ========================
+
+======================== RUN self_supervised @ 03:09:02 ========================
+[run_pipeline][ERROR] cell-analyzer must return a JSON object
+[run_pipeline] Running stage: concept-extractor
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+======================== FAIL self_supervised (exit 1) @ 03:25:16 ========================
+
+======================== RUN xformer @ 03:25:16 ========================
+[run_pipeline] Running stage: concept-extractor
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[run_pipeline] Assembled notebook: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/notebooks/xformer_interactive_skill.ipynb (16 cells, 29924 bytes)
+[run_pipeline] Stage 4 complete: 16 cells (10 code, 6 markdown)
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/04_generation_report.json
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260618T192516Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/run_log.json
+======================== DONE xformer @ 03:49:29 ========================
+
+BATCH SUMMARY: 3 ok, 2 failed
+  ok:   whydeeplearning autoencoder xformer
+  fail: gan self_supervised
+Batch end: Fri Jun 19 03:49:29 CST 2026

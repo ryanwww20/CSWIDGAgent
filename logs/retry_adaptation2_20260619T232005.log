@@ -1,0 +1,18 @@
+Retry start: Fri Jun 19 23:20:05 CST 2026
+======================== RUN adaptation @ 23:20:05 ========================
+[run_pipeline] Running stage: concept-extractor
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[run_pipeline] Assembled notebook: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/notebooks/adaptation_interactive_skill.ipynb (23 cells, 44686 bytes)
+[run_pipeline] Stage 4 complete: 23 cells (14 code, 9 markdown)
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/04_generation_report.json
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260619T152005Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/run_log.json
+======================== DONE adaptation @ 23:46:49 ========================
+Retry end: Fri Jun 19 23:46:49 CST 2026

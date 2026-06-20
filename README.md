@@ -74,7 +74,53 @@ Name it as xxx.ipnyb
 
 將 `xxx` 替換為講義主題或檔名（不含副檔名），agent 會依 [`.claude/skills/colab-demo-generator/SKILL.md`](.claude/skills/colab-demo-generator/SKILL.md) 產出含學習目標、互動控制、視覺化、反思題等完整結構的 notebook。
 
-## 快速開始
+## 一鍵生成單一 Notebook(官方 Pipeline)
+
+最快的方式是用官方入口腳本,一個指令就會跑完 4 個 stage 並產出一份 notebook。從 repo 根目錄執行:
+
+```bash
+./scripts/run_pipeline.sh --source course_source/Dijkstra.pdf --topic dijkstra
+```
+
+完成後會在 [`notebooks/`](notebooks/) 產出 `dijkstra_interactive_skill.ipynb`(檔名格式為 `<topic>_interactive_skill.ipynb`)。
+
+### 參數
+
+| 參數 | 必填 | 說明 |
+|------|------|------|
+| `--source` | 否 | 課程素材路徑,例如 `course_source/Dijkstra.pdf`、`course_source/KVcahce.pdf` |
+| `--topic` | **是** | 決定輸出 notebook 檔名,並寫入 `run_log.json` |
+| `--run-id` | 否 | 自訂 run 識別碼 |
+| `--dry-run` | 否 | 試跑,不實際呼叫 agent |
+| `--assemble-only` | 否 | 不重跑 agent,僅用既有 artifacts 重新組裝 notebook |
+
+可用環境變數覆寫執行檔:`PYTHON_BIN`(預設 `python3`)、`CLAUDE_BIN`(預設 `claude`)。
+
+### Pipeline 階段與產物
+
+每個 stage 讀上一個 stage 的 JSON 產物,並寫入 [`pipeline_outputs/`](pipeline_outputs/):
+
+| Stage | Agent | 輸入 | 產物 |
+|-------|-------|------|------|
+| 1 | concept-extractor | 課程素材 | `01_concepts.json` |
+| 2 | notebook-architect | `01_concepts.json` | `02_notebook_structure.json` |
+| 3 | cell-analyzer | `02_notebook_structure.json` | `03_cell_analysis.json` |
+| 4a | demo-coder | `02` + `03` | `04_cell_sources.json` + `04_generation_report.json` |
+| 4b | notebook_assembler.py | `02` + `04_cell_sources.json` | `notebooks/<topic>_interactive_skill.ipynb` |
+
+跑完後會寫入 [`pipeline_outputs/run_log.json`](pipeline_outputs/run_log.json),新 run 的 `generation_mode` 應為 `artifact_driven`。
+
+### 只重新組裝 Notebook
+
+若 artifacts 已存在、只想重新組裝 notebook(不重跑 agent):
+
+```bash
+./scripts/run_pipeline.sh --assemble-only --topic kvcache
+```
+
+> 架構、`generation_mode` 與 legacy 腳本政策詳見 [`docs/pipeline.md`](docs/pipeline.md);agent 與專案規範見 [`CLAUDE.md`](CLAUDE.md)。
+
+## 快速開始(手動 Prompt 方式)
 
 ### 1. 放入課程素材
 
@@ -150,6 +196,7 @@ flowchart LR
 ## 相關文件
 
 - [`CLAUDE.md`](CLAUDE.md) — Agent 環境與專案概述
+- [`docs/pipeline.md`](docs/pipeline.md) — 4-stage pipeline 架構、`generation_mode` 與 legacy 腳本政策
 - [`prompt/claude_1shot.md`](prompt/claude_1shot.md) — 1-shot 生成 prompt
 - [`prompt/claude_skill.md`](prompt/claude_skill.md) — Skill 生成 prompt
 - [`.claude/skills/colab-demo-generator/SKILL.md`](.claude/skills/colab-demo-generator/SKILL.md) — Notebook 生成規範

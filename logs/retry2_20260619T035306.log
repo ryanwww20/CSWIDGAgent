@@ -1,0 +1,43 @@
+Retry start: Fri Jun 19 03:53:06 CST 2026
+Topics: gan self_supervised
+
+======================== RUN gan @ 03:53:06 ========================
+[run_pipeline] Running stage: concept-extractor
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[run_pipeline] Assembled notebook: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/notebooks/gan_interactive_skill.ipynb (19 cells, 49600 bytes)
+[run_pipeline] Stage 4 complete: 19 cells (12 code, 7 markdown)
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/04_generation_report.json
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260618T195306Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/run_log.json
+======================== DONE gan @ 04:26:21 ========================
+
+======================== RUN self_supervised @ 04:26:21 ========================
+[run_pipeline] Running stage: concept-extractor
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[run_pipeline] notebook-architect: stdout was not a JSON object (no valid JSON payload found in model output); using the on-disk artifact 02_notebook_structure.json
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[run_pipeline] cell-analyzer: stdout was not a JSON object (no valid JSON payload found in model output); using the on-disk artifact 03_cell_analysis.json
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[run_pipeline] Assembled notebook: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/notebooks/self_supervised_interactive_skill.ipynb (19 cells, 40243 bytes)
+[run_pipeline] Stage 4 complete: 19 cells (12 code, 7 markdown)
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/04_generation_report.json
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260618T202621Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/run_log.json
+======================== DONE self_supervised @ 04:50:33 ========================
+
+RETRY SUMMARY: 2 ok, 0 failed
+  ok:   gan self_supervised
+  fail: (none)
+Retry end: Fri Jun 19 04:50:33 CST 2026

@@ -1,0 +1,10 @@
+Retry start: Fri Jun 19 23:06:02 CST 2026
+======================== RUN adaptation @ 23:06:02 ========================
+[run_pipeline][ERROR] cell-analyzer output failed validation: cell_specs[1] missing required keys: ['error_handling', 'function_signatures', 'implementation_plan', 'state_variables', 'test_checks']
+[run_pipeline] Running stage: concept-extractor
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+======================== FAIL adaptation (exit 1) @ 23:18:21 ========================
+Retry end: Fri Jun 19 23:18:21 CST 2026

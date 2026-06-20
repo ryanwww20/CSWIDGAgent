@@ -1,0 +1,36 @@
+Retry start: Fri Jun 19 22:14:44 CST 2026
+Topics: MetaLearning adaptation
+
+======================== RUN MetaLearning @ 22:14:44 ========================
+[run_pipeline] Running stage: concept-extractor
+[run_pipeline] concept-extractor: stdout was not a JSON object (no valid JSON payload found in model output); using the on-disk artifact 01_concepts.json
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[run_pipeline] cell-analyzer: stdout was not a JSON object (no valid JSON payload found in model output); using the on-disk artifact 03_cell_analysis.json
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[run_pipeline] Assembled notebook: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/notebooks/MetaLearning_interactive_skill.ipynb (25 cells, 53339 bytes)
+[run_pipeline] Stage 4 complete: 25 cells (16 code, 9 markdown)
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/04_generation_report.json
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260619T141444Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/run_log.json
+======================== DONE MetaLearning @ 22:49:13 ========================
+
+======================== RUN adaptation @ 22:49:13 ========================
+[run_pipeline][ERROR] cell-analyzer output failed validation: cell_specs contain ids not present as code cells in structure: ['C01', 'C02', 'C04', 'C11', 'C12', 'C14', 'C15', 'C21', 'C23']
+[run_pipeline] Running stage: concept-extractor
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[run_pipeline] cell-analyzer: stdout was not a JSON object (no valid JSON payload found in model output); using the on-disk artifact 03_cell_analysis.json
+======================== FAIL adaptation (exit 1) @ 23:03:49 ========================
+
+RETRY SUMMARY: 1 ok, 1 failed
+  ok:   MetaLearning
+  fail: adaptation
+Retry end: Fri Jun 19 23:03:49 CST 2026
