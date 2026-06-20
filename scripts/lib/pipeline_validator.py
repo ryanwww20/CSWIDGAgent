@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -132,25 +133,51 @@ def validate_cell_analyzer(payload: dict[str, Any], structure: dict[str, Any] | 
     for idx, item in enumerate(specs):
         if not isinstance(item, dict):
             raise ValidationError(f"cell_specs[{idx}] must be an object")
-        _require_keys(item, CELL_SPEC_REQUIRED, f"cell_specs[{idx}]")
+        if not isinstance(item.get("cell_id"), str) or not item["cell_id"].strip():
+            raise ValidationError(f"cell_specs[{idx}] must have a non-empty string cell_id")
 
-    if structure is not None:
-        code_ids = {
-            cell["cell_id"]
-            for cell in structure.get("cells", [])
-            if cell.get("cell_type") == "code"
-        }
-        spec_ids = {spec["cell_id"] for spec in specs}
-        missing = code_ids - spec_ids
-        extra = spec_ids - code_ids
-        if missing:
-            raise ValidationError(
-                f"cell_specs missing implementation plans for code cells: {sorted(missing)}"
-            )
-        if extra:
-            raise ValidationError(
-                f"cell_specs contain ids not present as code cells in structure: {sorted(extra)}"
-            )
+    if structure is None:
+        # Without the structure we can't tell code from markdown cells, so enforce
+        # the full spec contract on every entry (legacy strict behavior).
+        for idx, item in enumerate(specs):
+            _require_keys(item, CELL_SPEC_REQUIRED, f"cell_specs[{idx}]")
+        return
+
+    all_ids = {cell["cell_id"] for cell in structure.get("cells", [])}
+    code_ids = {
+        cell["cell_id"]
+        for cell in structure.get("cells", [])
+        if cell.get("cell_type") == "code"
+    }
+    spec_ids = {spec["cell_id"] for spec in specs}
+
+    missing = code_ids - spec_ids
+    if missing:
+        raise ValidationError(
+            f"cell_specs missing implementation plans for code cells: {sorted(missing)}"
+        )
+
+    # Specs referencing ids absent from the structure are a real error.
+    unknown = spec_ids - all_ids
+    if unknown:
+        raise ValidationError(
+            f"cell_specs reference ids not present in structure at all: {sorted(unknown)}"
+        )
+
+    # Only code-cell specs feed stage 4, so only they must carry the full
+    # implementation contract. Specs for markdown cells are redundant and may be
+    # sparse (no implementation_plan etc.) — require just a cell_id and ignore them.
+    for idx, item in enumerate(specs):
+        if item["cell_id"] in code_ids:
+            _require_keys(item, CELL_SPEC_REQUIRED, f"cell_specs[{idx}]")
+
+    extra_markdown = (spec_ids - code_ids) & all_ids
+    if extra_markdown:
+        print(
+            f"[validator] note: cell_specs include {len(extra_markdown)} non-code "
+            f"(markdown) cell id(s) {sorted(extra_markdown)}; ignored by stage 4",
+            file=sys.stderr,
+        )
 
 
 def validate_cell_sources(payload: dict[str, Any], structure: dict[str, Any]) -> None:

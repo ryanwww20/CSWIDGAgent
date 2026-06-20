@@ -11,6 +11,23 @@ Generate per-cell notebook content from pipeline analysis artifacts, write cell 
 
 Both files are required. Do not generate from memory or external scripts.
 
+## Generation Method (required)
+
+You **are** the generator. Produce every cell's `source` yourself by reasoning over
+stages 2 and 3, and write `04_cell_sources.json` **directly with the Write/Edit tool**.
+
+You must **not**:
+
+- write, create, or modify any helper / builder / codegen script (e.g.
+  `scripts/_build_*_sources.py`, `gen_*.py`, or any throwaway `.py`) to emit the artifact, then run it;
+- run, import, or reuse `scripts/legacy/gen_*_notebook.py` or any other one-off generator;
+- shell out to a script that writes `04_cell_sources.json` on your behalf.
+
+Writing the JSON directly is the only accepted method — a topic-specific build script
+is a contract violation even when its output is valid. You **may** run code only to
+*verify* the artifact you already wrote (e.g. parse the JSON, dry-run a cell), never to
+*produce* it.
+
 ## Output Files
 
 You must produce **two artifacts**:
@@ -29,7 +46,7 @@ Execute in this order:
 3. For each cell in order:
    - **markdown cells:** write `source` text that fulfills the cell `goal` from stage 2.
    - **code cells:** write `source` code per `implementation_plan`, `function_signatures`, `error_handling`, and `test_checks` from stage 3.
-4. Write `04_cell_sources.json` with every cell's `source` (see schema below).
+4. Write `04_cell_sources.json` **directly** with every cell's `source` (see schema below). Do not author or run a builder script to produce it.
 5. Return `04_generation_report.json` documenting every cell (see schema below).
 
 ## Cell Sources Schema (`04_cell_sources.json`)
@@ -93,7 +110,7 @@ Execute in this order:
 - Cell sources must be complete enough for Colab execution after assembly
 - Widget callbacks and visual outputs must work as intended
 - `generated_cells` must list **every** cell from stage 2, in the same order
-- Do **not** use one-off `scripts/legacy/gen_*_notebook.py` scripts
+- Do **not** use, write, or run one-off generator scripts (`scripts/legacy/gen_*_notebook.py`, `scripts/_build_*_sources.py`, or any topic-specific builder). Write the artifact directly — see **Generation Method** above.
 
 ## Completion Gate
 
@@ -101,4 +118,5 @@ Execute in this order:
 - `cells` length and `cell_id` order match `02_notebook_structure.json`
 - `generated_cells` length and `cell_id` order match `02_notebook_structure.json`
 - `final_notebook_path` matches `notebooks/<topic>_interactive_skill.ipynb`
+- `04_cell_sources.json` was written directly (no builder/codegen script created or run)
 - Report includes any unresolved assumptions or limitations

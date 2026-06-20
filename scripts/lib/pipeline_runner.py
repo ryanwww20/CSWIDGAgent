@@ -5,6 +5,7 @@ import argparse
 import json
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -46,7 +47,86 @@ def extract_json(text: str) -> Any:
     raise ValueError("no valid JSON payload found in model output")
 
 
-def run_claude_prompt(claude_bin: str, prompt: str, dry_run: bool) -> str:
+def parse_stage_payload(stage_name: str, stdout: str, output_path: Path) -> dict[str, Any]:
+    """Resolve a stage's JSON payload, tolerant of a prose final message.
+
+    Stages 1-3 are instructed to BOTH write their artifact to ``output_path`` and
+    return it on stdout. Models sometimes end with a human-style summary instead of
+    raw JSON; when that happens we fall back to the artifact the agent already wrote
+    to disk rather than failing the whole pipeline.
+    """
+    parse_err: str | None = None
+    payload: Any = None
+    try:
+        payload = extract_json(stdout)
+    except ValueError as exc:
+        parse_err = str(exc)
+
+    if isinstance(payload, dict):
+        return payload
+
+    # stdout was unparseable or not a JSON object — try the on-disk artifact.
+    if output_path.exists():
+        disk = load_json(output_path)
+        if isinstance(disk, dict):
+            reason = parse_err or f"top-level {type(payload).__name__}"
+            log(
+                f"{stage_name}: stdout was not a JSON object ({reason}); "
+                f"using the on-disk artifact {output_path.name}"
+            )
+            return disk
+
+    if parse_err is not None:
+        die(
+            f"{stage_name} did not return parseable JSON and no usable "
+            f"artifact at {output_path}: {parse_err}"
+        )
+    die(
+        f"{stage_name} must return a JSON object on stdout or write one to {output_path}"
+    )
+
+
+# Substrings that mark a transient (retryable) failure of the `claude` CLI:
+# network/socket drops and upstream API hiccups. Matched case-insensitively against
+# the combined stdout+stderr of a failed invocation.
+TRANSIENT_ERROR_MARKERS = (
+    "socket connection was closed",
+    "socket hang up",
+    "api error",
+    "overloaded",
+    "rate limit",
+    "econnreset",
+    "etimedout",
+    "connection error",
+    "connection reset",
+    "fetch failed",
+    "internal server error",
+    "bad gateway",
+    "service unavailable",
+    "gateway time-out",
+    "timed out",
+    " 429",
+    " 500",
+    " 502",
+    " 503",
+    " 529",
+)
+
+
+def _looks_transient(text: str) -> bool:
+    low = text.lower()
+    return any(marker in low for marker in TRANSIENT_ERROR_MARKERS)
+
+
+def run_claude_prompt(
+    claude_bin: str,
+    prompt: str,
+    dry_run: bool,
+    *,
+    max_attempts: int = 3,
+    backoff_seconds: float = 10.0,
+    timeout_seconds: float = 1800.0,
+) -> str:
     cmd = [
         claude_bin, "-p", prompt,
         "--allowedTools", "Read,Write,Bash",
@@ -55,8 +135,71 @@ def run_claude_prompt(claude_bin: str, prompt: str, dry_run: bool) -> str:
     if dry_run:
         print(f"[dry-run] {' '.join(cmd)}")
         return ""
-    result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-    return result.stdout
+
+    last_error = "<none>"
+    returncode: int | None = 1
+    for attempt in range(1, max_attempts + 1):
+        try:
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=timeout_seconds
+            )
+        except subprocess.TimeoutExpired:
+            # A hung claude (e.g. a half-open connection during a network outage)
+            # would otherwise block forever — bound each attempt and treat the
+            # timeout as transient so we retry instead of stalling the batch.
+            returncode = None
+            last_error = f"timed out after {timeout_seconds:.0f}s"
+            print(
+                f"[run_pipeline][ERROR] claude {last_error} "
+                f"(attempt {attempt}/{max_attempts})",
+                file=sys.stderr,
+            )
+            if attempt < max_attempts:
+                wait = backoff_seconds * attempt
+                print(
+                    f"[run_pipeline] timeout treated as transient; retrying in {wait:.0f}s",
+                    file=sys.stderr,
+                )
+                time.sleep(wait)
+                continue
+            break
+
+        if result.returncode == 0:
+            return result.stdout
+
+        returncode = result.returncode
+        last_error = (result.stderr or "").strip() or "<empty stderr>"
+        combined = f"{result.stdout or ''}\n{result.stderr or ''}"
+
+        # Surface the real failure instead of swallowing it behind a traceback.
+        print(
+            f"[run_pipeline][ERROR] claude exited {returncode} "
+            f"(attempt {attempt}/{max_attempts})",
+            file=sys.stderr,
+        )
+        if result.stderr and result.stderr.strip():
+            print(
+                f"[run_pipeline][ERROR] stderr: {result.stderr.strip()[-2000:]}",
+                file=sys.stderr,
+            )
+        stdout_tail = (result.stdout or "").strip()[-1000:]
+        if stdout_tail:
+            print(f"[run_pipeline][ERROR] stdout tail: {stdout_tail}", file=sys.stderr)
+
+        if attempt < max_attempts and _looks_transient(combined):
+            wait = backoff_seconds * attempt
+            print(
+                f"[run_pipeline] transient error detected; retrying in {wait:.0f}s",
+                file=sys.stderr,
+            )
+            time.sleep(wait)
+            continue
+        break
+
+    die(
+        f"claude invocation failed after {max_attempts} attempt(s) "
+        f"(exit {returncode}). Last error: {last_error[-500:]}"
+    )
 
 
 def write_json(path: Path, payload: Any, dry_run: bool) -> None:
@@ -495,30 +638,16 @@ def main() -> None:
                 log(f"[dry-run] would assemble notebook at {notebook_path}")
             continue
 
-        # Prefer the artifact the agent WROTE to disk over any JSON echoed inline
-        # on stdout. Stages 1-3 are told to write their output file; their chatty
-        # stdout sometimes carries only a partial JSON preview (e.g. missing
-        # top-level keys) that would spuriously fail validation even though the
-        # file on disk is complete and correct. demo-coder returns its report on
-        # stdout (cell sources are its on-disk artifact), so keep stdout-first.
-        output_path = Path(stage["output"])
-        if stage["name"] != "demo-coder" and output_path.exists():
-            log(f"{stage['name']}: validating artifact written to {output_path.name}")
-            payload = load_json(output_path)
-        else:
+        if stage["name"] == "demo-coder":
+            # The report must come from the model's stdout — the on-disk
+            # 04_generation_report.json may be stale from a prior topic, so no
+            # disk fallback here.
             try:
                 payload = extract_json(stdout)
-            except ValueError:
-                if output_path.exists():
-                    log(f"{stage['name']} stdout not JSON; reading from {output_path}")
-                    payload = load_json(output_path)
-                else:
-                    die(f"{stage['name']} did not return parseable JSON and no output file found")
-
-        if not isinstance(payload, dict):
-            die(f"{stage['name']} must return a JSON object")
-
-        if stage["name"] == "demo-coder":
+            except ValueError as exc:
+                die(f"{stage['name']} did not return parseable JSON: {exc}")
+            if not isinstance(payload, dict):
+                die(f"{stage['name']} must return a JSON object")
             if structure_payload is None:
                 structure_payload = load_json(structure_path)
             if not cell_sources_path.exists():
@@ -542,6 +671,10 @@ def main() -> None:
             load_json(report_path)
             log(f"Wrote {report_path}")
             continue
+
+        # Stages 1-3: the agent also writes its artifact to disk, so tolerate a
+        # prose final message by falling back to that file.
+        payload = parse_stage_payload(stage["name"], stdout, stage["output"])
 
         try:
             if stage["name"] == "cell-analyzer":
