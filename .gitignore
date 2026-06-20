@@ -10,3 +10,10 @@ executed.ipynb
 logs/ablation_*.log
 logs/.latest_ablation
 __MACOSX/
+
+#evaluation
+evalkit.zip
+.env
+testset/
+# Copyrighted starter decks — not redistributed; obtain separately
+evalkit/instances/starter/*.pdf
