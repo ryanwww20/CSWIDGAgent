@@ -1,0 +1,339 @@
+{
+  "notebook_title": "Pokémon vs. Digimon: Why Larger N and Smaller |H| — An Interactive Tour of ML Generalization",
+  "learning_objectives": [
+    "Recap the three-step ML framework (function set, loss, optimization) and define model complexity as the number of candidate functions |H|.",
+    "Build a one-parameter threshold classifier on the Pokémon/Digimon edge-count feature and compute its loss (error rate) on a dataset.",
+    "Distinguish the ideal hypothesis h_all found on the universe D_all from the empirical h_train found on a sampled D_train, and measure the resulting generalization gap.",
+    "Explain what makes a training set 'good' (the uniform-deviation condition with epsilon = delta/2) and estimate the probability of sampling a bad D_train by Monte Carlo simulation.",
+    "Derive and visualize the generalization bound P(D_train is bad) <= |H| * 2 * exp(-2 * N * epsilon^2) from the union bound and Hoeffding's inequality.",
+    "Quantify the roles of sample size N and model complexity |H|, including the sample-complexity rule N >= log(2|H|/delta) / (2*epsilon^2) and the bias-complexity tradeoff that motivates deep learning."
+  ],
+  "cells": [
+    {
+      "cell_id": "C01",
+      "cell_type": "markdown",
+      "goal": "Title, motivation (Pokémon vs. Digimon classifier), and an explicit list of learning objectives plus a roadmap of the notebook so learners know the destination: understanding why 'larger N, smaller |H|' makes a training set trustworthy.",
+      "inputs": [],
+      "outputs": [
+        "learner_roadmap"
+      ],
+      "widget_plan": "none — narrative markdown only",
+      "estimated_lines": 25,
+      "depends_on": []
+    },
+    {
+      "cell_id": "C02",
+      "cell_type": "code",
+      "goal": "Set up the environment: import numpy, matplotlib, and ipywidgets; configure inline plotting; fix a random seed for reproducibility; define small plotting helpers reused throughout. This is the single source of shared libraries and the RNG.",
+      "inputs": [],
+      "outputs": [
+        "np",
+        "plt",
+        "widgets",
+        "interact",
+        "rng",
+        "set_seed",
+        "style_helpers"
+      ],
+      "widget_plan": "none — environment setup; verifies ipywidgets is importable so later interactive cells run in Colab",
+      "estimated_lines": 22,
+      "depends_on": []
+    },
+    {
+      "cell_id": "C03",
+      "cell_type": "markdown",
+      "goal": "Review the basic idea of ML in three steps (Step 1: function with unknown parameters; Step 2: define loss; Step 3: optimization) and introduce model complexity as |H| = number of candidate functions. Pose the guiding question: 'more parameters → easier to overfit. Why?'",
+      "inputs": [
+        "learner_roadmap"
+      ],
+      "outputs": [
+        "concept_three_step_framework",
+        "concept_model_complexity"
+      ],
+      "widget_plan": "none — conceptual recap with the central question to be answered empirically later",
+      "estimated_lines": 28,
+      "depends_on": [
+        "C01"
+      ]
+    },
+    {
+      "cell_id": "C04",
+      "cell_type": "markdown",
+      "goal": "Introduce the case study: classify an image as Pokémon or Digimon using a single hand-crafted feature, the number of edges e (Digimon have more complex lines → larger e). Define the threshold classifier f_h: predict Pokémon if e >= h else Digimon, with hypothesis set H = {1, 2, ..., 10000} so |H| = 10000.",
+      "inputs": [
+        "concept_three_step_framework",
+        "concept_model_complexity"
+      ],
+      "outputs": [
+        "concept_edge_feature",
+        "concept_threshold_classifier",
+        "concept_hypothesis_set"
+      ],
+      "widget_plan": "none — sets up the feature and hypothesis set that the code cells will instantiate",
+      "estimated_lines": 26,
+      "depends_on": [
+        "C03"
+      ]
+    },
+    {
+      "cell_id": "C05",
+      "cell_type": "code",
+      "goal": "Construct a synthetic 'universe' D_all that stands in for all Pokémon and Digimon: draw edge-count values e from two overlapping integer distributions (Pokémon centered lower, Digimon centered higher) with controllable overlap, and attach labels. Expose a make_universe() factory and materialize e_all, y_all. This is the data foundation reused by every downstream computation.",
+      "inputs": [
+        "np",
+        "rng",
+        "concept_edge_feature"
+      ],
+      "outputs": [
+        "make_universe",
+        "e_all",
+        "y_all",
+        "EDGE_RANGE"
+      ],
+      "widget_plan": "none — deterministic data generation (seeded); a static labeled scatter/strip preview of the two classes confirms class overlap",
+      "estimated_lines": 38,
+      "depends_on": [
+        "C02"
+      ]
+    },
+    {
+      "cell_id": "C06",
+      "cell_type": "code",
+      "goal": "Make the threshold classifier tangible: plot the edge-count histograms of the two classes and let the learner drag a threshold h to see the decision regions and the resulting error rate L(h, D_all) update live. Builds intuition that loss is a function of the chosen hypothesis.",
+      "inputs": [
+        "plt",
+        "widgets",
+        "interact",
+        "e_all",
+        "y_all",
+        "EDGE_RANGE"
+      ],
+      "outputs": [
+        "fig_threshold_explorer"
+      ],
+      "widget_plan": "ipywidgets IntSlider for threshold h (over EDGE_RANGE); interact() redraws overlaid class histograms, the threshold line, shaded decision regions, and a live error-rate annotation",
+      "estimated_lines": 40,
+      "depends_on": [
+        "C05"
+      ]
+    },
+    {
+      "cell_id": "C07",
+      "cell_type": "code",
+      "goal": "Formalize loss and find the ideal hypothesis: define f_h(e) and the loss L(h, D) = mean indicator error (note cross-entropy is an alternative), sweep h across the full H, plot the loss curve L(h, D_all) vs h, and mark h_all = argmin and its value L(h_all, D_all). Establishes the 'best on the universe' baseline that generalization is measured against.",
+      "inputs": [
+        "np",
+        "plt",
+        "e_all",
+        "y_all",
+        "EDGE_RANGE",
+        "concept_threshold_classifier"
+      ],
+      "outputs": [
+        "f_h",
+        "loss",
+        "H_grid",
+        "loss_curve_all",
+        "h_all",
+        "L_h_all"
+      ],
+      "widget_plan": "none — single static loss-vs-threshold curve with h_all annotated; defines the loss machinery (f_h, loss) reused by all later cells",
+      "estimated_lines": 36,
+      "depends_on": [
+        "C05"
+      ]
+    },
+    {
+      "cell_id": "C08",
+      "cell_type": "code",
+      "goal": "Show the gap between ideal and reality: sample D_train of size N i.i.d. from D_all, find h_train = argmin L(h, D_train), and display L(h_train, D_train), L(h_train, D_all), and L(h_all, D_all) side by side. A resample button lets learners see how different draws yield different h_train and different generalization gaps (reproducing the 'good D_train1 / bad D_train2' contrast from the lecture).",
+      "inputs": [
+        "np",
+        "plt",
+        "widgets",
+        "interact",
+        "rng",
+        "e_all",
+        "y_all",
+        "f_h",
+        "loss",
+        "H_grid",
+        "h_all",
+        "L_h_all"
+      ],
+      "outputs": [
+        "sample_train",
+        "fig_train_vs_all"
+      ],
+      "widget_plan": "ipywidgets IntSlider for N plus a 'Resample D_train' Button; on interaction it draws a fresh D_train, overlays L(h, D_train) vs L(h, D_all), marks h_train and h_all, and prints the gap L(h_train, D_all) - L(h_all, D_all)",
+      "estimated_lines": 46,
+      "depends_on": [
+        "C05",
+        "C07"
+      ]
+    },
+    {
+      "cell_id": "C09",
+      "cell_type": "markdown",
+      "goal": "State the generalization goal precisely: we want L(h_train, D_all) - L(h_all, D_all) <= delta. Derive the sufficient 'good training set' condition: for all h in H, |L(h, D_train) - L(h, D_all)| <= epsilon with epsilon = delta/2, and walk through the chained inequality showing why this guarantees the goal. Stress that the argument is model-agnostic, distribution-free, and loss-agnostic.",
+      "inputs": [
+        "concept_hypothesis_set"
+      ],
+      "outputs": [
+        "concept_good_training_set",
+        "concept_uniform_deviation",
+        "epsilon_delta_relation"
+      ],
+      "widget_plan": "none — derivation in markdown/LaTeX bridging the empirical demo (C08) and the probabilistic bound (C10–C12)",
+      "estimated_lines": 30,
+      "depends_on": [
+        "C08"
+      ]
+    },
+    {
+      "cell_id": "C10",
+      "cell_type": "code",
+      "goal": "Estimate the probability of sampling a bad training set: repeat the i.i.d. sampling M times, and for each draw compute the worst-case deviation max over h in H of |L(h, D_train) - L(h, D_all)|; flag the draw as bad if it exceeds epsilon. Report the empirical P(D_train is bad) and show a histogram of worst-case deviations. Lets learners feel how N, epsilon, and the effective |H| change the failure rate.",
+      "inputs": [
+        "np",
+        "plt",
+        "widgets",
+        "interact",
+        "rng",
+        "e_all",
+        "y_all",
+        "f_h",
+        "loss",
+        "H_grid",
+        "loss_curve_all",
+        "concept_uniform_deviation"
+      ],
+      "outputs": [
+        "estimate_p_bad",
+        "fig_p_bad_histogram",
+        "p_bad_empirical"
+      ],
+      "widget_plan": "ipywidgets sliders for N, epsilon, number of trials M, and an |H| control (subsample the threshold grid); interact() recomputes the empirical bad-probability and redraws the worst-deviation histogram with the epsilon cutoff marked",
+      "estimated_lines": 48,
+      "depends_on": [
+        "C05",
+        "C07"
+      ]
+    },
+    {
+      "cell_id": "C11",
+      "cell_type": "markdown",
+      "goal": "Derive the theoretical bound: 'D_train is bad' means at least one h has deviation > epsilon, so by the union bound P(bad) <= sum over h of P(bad due to h); then Hoeffding's inequality gives P(bad due to h) <= 2*exp(-2*N*epsilon^2), yielding P(D_train is bad) <= |H| * 2 * exp(-2*N*epsilon^2). Conclude that larger N and smaller |H| both shrink the bound.",
+      "inputs": [
+        "concept_uniform_deviation",
+        "p_bad_empirical"
+      ],
+      "outputs": [
+        "concept_union_bound",
+        "concept_hoeffding",
+        "generalization_bound_formula"
+      ],
+      "widget_plan": "none — step-by-step derivation in markdown/LaTeX that the next code cell makes quantitative",
+      "estimated_lines": 30,
+      "depends_on": [
+        "C10"
+      ]
+    },
+    {
+      "cell_id": "C12",
+      "cell_type": "code",
+      "goal": "Compare theory to experiment: plot the Hoeffding/union bound |H|*2*exp(-2*N*epsilon^2) as a function of N and overlay the Monte Carlo empirical P(D_train is bad) from C10. Show the bound is valid (always above the empirical curve) but often loose, and that increasing N or decreasing |H| drives both down. Reproduce the lecture's numeric examples as labeled points.",
+      "inputs": [
+        "np",
+        "plt",
+        "widgets",
+        "interact",
+        "estimate_p_bad",
+        "generalization_bound_formula",
+        "p_bad_empirical"
+      ],
+      "outputs": [
+        "hoeffding_bound",
+        "fig_bound_vs_empirical"
+      ],
+      "widget_plan": "ipywidgets sliders for |H| and epsilon; interact() redraws the bound-vs-N curve (log-scaled y) with the empirical points overlaid and annotations for the N=100/500/1000 example values",
+      "estimated_lines": 44,
+      "depends_on": [
+        "C10"
+      ]
+    },
+    {
+      "cell_id": "C13",
+      "cell_type": "code",
+      "goal": "Turn the bound into a design tool: implement the sample-complexity rule N >= log(2*|H|/delta) / (2*epsilon^2) and let learners enter |H|, delta, and epsilon to read off the required number of training examples, reproducing the lecture result (|H|=10000, delta=0.1, epsilon=0.1 → N>=610).",
+      "inputs": [
+        "np",
+        "widgets",
+        "interact",
+        "generalization_bound_formula"
+      ],
+      "outputs": [
+        "required_n",
+        "fig_sample_complexity"
+      ],
+      "widget_plan": "ipywidgets sliders/inputs for |H|, delta, epsilon; interact() prints the required N and plots required N vs epsilon (and/or vs |H|) so the sensitivity is visible",
+      "estimated_lines": 30,
+      "depends_on": [
+        "C02"
+      ]
+    },
+    {
+      "cell_id": "C14",
+      "cell_type": "code",
+      "goal": "Reveal the bias-complexity tradeoff: sweep model complexity |H| and plot two competing curves — L(h_all, D_all) (the ideal loss, which falls as |H| grows) and the expected generalization gap (which rises as |H| grows) — and their sum, the expected test loss L(h_train, D_all), exposing the U-shape. This answers C03's overfitting question and motivates the closing 'Yes, Deep Learning'.",
+      "inputs": [
+        "np",
+        "plt",
+        "widgets",
+        "interact",
+        "make_universe",
+        "f_h",
+        "loss",
+        "rng",
+        "EDGE_RANGE"
+      ],
+      "outputs": [
+        "fig_complexity_tradeoff",
+        "best_complexity"
+      ],
+      "widget_plan": "ipywidgets IntSlider for N; interact() recomputes ideal loss, generalization gap, and expected test loss across a range of |H| values and redraws the three-curve tradeoff plot with the optimal complexity marked",
+      "estimated_lines": 50,
+      "depends_on": [
+        "C05",
+        "C07"
+      ]
+    },
+    {
+      "cell_id": "C15",
+      "cell_type": "markdown",
+      "goal": "Summarize the key results (loss as a function of h; ideal h_all vs empirical h_train; good-training-set condition; P(bad) <= |H|*2*exp(-2*N*epsilon^2); sample complexity; bias-complexity tradeoff), recap the 'larger N, smaller |H|' guidance and its tension, end on the lecture's punchline (魚與熊掌可以兼得嗎? Yes, Deep Learning), and link to the original course videos and data sources for further study.",
+      "inputs": [
+        "fig_complexity_tradeoff",
+        "generalization_bound_formula",
+        "required_n"
+      ],
+      "outputs": [
+        "concept_summary"
+      ],
+      "widget_plan": "none — recap, takeaways, and references",
+      "estimated_lines": 30,
+      "depends_on": [
+        "C14"
+      ]
+    }
+  ],
+  "global_flow_notes": "Linear, top-to-bottom executable narrative. C02 is the single setup cell (libraries + seeded RNG + helpers) every code cell depends on transitively. C05 builds the synthetic universe D_all; C07 defines the reusable loss machinery (f_h, loss) and the h_all baseline. The notebook then escalates: tangible threshold/error-rate intuition (C06), the ideal-vs-empirical gap (C08), the formal 'good training set' goal (C09), an empirical failure-probability estimate (C10), the union-bound + Hoeffding derivation (C11), theory-vs-experiment comparison (C12), the sample-complexity design tool (C13), and finally the bias-complexity tradeoff (C14) that closes the loop on C03's overfitting question. Markdown cells (C01, C03, C04, C09, C11, C15) carry the pedagogy; code cells (C02, C05, C06, C07, C08, C10, C12, C13, C14) make each idea executable and, where marked, interactive. Every interactive cell reuses f_h/loss from C07 and the universe from C05 so widgets stay consistent and re-runnable. Variables flow forward only (no backward references), guaranteeing a clean kernel-restart-and-run-all.",
+  "assumptions": [
+    "No upstream 01_concepts.json existed, so concepts were extracted directly from course_source/MLBasic.pdf (Hung-yi Lee, '淺談機器學習原理 / Pokémon vs. Digimon classifier'); the prioritized concepts are the three-step ML framework, model complexity |H|, loss/error rate, D_all vs D_train and the generalization gap, the good-training-set (uniform-deviation) condition, the union bound + Hoeffding inequality bound, sample complexity, and the bias-complexity tradeoff.",
+    "The lecture uses real Pokémon/Digimon edge-count statistics that are not shipped with the repo, so the notebook generates a seeded synthetic 'universe' D_all with the same qualitative structure (two overlapping edge-count distributions, Digimon skewed higher); this keeps the notebook self-contained and fully executable in Colab while preserving every pedagogical point.",
+    "Loss is the 0/1 error rate bounded in [0,1] (consistent with the Hoeffding assumption in the slides); cross-entropy is mentioned as an alternative but not used, so the empirical probabilities match the theoretical bound's range assumption.",
+    "Interactivity is delivered with ipywidgets (interact, IntSlider, Button), which is available in Google Colab; static fallbacks are implied for non-interactive renders but the design targets a live kernel.",
+    "Model complexity |H| is treated as the discrete count of candidate threshold functions (per the slides' 'everything in a computer is discrete' note); VC-dimension is intentionally out of scope, matching the lecture.",
+    "Monte Carlo estimates of P(D_train is bad) use a finite number of trials M, so the empirical curve is an approximation that should sit below the Hoeffding bound but may be noisy for small M; this is called out in the relevant cell goals."
+  ]
+}

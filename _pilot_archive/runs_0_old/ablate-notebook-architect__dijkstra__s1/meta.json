@@ -1,0 +1,7 @@
+{
+  "run_tag": "ablate-notebook-architect__dijkstra__s1",
+  "condition": "ablate-notebook-architect",
+  "topic": "dijkstra",
+  "seed": 1,
+  "source_pdf": "Dijkstra.pdf"
+}

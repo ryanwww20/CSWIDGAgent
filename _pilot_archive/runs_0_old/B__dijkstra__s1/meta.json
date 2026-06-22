@@ -1,0 +1,7 @@
+{
+  "run_tag": "B__dijkstra__s1",
+  "condition": "B",
+  "topic": "dijkstra",
+  "seed": 1,
+  "source_pdf": "Dijkstra.pdf"
+}

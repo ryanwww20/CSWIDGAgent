@@ -48,6 +48,25 @@ SEEDS="${SEEDS:-3}"
 JUDGES="${JUDGES:-0}"
 PER_CELL_TIMEOUT="${PER_CELL_TIMEOUT:-300}"
 
+# --- evalkit scoring (the senior's eval pack = chosen quality track) ----------
+# When EVALKIT=1, every generated notebook is scored by evalkit/run_eval.py under
+# its OWN conda env (ml-colab-eval), producing the 7-metric vector at
+# evalkit/results/<condition>/<topic>__s<seed>/summary.json. This supersedes the
+# built-in JUDGES path. Stages: a=execution (#1,#6) b=interactivity (#5)
+# c=quality (#2,#3,#4,#7). cpu-stable.yaml is the official-numbers profile.
+#   * Stages b/c need API keys in evalkit/.env (OPENAI_API_KEY + ANTHROPIC_API_KEY,
+#     kept in different model families for anti-bias). With keys absent, run
+#     EVALKIT_NO_LLM=1 (free, deterministic) or EVALKIT_STAGES=a (exec only).
+#   * torch-dependent topics need torch in the eval env, else #1 run_success is an
+#     ENVIRONMENT failure, not a quality one — install torch into ml-colab-eval or
+#     point EVALKIT_PY at a Colab/GPU python.
+EVALKIT="${EVALKIT:-1}"
+EVALKIT_PY="${EVALKIT_PY:-/Users/ryan/miniconda3/envs/ml-colab-eval/bin/python}"
+EVALKIT_STAGES="${EVALKIT_STAGES:-abc}"
+EVALKIT_CONFIG="${EVALKIT_CONFIG:-$ROOT_DIR/evalkit/configs/cpu-stable.yaml}"
+EVALKIT_NO_LLM="${EVALKIT_NO_LLM:-}"        # set to 1 for a zero-API deterministic pass
+EVALKIT_JUDGE_SAMPLES="${EVALKIT_JUDGE_SAMPLES:-1}"  # 3 recommended to lower judge variance
+
 note() { echo "[ablation] $*"; }
 
 # A run counts as already-done if its notebook parses and has a few cells.
@@ -60,6 +79,19 @@ try:
     sys.exit(0 if isinstance(d.get('cells'),list) and len(d['cells'])>=3 else 1)
 except Exception:
     sys.exit(1)" "$1" 2>/dev/null
+}
+
+# True (exit 0) if a real (non --no-llm) evalkit summary already exists for this
+# run. Lets resume re-score a notebook whose only score is a free exec-only pass.
+evalkit_fresh() {
+  local s="$ROOT_DIR/evalkit/results/$1/$2__s$3/summary.json"
+  [[ -f "$s" ]] || return 1
+  "$PYTHON_BIN" -c "import json,sys
+try:
+    d=json.load(open(sys.argv[1]))
+    sys.exit(1 if d.get('no_llm') else 0)
+except Exception:
+    sys.exit(1)" "$s" 2>/dev/null
 }
 
 # Map a condition name to the pipeline runner's --ablate value ("" if none).
@@ -97,6 +129,13 @@ processed=0; generated=0; skipped=0
 for cond in $CONDITIONS; do
   for pair in $TOPICS; do
     topic="${pair%%:*}"; pdf="${pair#*:}"
+    # Guard: a topic whose source PDF is missing would silently fail generation
+    # for every condition and pollute the matrix with phantom 'generation_failed'
+    # rows (this is exactly what the 'dijkstra' override did). Skip it loudly.
+    if [[ ! -f "$ROOT_DIR/course_source/${pdf}" ]]; then
+      note "SKIP topic '$topic' — course_source/${pdf} not found (bad TOPICS override?)"
+      continue
+    fi
     for seed in $(seq 1 "$SEEDS"); do
       tag="${cond}__${topic}__s${seed}"
       run_dir="$RUNS_DIR/$tag"
@@ -104,30 +143,39 @@ for cond in $CONDITIONS; do
       processed=$((processed+1))
       note "=== $tag ==="
 
-      # Resume: skip runs that already produced a valid notebook.
+      # Resume (granular): skip GENERATION when the notebook already parses, but
+      # still (re)score with evalkit when its summary is missing or only a free
+      # --no-llm pass. Fully skip only when generation AND scoring are both done.
+      regen=1
       if [[ -z "$DRY_RUN" && "${RESUME:-1}" == "1" ]] && nb_ok "$nb"; then
-        note "SKIP $tag (notebook already present — resume)"
-        skipped=$((skipped+1)); continue
+        if [[ "$EVALKIT" != "1" || -n "$EVALKIT_NO_LLM" ]] || evalkit_fresh "$cond" "$topic" "$seed"; then
+          note "SKIP $tag (notebook + score present — resume)"
+          skipped=$((skipped+1)); continue
+        fi
+        note "RESUME $tag (notebook present; re-scoring with evalkit only)"
+        regen=0
       fi
 
       mkdir -p "$run_dir"
       ok=1
-      if [[ "$cond" == "S0" ]]; then
-        run_singleshot "$topic" "$pdf" "$nb" || ok=0
-      else
-        flag="$(ablate_flag "$cond")"
-        args=(--source "course_source/${pdf}" --topic "$topic" --run-tag "$tag" --claude-bin "$CLAUDE_BIN")
-        [[ -n "$flag" ]] && args+=(--ablate "$flag")
-        # notebook_verifier (stage 5) IS the bug_solver: it executes + autofixes
-        # the notebook. Enable it only for B+bug_solver; generation conditions
-        # skip it so the ablation measures raw generation, not post-hoc autofix.
-        if [[ "$cond" == "B+bug_solver" ]]; then
-          args+=(--kernel-name "$KERNEL_NAME")
+      if [[ "$regen" == "1" ]]; then
+        if [[ "$cond" == "S0" ]]; then
+          run_singleshot "$topic" "$pdf" "$nb" || ok=0
         else
-          args+=(--skip-verify)
+          flag="$(ablate_flag "$cond")"
+          args=(--source "course_source/${pdf}" --topic "$topic" --run-tag "$tag" --claude-bin "$CLAUDE_BIN")
+          [[ -n "$flag" ]] && args+=(--ablate "$flag")
+          # notebook_verifier (stage 5) IS the bug_solver: it executes + autofixes
+          # the notebook. Enable it only for B+bug_solver; generation conditions
+          # skip it so the ablation measures raw generation, not post-hoc autofix.
+          if [[ "$cond" == "B+bug_solver" ]]; then
+            args+=(--kernel-name "$KERNEL_NAME")
+          else
+            args+=(--skip-verify)
+          fi
+          [[ -n "$DRY_RUN" ]] && args+=(--dry-run)
+          "$RUNNER" "${args[@]}" || ok=0
         fi
-        [[ -n "$DRY_RUN" ]] && args+=(--dry-run)
-        "$RUNNER" "${args[@]}" || ok=0
       fi
 
       # meta.json (consumed by aggregate_results.py)
@@ -163,6 +211,22 @@ PY
           --claude-bin "$CLAUDE_BIN" --output "$run_dir/judge_result.json" \
           >/dev/null || note "judge failed for $tag"
       fi
+
+      # evalkit scoring (chosen quality track): 7-metric vector per notebook,
+      # written to evalkit/results/<cond>/<topic>__s<seed>/summary.json.
+      if [[ "$EVALKIT" == "1" ]]; then
+        ek_args=("$ROOT_DIR/evalkit/evalkit/run_eval.py" "$nb"
+                 --slides "$ROOT_DIR/course_source/${pdf}"
+                 --method "$cond" --run-id "${topic}__s${seed}"
+                 --stages "$EVALKIT_STAGES" --config "$EVALKIT_CONFIG"
+                 --judge-samples "$EVALKIT_JUDGE_SAMPLES")
+        [[ -n "$EVALKIT_NO_LLM" ]] && ek_args+=(--no-llm)
+        # Run from evalkit/ so run_eval's find_dotenv(usecwd=True) discovers
+        # evalkit/.env (API keys). All paths passed above are absolute, so cwd
+        # only affects key loading, not artifact resolution.
+        ( cd "$ROOT_DIR/evalkit" && "$EVALKIT_PY" "${ek_args[@]}" ) \
+          || note "evalkit scoring failed for $tag"
+      fi
     done
   done
 done
@@ -172,5 +236,12 @@ note "generated $generated / processed $processed (skipped $skipped)"
 if [[ -z "$DRY_RUN" ]]; then
   note "aggregating..."
   ( cd "$ROOT_DIR" && "$PYTHON_BIN" scripts/lib/aggregate_results.py --runs-dir runs --out-dir results ) || true
-  note "done. See results/summary.md"
+  if [[ "$EVALKIT" == "1" ]]; then
+    ( cd "$ROOT_DIR" && "$PYTHON_BIN" scripts/lib/aggregate_evalkit.py \
+        --results-dir evalkit/results --out-dir results \
+        --conditions "$CONDITIONS" --baseline B ) || true
+    note "done. See results/evalkit_by_condition.md (7-metric vector + paired deltas vs B)"
+  else
+    note "done. See results/summary.md"
+  fi
 fi

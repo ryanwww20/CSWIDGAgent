@@ -1,0 +1,36 @@
+{
+  "run_id": "run-20260620T155543Z",
+  "timestamp_utc": "2026-06-20T15:55:43Z",
+  "topic": "MLBasic",
+  "course_source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf",
+  "generation_mode": "artifact_driven",
+  "run_tag": "ablate-notebook-architect__MLBasic__s1",
+  "ablation": "notebook-architect",
+  "stage_status": {
+    "concept_extractor": "completed",
+    "notebook_architect": "ablated",
+    "cell_analyzer": "completed",
+    "demo_coder": "completed",
+    "notebook_verifier": "skipped"
+  },
+  "artifacts": {
+    "concepts": "pipeline_outputs/01_concepts.json",
+    "structure": "pipeline_outputs/02_notebook_structure.json",
+    "analysis": "pipeline_outputs/03_cell_analysis.json",
+    "cell_sources": "pipeline_outputs/04_cell_sources.json",
+    "generation_report": "pipeline_outputs/04_generation_report.json",
+    "execution_report": "pipeline_outputs/05_execution_report.json",
+    "final_notebook": "notebooks/MLBasic_interactive_skill.ipynb"
+  },
+  "summary": {
+    "top_to_bottom_runnable": true,
+    "syntax_ok": null,
+    "verified_by_execution": false,
+    "colab_runtime_match": null,
+    "total_cells": 13,
+    "code_cells": 7,
+    "markdown_cells": 6
+  },
+  "legacy_notes": null,
+  "errors": []
+}

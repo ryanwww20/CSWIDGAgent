@@ -1,0 +1,14 @@
+{
+  "notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb",
+  "ran_to_completion": true,
+  "error_type": null,
+  "error_name": null,
+  "error_value": null,
+  "first_failed_cell_index": null,
+  "first_failed_code_cell": null,
+  "n_code_cells": 7,
+  "executed_code_cells": 7,
+  "wall_seconds": 3.27,
+  "per_cell_timeout": 300,
+  "kernel": "python3"
+}

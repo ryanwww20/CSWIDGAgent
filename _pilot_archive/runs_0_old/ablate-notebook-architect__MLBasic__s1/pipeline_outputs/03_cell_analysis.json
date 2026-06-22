@@ -1,0 +1,267 @@
+{
+  "cell_specs": [
+    {
+      "cell_id": "C01",
+      "implementation_plan": "Pure markdown. Render the title 'Why Does Training Data Work? An Interactive Tour of Generalization (Pokémon vs. Digimon)', a bulleted list of the four learning objectives, and a short roadmap paragraph naming the four parts (threshold classifier -> generalization gap -> union-bound/Hoeffding bound -> bias-complexity tradeoff). Include a one-line disclaimer that all data is synthetic and calibrated to the lecture's numbers (h_all~4824, L~0.28) and that no slide figures are redistributed. No code.",
+      "function_signatures": [],
+      "state_variables": [],
+      "error_handling": [
+        "N/A (markdown cell; no executable failure modes)"
+      ],
+      "test_checks": [
+        "Renders without raw HTML/Markdown syntax errors; objective list has exactly four items matching 02_notebook_structure.json learning_objectives."
+      ]
+    },
+    {
+      "cell_id": "C02",
+      "implementation_plan": "Imports and global config. Import numpy as np and matplotlib.pyplot as plt. Try `import ipywidgets as widgets` and `from ipywidgets import interact, interactive_output, IntSlider, FloatSlider, Button, Dropdown, Output, VBox, HBox`; wrap in try/except ImportError that prints a clear note (do NOT call pip in the verified path — keep the cell import-only so nbclient passes; provide a commented '!pip install ipywidgets' line for Colab users who lack it). Set SEED=0 and create `rng = np.random.default_rng(SEED)` as the single global generator. Enable inline plotting with `%matplotlib inline` (IPython magic; the verifier is magic-aware). Set a small set of plt rcParams (figure dpi, default figsize). Print numpy/matplotlib/ipywidgets versions for reproducibility.",
+      "function_signatures": [],
+      "state_variables": [
+        "SEED: int = 0",
+        "rng: numpy.random.Generator (the single source of randomness for the whole notebook)",
+        "widgets / interact / Output / slider classes: imported names (may be None-guarded if ipywidgets missing)",
+        "WIDGETS_AVAILABLE: bool flag set in the try/except"
+      ],
+      "error_handling": [
+        "try/except ImportError around ipywidgets: set WIDGETS_AVAILABLE=False and print a one-line install hint so later cells can degrade gracefully instead of raising.",
+        "Do not invoke shell pip in the executed path so nbclient verification does not depend on network; keep install as a commented hint."
+      ],
+      "test_checks": [
+        "assert np is not None and plt is not None after import.",
+        "assert isinstance(rng, np.random.Generator).",
+        "Version print executes without exception; WIDGETS_AVAILABLE is a bool."
+      ]
+    },
+    {
+      "cell_id": "C03",
+      "implementation_plan": "Markdown only. State the domain intuition (Digimon outlines are more complex -> more edge pixels), define the scalar feature e(x)=edge-pixel count, the classifier f_h(x)=Digimon (label 1) if e(x)>=h else Pokémon (label 0), the candidate set H={1,...,10000}, and the 0/1 loss L(h,D)=(1/N) sum 1[f_h(x_n)!=y_n] as the error rate. Use LaTeX. Forward-reference the C05 slider demo.",
+      "function_signatures": [],
+      "state_variables": [],
+      "error_handling": [
+        "N/A (markdown)."
+      ],
+      "test_checks": [
+        "LaTeX expressions are well-formed (balanced $...$); label convention (0=Pokémon, 1=Digimon) stated and matches code in C04."
+      ]
+    },
+    {
+      "cell_id": "C04",
+      "implementation_plan": "Generate the synthetic population and define model+loss. (1) Draw N_POKEMON=819 Pokémon edge counts and N_DIGIMON=971 Digimon edge counts from clipped Gaussians chosen so the optimal threshold and error match the lecture: e.g. Pokémon ~ Normal(mu_p≈3900, sigma_p≈1500), Digimon ~ Normal(mu_d≈5700, sigma_d≈1800), each np.clip to [0,10000] and rounded to int. Tune mu/sigma constants so that the best integer threshold over H lands near 4824 with min loss near 0.28 (verify in C07; constants are documented as tunable). Concatenate into `e_all` (int array) and `y_all` (0/1 int array, 0=Pokémon,1=Digimon). (2) Define `classify(e, h)` returning (e>=h).astype(int), vectorized over e. (3) Define `zero_one_loss(h, e, y)` returning float mean(classify(e,h)!=y). (4) Build `H_FULL = np.arange(1, 10001)` (int) as the candidate thresholds; record `H_SIZE_FULL=H_FULL.size`. Print class counts and feature min/max as a sanity readout.",
+      "function_signatures": [
+        "make_population(rng, n_pokemon=819, n_digimon=971, mu_p=3900.0, sd_p=1500.0, mu_d=5700.0, sd_d=1800.0, lo=0, hi=10000) -> tuple[np.ndarray, np.ndarray]",
+        "classify(e: np.ndarray | int, h: int) -> np.ndarray | int",
+        "zero_one_loss(h: int, e: np.ndarray, y: np.ndarray) -> float"
+      ],
+      "state_variables": [
+        "e_all: np.ndarray[int] edge counts for the whole population",
+        "y_all: np.ndarray[int] in {0,1}, 0=Pokémon 1=Digimon",
+        "H_FULL: np.ndarray[int] = arange(1,10001)",
+        "H_SIZE_FULL: int = 10000",
+        "N_POKEMON, N_DIGIMON: int class sizes"
+      ],
+      "error_handling": [
+        "np.clip feature values to [0,10000] so synthetic draws never leave the documented range; cast to int after clipping.",
+        "Validate via assertions that e_all and y_all have equal length and y_all is strictly in {0,1}; raise AssertionError early if data generation is misconfigured.",
+        "classify/zero_one_loss accept scalar or array e via np.asarray to avoid shape errors when reused by interactive cells."
+      ],
+      "test_checks": [
+        "assert e_all.shape == y_all.shape and set(np.unique(y_all)).issubset({0,1}).",
+        "assert e_all.min() >= 0 and e_all.max() <= 10000.",
+        "assert N_POKEMON + N_DIGIMON == e_all.size == 1790.",
+        "Spot-check zero_one_loss(h=0,...) ~ fraction of Pokémon (everything predicted Digimon) and zero_one_loss(h=10001,...) ~ fraction of Digimon; both in [0,1]."
+      ]
+    },
+    {
+      "cell_id": "C05",
+      "implementation_plan": "Interactive threshold explorer. Define a plotting function `plot_threshold(h)` that: clears/uses a fixed-size figure, draws overlaid histograms of e_all[y_all==0] and e_all[y_all==1] with shared bins (np.linspace(0,10000,51)), draws a vertical dashed line at h, sets a title showing h and L(h,D_all)=zero_one_loss(h,e_all,y_all) formatted to 3 decimals, labels axes ('edge count e(x)', 'frequency') and a legend (Pokémon/Digimon). If WIDGETS_AVAILABLE, bind via interact with IntSlider(min=1,max=10000,step=50,value=4824, continuous_update=False); else call plot_threshold(4824) once and print a note that interactivity needs ipywidgets. Reuse a module-level figure or use interactive_output to reduce flicker.",
+      "function_signatures": [
+        "plot_threshold(h: int) -> None"
+      ],
+      "state_variables": [
+        "Reads e_all, y_all, zero_one_loss, classify (C04) and WIDGETS_AVAILABLE/IntSlider (C02).",
+        "Optional module-level `_fig_c05` if a reused figure is used."
+      ],
+      "error_handling": [
+        "Clamp/cast h to int inside plot_threshold so slider float quirks do not break classify.",
+        "Guard interactivity behind WIDGETS_AVAILABLE: on missing widgets, render one static plot at h=4824 and print a hint rather than raising NameError.",
+        "Use shared, fixed bin edges so empty-class subsets do not error in hist."
+      ],
+      "test_checks": [
+        "Calling plot_threshold(4824) once executes without exception and produces a figure.",
+        "zero_one_loss shown is within [0,1] for slider extremes (h=1 and h=10000).",
+        "Histogram uses both classes (two labeled series present)."
+      ]
+    },
+    {
+      "cell_id": "C06",
+      "implementation_plan": "Markdown only. Define h_all=argmin_{h in H} L(h,D_all) and h_train=argmin_{h in H} L(h,D_train) with (x_n,y_n)~D_all i.i.d. Pose the central question: how large is the generalization gap L(h_train,D_all)-L(h_all,D_all)? Emphasize it is a random quantity because D_train is random, and that train loss can look deceptively low (foreshadow C08's repeated sampling). Reference the slide examples (h_train1≈4727 true loss≈0.28; h_train2≈3642 train loss≈0.20 but true loss≈0.37).",
+      "function_signatures": [],
+      "state_variables": [],
+      "error_handling": [
+        "N/A (markdown)."
+      ],
+      "test_checks": [
+        "Definitions of h_all/h_train are consistent with the argmin implemented in C07; LaTeX well-formed."
+      ]
+    },
+    {
+      "cell_id": "C07",
+      "implementation_plan": "Reference optimum + sampling helpers. (1) `best_threshold(e,y,H)` computes zero_one_loss for every h in H and returns (h_star:int, loss_star:float) using argmin; vectorize where practical (compute predictions for all H via broadcasting e[:,None]>=H[None,:] when memory allows, else loop) — for H_FULL of 10000 and N up to ~1790 the broadcast matrix is fine; for large training+H combos fall back to a Python loop. (2) Compute h_all, L_all = best_threshold(e_all,y_all,H_FULL); print them and assert closeness to lecture targets (h_all within a tolerant band, L_all in ~[0.25,0.31]) — if outside, print a warning to retune C04 constants rather than hard-failing. (3) `sample_dtrain(e,y,N,rng)` draws N indices with replacement (rng.integers/ rng.choice) and returns (e_tr,y_tr). (4) `fit_and_eval(e_tr,y_tr,e_all,y_all,H)` returns dict with h_train, train_loss=L(h_train,D_train), true_loss=L(h_train,D_all). Use H_FULL by default.",
+      "function_signatures": [
+        "best_threshold(e: np.ndarray, y: np.ndarray, H: np.ndarray) -> tuple[int, float]",
+        "sample_dtrain(e: np.ndarray, y: np.ndarray, N: int, rng: np.random.Generator) -> tuple[np.ndarray, np.ndarray]",
+        "fit_and_eval(e_tr: np.ndarray, y_tr: np.ndarray, e_all: np.ndarray, y_all: np.ndarray, H: np.ndarray) -> dict"
+      ],
+      "state_variables": [
+        "h_all: int (population-optimal threshold, expected ~4824)",
+        "L_all: float (population min loss, expected ~0.28)",
+        "Reads e_all,y_all,H_FULL,zero_one_loss (C04), rng (C02)"
+      ],
+      "error_handling": [
+        "Guard the broadcast path with a size check (e.size * H.size below a memory threshold, e.g. 5e7); otherwise loop to avoid MemoryError.",
+        "Assert N>=1 in sample_dtrain; sample with replacement so N>population size is allowed (i.i.d. from D_all as a proxy distribution).",
+        "Calibration check on h_all/L_all emits a warning (not an exception) if outside tolerance so the notebook still runs end-to-end under verification."
+      ],
+      "test_checks": [
+        "assert 1 <= h_all <= 10000 and 0.0 <= L_all <= 1.0.",
+        "assert best_threshold(e_all,y_all,H_FULL)[1] <= zero_one_loss(1,e_all,y_all) and <= zero_one_loss(10000,e_all,y_all) (optimum no worse than extremes).",
+        "sample_dtrain(e_all,y_all,200,rng) returns arrays of length 200 with labels in {0,1}.",
+        "fit_and_eval output dict has keys {h_train,train_loss,true_loss} all finite and losses in [0,1]."
+      ]
+    },
+    {
+      "cell_id": "C08",
+      "implementation_plan": "Sampling-variability demo with two panels. (A) Single-sample view: a Button 'Resample D_train' and an IntSlider N (50..1000, step 50, default 200). On click/change, call sample_dtrain with the global rng (which advances, giving fresh draws), then fit_and_eval; redraw the C05-style histogram with two vertical lines (h_all solid, h_train dashed) and a text box reporting h_train, train_loss, true_loss, and the gap true_loss-L_all; color the readout to flag deceptive cases where train_loss < L_all. (B) Repeated-sampling view: an IntSlider n_trials (50..1000, default 300); compute true_loss over n_trials independent D_train of the chosen N and plot a histogram of true losses with a vertical line at L_all. Implement with two Output widgets inside a VBox and observe handlers; if WIDGETS_AVAILABLE is False, run one resample + one repeated-sampling pass with defaults and render static plots. Keep n_trials*N modest for responsiveness/verification.",
+      "function_signatures": [
+        "draw_single_sample(N: int) -> dict  # samples, fits, draws panel A, returns fit_and_eval result",
+        "repeated_true_losses(N: int, n_trials: int) -> np.ndarray  # returns array of true losses",
+        "render_panel_A(result: dict) -> None",
+        "render_panel_B(losses: np.ndarray, N: int) -> None",
+        "on_resample(_btn=None) -> None  # event handler"
+      ],
+      "state_variables": [
+        "Reads e_all,y_all,h_all,L_all (C07), sample_dtrain/fit_and_eval/best_threshold (C07), rng (C02)",
+        "out_A, out_B: ipywidgets.Output panels",
+        "N_slider, trials_slider, resample_button: widget handles",
+        "last_result: dict cached single-sample result"
+      ],
+      "error_handling": [
+        "Each event handler wraps its body in try/except and prints the exception into its Output widget so a bad draw does not silently break the UI.",
+        "Cap n_trials and N (and document the cap) so a single interaction cannot exceed the cell timeout; use the global rng consistently so resamples are reproducible given SEED + click order.",
+        "WIDGETS_AVAILABLE False path: execute one default single sample + one repeated-sampling computation so the cell still produces output and verifies."
+      ],
+      "test_checks": [
+        "draw_single_sample(200) returns a dict with finite h_train/train_loss/true_loss in valid ranges.",
+        "repeated_true_losses(200, 100) returns a length-100 array with all values in [0,1].",
+        "Mean of repeated true losses is >= L_all (population optimum is a lower bound in expectation) up to Monte Carlo noise — checked as a soft assertion / printed diagnostic.",
+        "Static fallback path runs without raising when WIDGETS_AVAILABLE is forced False."
+      ]
+    },
+    {
+      "cell_id": "C09",
+      "implementation_plan": "Markdown only. Define 'bad' D_train: exists h in H with |L(h,D_train)-L(h,D_all)|>eps. Walk the derivation: P(bad)=P(union over h of bad-due-to-h) <= sum_h P(|L(h,D_train)-L(h,D_all)|>eps) (union bound); each term <= 2 exp(-2 N eps^2) by Hoeffding (loss in [0,1], N i.i.d. examples); hence P(bad) <= |H| * 2 exp(-2 N eps^2). State that the bound can exceed 1 (vacuous) and recall the slide numbers (|H|=10000, eps=0.1: vacuous at N=100, ≈0.91 at N=500, ≈4e-5 at N=1000). Note the link to sample complexity N>=log(2|H|/delta)/(2 eps^2).",
+      "function_signatures": [],
+      "state_variables": [],
+      "error_handling": [
+        "N/A (markdown)."
+      ],
+      "test_checks": [
+        "Bound formula in markdown matches hoeffding_union_bound implemented in C10; quoted numeric examples match the formula."
+      ]
+    },
+    {
+      "cell_id": "C10",
+      "implementation_plan": "Bound vs Monte Carlo. (1) `hoeffding_union_bound(H_size,N,eps)` returns min(1.0, H_size*2*np.exp(-2*N*eps**2)) (clamped for display) and also expose the raw (unclamped) value for the table. (2) `is_bad(e_tr,y_tr,e_all,y_all,H,eps)`: compute L(h,D_train) and L(h,D_all) for all h in H (broadcast where memory allows, else loop) and return bool(np.max(np.abs(Ltr-Lall))>eps). Precompute Lall over H once outside the trial loop for speed. (3) `estimate_p_bad(N,eps,H,n_trials,rng)`: fraction of n_trials sampled D_train that are bad. (4) Build a log-spaced N grid (e.g. [100,200,...,1000] or geomspace), compute empirical P(bad) and the (clamped) bound per N, and plot both vs N (empirical as markers, bound as line). Print a small table at N in {100,500,1000} with raw bound + empirical estimate. Wrap the plotting in an interact over eps (FloatSlider 0.02..0.2,step0.01,default0.1), |H| via Dropdown of sub-grid sizes (e.g. 100/1000/10000 thresholds evenly spaced from H_FULL), and n_trials. Use a reduced H sub-grid for the empirical part to keep is_bad fast while reporting the true |H| used in the bound.",
+      "function_signatures": [
+        "hoeffding_union_bound(H_size: int, N: int, eps: float, clamp: bool = True) -> float",
+        "subgrid_H(H_size: int) -> np.ndarray  # evenly spaced thresholds from [1,10000]",
+        "is_bad(e_tr: np.ndarray, y_tr: np.ndarray, L_all_H: np.ndarray, e_all: np.ndarray, H: np.ndarray, eps: float) -> bool",
+        "estimate_p_bad(N: int, eps: float, H: np.ndarray, n_trials: int, rng: np.random.Generator) -> float",
+        "plot_bound_vs_empirical(eps: float, H_size: int, n_trials: int) -> None"
+      ],
+      "state_variables": [
+        "Reads e_all,y_all,H_FULL,zero_one_loss (C04), sample_dtrain (C07), rng (C02)",
+        "Precomputed L_all_H: np.ndarray of L(h,D_all) over the chosen H sub-grid (cached per H to avoid recompute)",
+        "N_GRID: np.ndarray of training sizes used on the x-axis"
+      ],
+      "error_handling": [
+        "Clamp the displayed bound to <=1.0 so vacuous regions plot sensibly; keep an unclamped value for the printed table to show how large the raw bound is at small N.",
+        "Memory guard in is_bad: choose broadcast vs loop based on e_tr.size*H.size threshold to avoid MemoryError for large |H|.",
+        "Bound the product n_trials*|H_subgrid|*max(N) so interactive recomputation stays within the cell timeout; document the cap and note in the plot title that the empirical curve uses the sub-grid while the bound uses the selected |H|.",
+        "Use eps>0 guard (FloatSlider min 0.02) to avoid degenerate bounds."
+      ],
+      "test_checks": [
+        "assert hoeffding_union_bound(10000,100,0.1,clamp=False) > 1.0 (vacuous) and hoeffding_union_bound(10000,1000,0.1,clamp=False) < 1e-3.",
+        "For every plotted N: empirical estimate <= clamped bound + Monte Carlo tolerance (the bound dominates) — assert with a small slack, else print a diagnostic.",
+        "estimate_p_bad is nonincreasing on average as N grows (checked qualitatively / soft assertion on grid endpoints).",
+        "is_bad returns a Python bool; estimate_p_bad returns a float in [0,1]."
+      ]
+    },
+    {
+      "cell_id": "C11",
+      "implementation_plan": "Markdown only. Explain |H| as model complexity (number of selectable functions). Smaller |H| -> smaller bound/gap but larger best achievable loss L(h_all,D_all) (ideal collapses); larger |H| -> smaller best loss but larger gap. Name this the bias-complexity tradeoff, set up the C12 sweep (nested coarse-to-fine threshold grids), and end on the 'why deep learning' framing (get low bias and controlled gap via better hypothesis classes + data).",
+      "function_signatures": [],
+      "state_variables": [],
+      "error_handling": [
+        "N/A (markdown)."
+      ],
+      "test_checks": [
+        "Tradeoff direction described matches the curves produced in C12; LaTeX well-formed."
+      ]
+    },
+    {
+      "cell_id": "C12",
+      "implementation_plan": "Bias-complexity sweep. (1) `restricted_H(size)` returns a threshold grid of the given size evenly spaced over [1,10000] (np.unique(np.linspace(...).round().astype(int))), giving nested coarse-to-fine hypothesis sets; build a list of sizes, e.g. [2,5,10,25,50,100,250,1000,10000]. (2) For each H_k: best-loss term = best_threshold(e_all,y_all,H_k)[1] (the achievable bias floor for that complexity); expected-gap term = mean over n_trials of (true_loss(h_train_on_H_k) - best_loss_k) where h_train is fit on a sampled D_train of size N restricted to H_k — i.e. reuse sample_dtrain + best_threshold on H_k. (3) Plot two curves vs |H| on a log-x axis: best achievable loss (decreasing) and expected generalization gap (increasing); optionally overlay hoeffding_union_bound(|H|,N,eps) to tie to C10. Wrap in interact over N (IntSlider 50..1000, default 200) and n_trials (default 200); redraw on change. Static fallback if WIDGETS_AVAILABLE is False.",
+      "function_signatures": [
+        "restricted_H(size: int, lo: int = 1, hi: int = 10000) -> np.ndarray",
+        "tradeoff_curves(N: int, n_trials: int, sizes: list[int], rng: np.random.Generator) -> dict  # {sizes, best_loss, exp_gap}",
+        "plot_tradeoff(N: int, n_trials: int) -> None"
+      ],
+      "state_variables": [
+        "Reads e_all,y_all,zero_one_loss (C04), sample_dtrain/best_threshold (C07), hoeffding_union_bound (C10), rng (C02)",
+        "H_SIZES: list[int] nested hypothesis-set sizes",
+        "cached best_loss per size (population term is independent of N/trials, compute once)"
+      ],
+      "error_handling": [
+        "np.unique guards against duplicate thresholds when rounding small linspaces so |H_k| is the realized (deduplicated) size; report the realized size on the axis.",
+        "Cache the population best-loss per H_k (independent of N) so only the gap term recomputes when N/n_trials change, keeping interaction responsive.",
+        "Bound len(H_SIZES)*n_trials work to stay within the cell timeout; document the cap.",
+        "Static fallback path runs one tradeoff computation with defaults when widgets are unavailable."
+      ],
+      "test_checks": [
+        "best_loss curve is (weakly) nonincreasing as |H| grows (finer grids cannot do worse) — assert monotonicity up to ties.",
+        "exp_gap curve is >= 0 for all sizes and trends upward with |H| (soft/qualitative check on endpoints).",
+        "restricted_H(10000) has size ~10000 and restricted_H(2) returns 2 distinct thresholds.",
+        "All plotted values are finite and losses/gaps lie in [0,1]."
+      ]
+    },
+    {
+      "cell_id": "C13",
+      "implementation_plan": "Markdown only. Recap the four concepts and how the demos showed them; restate the bound P(bad)<=|H|*2exp(-2 N eps^2) and the sample-complexity intuition N grows with log|H| and 1/eps^2; tie back to the Pokémon-vs-Digimon edge-count story; list extensions (cross-entropy loss, multi-feature/2D classifiers, real edge detection on user images, VC-dimension for continuous parameters). No code.",
+      "function_signatures": [],
+      "state_variables": [],
+      "error_handling": [
+        "N/A (markdown)."
+      ],
+      "test_checks": [
+        "Summary references match concepts/demos actually implemented (C04-C12); no dangling claims about features the notebook does not build."
+      ]
+    }
+  ],
+  "cross_cell_invariants": [
+    "A single seeded generator `rng` (created in C02 with SEED=0) is the only source of randomness; all sampling (C04 data generation, C07/C08/C10/C12 D_train draws) flows through it so the notebook is reproducible, and interactive resample controls advance it deliberately to expose variability.",
+    "Label convention is fixed everywhere: 0 = Pokémon, 1 = Digimon; classify(e,h) predicts 1 when e>=h. C03's math and all code agree on this.",
+    "e_all, y_all, classify, zero_one_loss, and H_FULL are defined exactly once in C04 and read-only thereafter; downstream cells must not redefine or mutate them.",
+    "h_all and L_all are defined once in C07 via best_threshold over H_FULL and serve as the reference optimum for C08 (gap readout) and C12 (gap baseline per restricted H).",
+    "All loss values are 0/1 error rates in [0,1], satisfying the range precondition Hoeffding requires in C10; any computed loss outside [0,1] indicates a bug.",
+    "Hypothesis-set size |H| is varied only via threshold-grid granularity (sub-grids/nested grids of H_FULL), never by changing the model family, so 'complexity' has a single consistent meaning across C10 and C12.",
+    "Every interactive (widget) cell has a WIDGETS_AVAILABLE=False fallback that executes a static default so the notebook runs top-to-bottom under nbclient verification without ipywidgets and without network/pip calls."
+  ],
+  "assumptions": [
+    "Synthetic-population constants in C04 (class means/sigmas) are tuned so best_threshold over H_FULL yields h_all near the lecture's 4824 and L_all near 0.28; C07 emits a warning (not an error) if calibration drifts, so verification never hard-fails on tuning.",
+    "Monte Carlo trial counts in C08/C10/C12 default to a few hundred to balance estimate quality against interactive responsiveness and cell-timeout limits during Stage 5 verification; they are exposed as widgets for higher-fidelity runs.",
+    "ipywidgets renders in the target Colab runtime; for deterministic headless verification the static fallbacks are what nbclient exercises, and pip installs are left as commented hints rather than executed.",
+    "The broadcast (vectorized) loss computation over H is memory-bounded by a size threshold; for the realized array sizes here (population <=1790, |H|<=10000) it fits comfortably, with a Python-loop fallback guarding larger configurations a user might dial in.",
+    "Treating D_all as the data distribution and sampling D_train i.i.d. with replacement from it is the intended proxy for the lecture's (x_n,y_n)~D_all i.i.d. setup; this keeps the empirical bound check faithful without needing a separate generative distribution."
+  ]
+}

@@ -36,15 +36,24 @@ def extract_json(text: str) -> Any:
         cleaned = cleaned.replace("json\n", "", 1).strip()
 
     decoder = json.JSONDecoder()
+    best: Any = None
+    best_span = -1
     for idx, char in enumerate(cleaned):
         if char not in "{[":
             continue
         try:
-            obj, _ = decoder.raw_decode(cleaned[idx:])
-            return obj
+            obj, end = decoder.raw_decode(cleaned[idx:])
         except json.JSONDecodeError:
             continue
-    raise ValueError("no valid JSON payload found in model output")
+        # Prefer the LARGEST JSON span, not the first. A prose preamble can carry
+        # spurious tiny payloads (e.g. "[4500,5200]" or "[0.24,0.32]" from a
+        # narrated calibration line) that would otherwise be returned instead of
+        # the real report object that follows.
+        if end > best_span:
+            best, best_span = obj, end
+    if best is None:
+        raise ValueError("no valid JSON payload found in model output")
+    return best
 
 
 def parse_stage_payload(stage_name: str, stdout: str, output_path: Path) -> dict[str, Any]:
@@ -296,10 +305,13 @@ def run_stage5_verification(
     max_fix_attempts: int,
     cell_timeout: int,
     startup_timeout: int,
+    agents_dir: Path,
     kernel_name: str = COLAB_KERNEL,
 ) -> dict[str, Any]:
     """Stage 5: verify the assembled notebook, then optionally repair + re-verify."""
-    fixer_agent = structure_path.parent.parent / ".claude" / "agents" / "notebook-fixer.md"
+    # Agent files live at the repo root, NOT inside the (possibly isolated
+    # runs/<tag>/) work dir — deriving from structure_path would break --run-tag.
+    fixer_agent = agents_dir / "notebook-fixer.md"
     fix_attempts: list[dict[str, Any]] = []
 
     def _verify():
@@ -787,6 +799,7 @@ def main() -> None:
             max_fix_attempts=args.max_fix_attempts,
             cell_timeout=args.cell_timeout,
             startup_timeout=args.startup_timeout,
+            agents_dir=agents_dir,
             kernel_name=args.kernel_name,
         )
         final_status = verify_report["final_status"]

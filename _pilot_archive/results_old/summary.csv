@@ -1,0 +1,11 @@
+run_tag,condition,topic,seed,ran_to_completion,error_type,first_failed_code_cell,mean_overall,executability,concept_correctness,interactivity,visualization_quality,pedagogical_value,alignment_with_source,robustness,simplicity_maintainability
+B__MLBasic__s1,B,MLBasic,1,False,timeout,,,,,,,,,,
+B__dijkstra__s1,B,dijkstra,1,False,generation_failed,,,,,,,,,,
+S0__MLBasic__s1,S0,MLBasic,1,True,,,,,,,,,,,
+S0__dijkstra__s1,S0,dijkstra,1,True,,,,,,,,,,,
+ablate-cell-analyzer__MLBasic__s1,ablate-cell-analyzer,MLBasic,1,False,environment_dependency,1,,,,,,,,,
+ablate-cell-analyzer__dijkstra__s1,ablate-cell-analyzer,dijkstra,1,False,generation_failed,,,,,,,,,,
+ablate-concept-extractor__MLBasic__s1,ablate-concept-extractor,MLBasic,1,False,generation_failed,,,,,,,,,,
+ablate-concept-extractor__dijkstra__s1,ablate-concept-extractor,dijkstra,1,False,generation_failed,,,,,,,,,,
+ablate-notebook-architect__MLBasic__s1,ablate-notebook-architect,MLBasic,1,True,,,,,,,,,,,
+ablate-notebook-architect__dijkstra__s1,ablate-notebook-architect,dijkstra,1,False,generation_failed,,,,,,,,,,

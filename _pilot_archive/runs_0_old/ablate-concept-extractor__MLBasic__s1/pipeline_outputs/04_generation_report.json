@@ -1,0 +1,100 @@
+{
+  "final_notebook_path": "notebooks/MLBasic_interactive_skill.ipynb",
+  "generated_cells": [
+    {
+      "cell_id": "C01",
+      "status": "generated",
+      "notes": "Markdown: title, motivation, six learning objectives verbatim, and section roadmap."
+    },
+    {
+      "cell_id": "C02",
+      "status": "generated",
+      "notes": "Code: imports, guarded inline magic, SEED/rng/set_seed, new_axes + color constants, ipywidgets probe."
+    },
+    {
+      "cell_id": "C03",
+      "status": "generated",
+      "notes": "Markdown: three-step ML framework and |H| complexity with the 'more parameters -> overfit. Why?' question."
+    },
+    {
+      "cell_id": "C04",
+      "status": "generated",
+      "notes": "Markdown: edge feature, threshold classifier f_h (Digimon iff e>=h), label encoding (Digimon=1), H={1..10000}."
+    },
+    {
+      "cell_id": "C05",
+      "status": "generated",
+      "notes": "Code: make_universe factory + fixed e_all/y_all materialization (set_seed) + overlap histogram preview."
+    },
+    {
+      "cell_id": "C06",
+      "status": "generated",
+      "notes": "Code: interactive IntSlider threshold explorer with shaded decision regions and live L(h,D_all) annotation."
+    },
+    {
+      "cell_id": "C07",
+      "status": "generated",
+      "notes": "Code: f_h, loss, H_grid, O((n+|H|)log n) loss_curve_over, h_all/L_h_all baseline and loss-curve plot."
+    },
+    {
+      "cell_id": "C08",
+      "status": "generated",
+      "notes": "Code: N slider + Resample button sharing one draw; overlays train vs all loss, reports three losses and the gap."
+    },
+    {
+      "cell_id": "C09",
+      "status": "generated",
+      "notes": "Markdown: goal inequality, uniform-deviation good-training-set condition, four-term chain, epsilon=delta/2."
+    },
+    {
+      "cell_id": "C10",
+      "status": "generated",
+      "notes": "Code: Monte Carlo estimate_p_bad with compute guard and worst-deviation histogram with epsilon cutoff."
+    },
+    {
+      "cell_id": "C11",
+      "status": "generated",
+      "notes": "Markdown: union bound + Hoeffding derivation yielding |H|*2*exp(-2*N*epsilon^2)."
+    },
+    {
+      "cell_id": "C12",
+      "status": "generated",
+      "notes": "Code: clipped hoeffding_bound vs N (semilogy) with Monte Carlo overlay at N=100/500/1000."
+    },
+    {
+      "cell_id": "C13",
+      "status": "generated",
+      "notes": "Code: required_n inverts the bound; reproduces |H|=10000,delta=0.1,epsilon=0.1 -> N=611 (~610); N-vs-epsilon and N-vs-|H| plots."
+    },
+    {
+      "cell_id": "C14",
+      "status": "generated",
+      "notes": "Code: bias-complexity tradeoff over subsampled |H| — ideal loss, gap, U-shaped expected test loss, best_complexity marked."
+    },
+    {
+      "cell_id": "C15",
+      "status": "generated",
+      "notes": "Markdown: summary of all six results, larger-N/smaller-|H| tension, Deep Learning punchline, references and synthetic-data caveat."
+    }
+  ],
+  "execution_status": {
+    "top_to_bottom_runnable": true,
+    "failed_cell_ids": []
+  },
+  "dependency_notes": [
+    "C02 defines the shared np/plt/math, SEED/rng/set_seed, and new_axes/color helpers that every later code cell uses.",
+    "C05 builds e_all/y_all/EDGE_RANGE/make_universe (used by C06, C07, C08, C10, C12, C14).",
+    "C07 defines f_h, loss, H_grid, loss_curve_over, loss_curve_all, h_all, L_h_all once; C08/C10/C12/C14 import these by reference and never redefine loss semantics.",
+    "C10 defines subsample_H and estimate_p_bad, reused by C12 (overlay points) and C14 (effective-|H| sweep).",
+    "C12 defines hoeffding_bound, inverted by required_n in C13.",
+    "Verified headless: code cells execute in order C02,C05,C06,C07,C08,C10,C12,C13,C14 with no exceptions; h_all=157, L_h_all=0.1792, required_n(10000,0.1,0.1)=611, hoeffding_bound(611,10000,0.1)=0.0986<=0.1."
+  ],
+  "assumptions": [
+    "Classifier orientation corrected for executability: stage 2 C04 literally writes 'predict Pokemon if e >= h', but Digimon are the high-edge class, so the implemented f_h predicts Digimon when e >= h (label 1). The generalization argument is orientation-invariant, so no pedagogical point changes.",
+    "The Pokemon/Digimon universe is synthetic (seeded Gaussians in C05: Pokemon~N(120,40), Digimon~N(200,48), 2000/class, clipped to [1,10000]); reported numbers (h_all, L_h_all) are illustrative, not measured sprite statistics.",
+    "Loss is the 0/1 error rate in [0,1], satisfying Hoeffding's boundedness assumption; cross-entropy is mentioned in stage 2 but not implemented.",
+    "required_n uses natural log and math.ceil, so |H|=10000, delta=0.1, epsilon=0.1 yields 611, reported as the lecture's ~610.",
+    "Interactive cells (C06, C08, C10, C12, C13, C14) target a live ipywidgets kernel and include a static single-call fallback (guarded by the C02 probe) when the widget stack is unavailable, so the notebook still renders end-to-end.",
+    "Effective model complexity is realized by evenly subsampling the integer threshold grid (subsample_H); |H| is treated as the discrete count of candidate threshold functions and VC-dimension is out of scope."
+  ]
+}

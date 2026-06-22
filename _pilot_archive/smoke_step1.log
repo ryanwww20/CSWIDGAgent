@@ -1,0 +1,68 @@
+[ablation] === S0__MLBasic__s1 ===
+run dir: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1
+
+=== stage A: execution ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/S0__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --config /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1
+
+[IPKernelApp] ERROR | KeyboardInterrupt caught in kernel.
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-21T13:01:57.462206+00:00",
+  "input_notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/S0__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb",
+  "executed_notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 2.3744,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 6,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "python_version": "3.11.15",
+    "machine": "arm64",
+    "processor": "arm",
+    "gpu_name": null,
+    "gpu_memory_total": null,
+    "cuda_hint": null
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         NA
+  2a_assertional         NA
+  2b_computational       NA
+  2c_correctness         NA
+  3_pedagogy             NA
+  4_topic                NA
+  5_interactivity        NA
+  5_effectiveness        NA
+  6_duration_seconds     2.3744
+  7_clarity              NA
+  7a_visual              NA
+  7b_textual             NA
+  7c_code_explanation    NA
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/summary.json
+[ablation] === ablate-cell-analyzer__MLBasic__s1 ===

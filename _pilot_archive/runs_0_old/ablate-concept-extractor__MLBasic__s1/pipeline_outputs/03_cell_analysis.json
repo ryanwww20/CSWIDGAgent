@@ -1,0 +1,371 @@
+{
+  "cell_specs": [
+    {
+      "cell_id": "C01",
+      "cell_type": "markdown",
+      "implementation_plan": "Static title/intro markdown. Render the H1 title 'Pokemon vs. Digimon: Why Larger N and Smaller |H|'. Add a 2-3 sentence motivation framing the binary image classifier and the central question. Render the six learning objectives verbatim as a bulleted list, then a numbered 'Roadmap' mapping each notebook section to a cell range (Setup C02; Data C05; Threshold/Loss intuition C06-C07; Ideal vs empirical C08; Good-training-set goal C09; Empirical P(bad) C10; Union-bound+Hoeffding C11-C12; Sample complexity C13; Bias-complexity tradeoff C14; Summary C15). Use inline LaTeX delimiters ($...$) for symbols |H|, N, epsilon, delta. No executable code.",
+      "function_signatures": [],
+      "state_variables": [
+        "learner_roadmap (conceptual handle; not a Python object — defined as the rendered roadmap consumed by later markdown narrative)"
+      ],
+      "error_handling": [
+        "Not applicable: non-executing markdown. Mitigation: keep all LaTeX in inline $...$ or $$...$$ so Colab/MathJax renders it; avoid stray underscores outside math mode that MathJax would misparse."
+      ],
+      "test_checks": [
+        "Visual: cell renders with no raw '$' artifacts and the objectives/roadmap lists display as bullets/numbers.",
+        "Content: all six learning objectives from stage 2 are present and the roadmap references the same cell ids used downstream."
+      ]
+    },
+    {
+      "cell_id": "C02",
+      "cell_type": "code",
+      "implementation_plan": "Single environment/setup cell. (1) Imports: 'import numpy as np', 'import matplotlib.pyplot as plt', 'import math', 'import ipywidgets as widgets', 'from ipywidgets import interact, IntSlider, FloatSlider, Button, Output, HBox, VBox', 'from IPython.display import display'. (2) Enable inline plotting via the magic 'get_ipython().run_line_magic(\"matplotlib\", \"inline\")' guarded by 'if \"get_ipython\" in globals() or True' try/except so the file is importable outside IPython. (3) Define SEED = 0 and a factory set_seed(seed=SEED) -> np.random.Generator returning np.random.default_rng(seed); also create the shared global rng = set_seed(SEED). (4) Define color/style constants POKEMON_COLOR = '#1f77b4', DIGIMON_COLOR = '#d62728', and a helper new_axes(figsize=(7,4), title='', xlabel='', ylabel='') -> (fig, ax) that creates a figure, applies labels/title, light grid, and returns it. (5) Verify the interactive stack: in a try/except print the ipywidgets and numpy versions and a one-line confirmation that interact is importable; on ImportError print an actionable message telling the user to run 'pip install ipywidgets' and enable the Colab widget manager. Keep all later cells dependent on np, plt, rng, set_seed, and the style helpers defined here.",
+      "function_signatures": [
+        "set_seed(seed: int = 0) -> numpy.random.Generator",
+        "new_axes(figsize: tuple = (7, 4), title: str = '', xlabel: str = '', ylabel: str = '') -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]"
+      ],
+      "state_variables": [
+        "SEED: int = 0 (global reproducibility seed)",
+        "rng: numpy.random.Generator (single shared RNG advanced by all stochastic cells)",
+        "POKEMON_COLOR, DIGIMON_COLOR: str hex color constants",
+        "np, plt, widgets, interact, IntSlider, FloatSlider, Button, Output: module/symbol handles reused downstream"
+      ],
+      "error_handling": [
+        "Wrap the matplotlib inline magic in try/except NameError so execution as a plain script does not crash.",
+        "Wrap ipywidgets import/version probe in try/except ImportError and print remediation ('pip install ipywidgets', restart runtime) instead of raising, so the notebook can still render static plots.",
+        "Pin no specific versions but print the detected ipywidgets version so a learner can diagnose widget-rendering issues in Colab."
+      ],
+      "test_checks": [
+        "assert isinstance(rng, np.random.Generator)",
+        "assert callable(set_seed) and isinstance(set_seed(0), np.random.Generator)",
+        "Smoke: 'fig, ax = new_axes(); plt.close(fig)' executes without error.",
+        "Print confirms 'ipywidgets OK (vX.Y.Z)' so the live-kernel requirement is verified before interactive cells run."
+      ]
+    },
+    {
+      "cell_id": "C03",
+      "cell_type": "markdown",
+      "implementation_plan": "Conceptual recap markdown. Present the three-step ML framework as a numbered list: Step 1 model/function set with unknown parameters (give f_h as the running example); Step 2 define a loss/error measure L; Step 3 optimization (pick the hypothesis minimizing loss). Then define model complexity as |H| = number of candidate functions in the hypothesis set and state the central, to-be-answered-empirically question verbatim: 'more parameters -> easier to overfit. Why?'. Use a short callout that the rest of the notebook answers this with the Pokemon/Digimon threshold model. Inline LaTeX for H, |H|, L, f_h.",
+      "function_signatures": [],
+      "state_variables": [
+        "concept_three_step_framework (conceptual handle consumed by C04)",
+        "concept_model_complexity (conceptual handle consumed by C04)"
+      ],
+      "error_handling": [
+        "Not applicable: non-executing markdown. Mitigation: ensure the guiding question is phrased so C14 can explicitly answer it; keep |H| inside math mode to avoid '|' rendering issues."
+      ],
+      "test_checks": [
+        "Content: the three steps, the |H| definition, and the overfitting question all appear.",
+        "Continuity: the question wording matches the answer callback in C14's narrative."
+      ]
+    },
+    {
+      "cell_id": "C04",
+      "cell_type": "markdown",
+      "implementation_plan": "Case-study setup markdown. Introduce the single hand-crafted feature e = number of edges in the image, and the qualitative claim that Digimon line art is more complex -> larger e. Define the threshold classifier and FIX A SINGLE ORIENTATION used by all code: f_h(e) = Digimon if e >= h else Pokemon (see assumptions for why this is chosen over the literally-written 'Pokemon if e >= h' so the classifier is correctly oriented to the data; the generalization argument is orientation-independent). State the label encoding convention y = 1 for Digimon, y = 0 for Pokemon. Define the hypothesis set H = {1, 2, ..., 10000} so |H| = 10000, matching the lecture. Use LaTeX for f_h, e, h, H.",
+      "function_signatures": [],
+      "state_variables": [
+        "concept_edge_feature (feature definition consumed by C05)",
+        "concept_threshold_classifier (f_h orientation + label convention consumed by C07)",
+        "concept_hypothesis_set (H = {1..10000}, |H| = 10000, consumed by C09)"
+      ],
+      "error_handling": [
+        "Not applicable: non-executing markdown. Mitigation: the orientation of f_h and the label encoding stated here MUST match the C07 implementation; flag the deviation from the stage-2 literal wording so coders do not silently invert predictions."
+      ],
+      "test_checks": [
+        "Content: classifier rule, label encoding (Digimon=1, Pokemon=0), and |H|=10000 all stated.",
+        "Cross-cell: encoding and orientation here are identical to those implemented in C05/C07 (enforced by cross_cell_invariants)."
+      ]
+    },
+    {
+      "cell_id": "C05",
+      "cell_type": "code",
+      "implementation_plan": "Build the synthetic universe D_all. (1) Define EDGE_MIN = 1, EDGE_MAX = 10000 and EDGE_RANGE = (EDGE_MIN, EDGE_MAX); these bound both the feature and the threshold grid H. (2) Implement make_universe(n_per_class=2000, pokemon_mean=120.0, digimon_mean=200.0, spread=40.0, rng=None) -> (e_all: np.ndarray[int], y_all: np.ndarray[int]): if rng is None use the module rng; draw n_per_class Pokemon edge counts ~ Normal(pokemon_mean, spread) and n_per_class Digimon ~ Normal(digimon_mean, spread*1.2) to create deliberate but partial overlap; round to int, clip to [EDGE_MIN, EDGE_MAX]; build y as 1 for Digimon, 0 for Pokemon; concatenate, then shuffle with rng.permutation so order carries no label signal; return (e_all, y_all). (3) Materialize e_all, y_all = make_universe(rng=set_seed(SEED)) so the universe is deterministic regardless of prior rng consumption. (4) Static preview: a strip/scatter or two overlaid histograms colored by class (POKEMON_COLOR/DIGIMON_COLOR) to visually confirm overlap; annotate class means. Keep this the single data source reused downstream.",
+      "function_signatures": [
+        "make_universe(n_per_class: int = 2000, pokemon_mean: float = 120.0, digimon_mean: float = 200.0, spread: float = 40.0, rng: numpy.random.Generator | None = None) -> tuple[numpy.ndarray, numpy.ndarray]"
+      ],
+      "state_variables": [
+        "EDGE_MIN: int = 1, EDGE_MAX: int = 10000, EDGE_RANGE: tuple = (1, 10000)",
+        "e_all: np.ndarray[int] of shape (2*n_per_class,) — edge counts of the universe",
+        "y_all: np.ndarray[int] in {0,1} — labels (1=Digimon, 0=Pokemon), aligned with e_all",
+        "make_universe: factory reused by C14 to rebuild universes"
+      ],
+      "error_handling": [
+        "If rng is None fall back to the global rng so the function is usable standalone; for the materialization use set_seed(SEED) to guarantee a fixed universe independent of execution order.",
+        "Clip drawn values to [EDGE_MIN, EDGE_MAX] so no edge count escapes the threshold domain (prevents thresholds that can never separate any point).",
+        "Assert n_per_class >= 1 and both classes are non-empty after generation; raise ValueError with a clear message otherwise.",
+        "Cast to int after rounding so downstream comparisons against integer thresholds are exact."
+      ],
+      "test_checks": [
+        "assert e_all.shape == y_all.shape and e_all.ndim == 1",
+        "assert set(np.unique(y_all)).issubset({0, 1}) and y_all.sum() > 0 and (y_all == 0).sum() > 0",
+        "assert e_all.min() >= EDGE_MIN and e_all.max() <= EDGE_MAX",
+        "Sanity: e_all[y_all == 1].mean() > e_all[y_all == 0].mean() (Digimon skew higher), confirming the assumed orientation.",
+        "Determinism: rerunning the materialization yields an identical e_all (compare hashes) because set_seed(SEED) reseeds."
+      ]
+    },
+    {
+      "cell_id": "C06",
+      "cell_type": "code",
+      "implementation_plan": "Interactive threshold explorer. (1) Compute per-class histogram edges over a data-focused window [d_lo, d_hi] = (max(EDGE_MIN, e_all.min()-10), min(EDGE_MAX, e_all.max()+10)). (2) Define a fast error-rate-at-threshold helper error_rate_at(h) that returns mean((e_all >= h).astype(int) != y_all) using the C04 orientation (Digimon if e>=h). (3) Define plot_threshold(h): clear/recreate axes via new_axes, draw overlaid class histograms (alpha=0.6, class colors, shared bins), draw a vertical dashed line at h, shade the e<h region as 'predict Pokemon' and e>=h as 'predict Digimon', and annotate the live error rate L(h, D_all)=error_rate_at(h) in the title. (4) Bind with interact(plot_threshold, h=IntSlider(min=d_lo, max=d_hi, step=max(1,(d_hi-d_lo)//200), value=int((pokemon_mean+digimon_mean)/2))). The slider spans the data window (full H is conceptual; thresholds outside the window only trivially relabel) for usability. Reuse the displayed figure handle as fig_threshold_explorer.",
+      "function_signatures": [
+        "error_rate_at(h: int) -> float",
+        "plot_threshold(h: int) -> None  # draws into a fresh figure as the interact callback"
+      ],
+      "state_variables": [
+        "d_lo, d_hi: int — slider/plot window derived from the data",
+        "hist_bins: np.ndarray — shared histogram bin edges for both classes",
+        "fig_threshold_explorer: the most recent Figure produced by plot_threshold"
+      ],
+      "error_handling": [
+        "Clamp h into [d_lo, d_hi] inside plot_threshold before use so a programmatic or out-of-range value cannot break indexing.",
+        "Guard against an empty class slice when annotating per-class counts (use size checks before division).",
+        "If ipywidgets/interact is unavailable (C02 probe failed), fall back to calling plot_threshold once at a default h and print a note that the slider is inactive.",
+        "Call plt.close on stale figures inside the callback path or rely on interact's redraw to avoid accumulating open figures across slider drags."
+      ],
+      "test_checks": [
+        "assert 0.0 <= error_rate_at(int((d_lo+d_hi)/2)) <= 1.0",
+        "Monotone-ish sanity: error_rate_at(EDGE_MIN) and error_rate_at(EDGE_MAX) are the two trivial all-one-class error rates and equal the class priors.",
+        "Smoke: plot_threshold(d_lo) and plot_threshold(d_hi) run without exception.",
+        "Visual: dragging the slider updates the shaded regions, threshold line, and the error-rate annotation together."
+      ]
+    },
+    {
+      "cell_id": "C07",
+      "cell_type": "code",
+      "implementation_plan": "Define the reusable loss machinery and the ideal baseline. (1) f_h(e, h): vectorized predictions, returns (np.asarray(e) >= h).astype(int) (1=Digimon per C04). (2) loss(h, e, y): scalar h -> error rate float = mean(f_h(e, h) != y). (3) H_grid = np.arange(EDGE_MIN, EDGE_MAX + 1) so |H| = 10000. (4) loss_curve_over(e, y, H=H_grid) -> np.ndarray: compute the error rate for EVERY threshold efficiently in O((n + |H|) log n) instead of O(|H| * n): sort e, and for a threshold h the number of points predicted Digimon (e>=h) and their label mix can be obtained from cumulative label counts via np.searchsorted; derive error(h) = (pokemon_count_with_e>=h + digimon_count_with_e<h) / n. Provide a simple broadcasting fallback (f_h over an (|H|, n) matrix) behind a comment for clarity but default to the cumulative method. (5) loss_curve_all = loss_curve_over(e_all, y_all). (6) idx = int(np.argmin(loss_curve_all)); h_all = int(H_grid[idx]); L_h_all = float(loss_curve_all[idx]). (7) Plot loss_curve_all vs H_grid, mark (h_all, L_h_all) with a point + annotation. These objects (f_h, loss, H_grid, loss_curve_all, h_all, L_h_all) are the shared baseline for C08, C10, C12, C14.",
+      "function_signatures": [
+        "f_h(e: numpy.ndarray | int, h: int) -> numpy.ndarray | int",
+        "loss(h: int, e: numpy.ndarray, y: numpy.ndarray) -> float",
+        "loss_curve_over(e: numpy.ndarray, y: numpy.ndarray, H: numpy.ndarray = H_grid) -> numpy.ndarray"
+      ],
+      "state_variables": [
+        "H_grid: np.ndarray = arange(1, 10001), |H| = 10000",
+        "loss_curve_all: np.ndarray of shape (|H|,) — L(h, D_all) for each h",
+        "h_all: int — argmin threshold on the universe",
+        "L_h_all: float — minimal achievable loss on the universe (the irreducible/bias baseline)"
+      ],
+      "error_handling": [
+        "Validate e and y have equal length inside loss/loss_curve_over; raise ValueError otherwise.",
+        "Handle ties in argmin deterministically (np.argmin returns the first minimum) and note that h_all is the smallest minimizing threshold.",
+        "Ensure loss returns values strictly within [0,1]; assert this so the Hoeffding [0,1] assumption (used in C11/C12) holds.",
+        "The cumulative method must reproduce the naive broadcast result; include an internal assert on a small random subset comparing the two computations the first time the function runs."
+      ],
+      "test_checks": [
+        "assert loss_curve_all.shape == H_grid.shape and loss_curve_all.min() >= 0.0 and loss_curve_all.max() <= 1.0",
+        "assert L_h_all == loss(h_all, e_all, y_all)  # curve agrees with direct evaluation",
+        "Cross-check: for 5 random thresholds, abs(loss_curve_over(e_all,y_all)[k] - loss(H_grid[k], e_all, y_all)) < 1e-12 (cumulative == naive).",
+        "Sanity: L_h_all is small (well below 0.5) given the constructed class separation, and h_all lies between the two class means."
+      ]
+    },
+    {
+      "cell_id": "C08",
+      "cell_type": "code",
+      "implementation_plan": "Visualize the ideal-vs-empirical gap with resampling. (1) sample_train(N, rng=None) -> (e_tr, y_tr): draw N indices with replacement via rng.integers(0, len(e_all), size=N) (i.i.d. from D_all) and index e_all/y_all. (2) Maintain a mutable state dict STATE = {'e_tr': None, 'y_tr': None} so the Resample button and the N slider operate on a shared current draw. (3) redraw(N): if STATE empty or N changed, set STATE draws via sample_train(N, rng) (advancing the global rng); compute loss_curve_train = loss_curve_over(STATE e/y); h_train = int(H_grid[argmin]); compute L_train_train = loss(h_train, e_tr, y_tr), L_train_all = loss(h_train, e_all, y_all), and reuse L_h_all; plot loss_curve_train and loss_curve_all overlaid vs H_grid, mark h_train and h_all, and print a formatted table of the three losses plus the generalization gap L_train_all - L_h_all. (4) Wire an Output widget out; N_slider = IntSlider(min=10, max=2000, step=10, value=100); resample_btn = Button(description='Resample D_train'); on N change and on button click, clear out and call redraw inside 'with out'. Display VBox([HBox([N_slider, resample_btn]), out]). Store the last figure as fig_train_vs_all.",
+      "function_signatures": [
+        "sample_train(N: int, rng: numpy.random.Generator | None = None) -> tuple[numpy.ndarray, numpy.ndarray]",
+        "redraw(N: int) -> None  # recompute current draw and render into the Output widget"
+      ],
+      "state_variables": [
+        "STATE: dict holding the current (e_tr, y_tr) so slider and button share one draw",
+        "N_slider: IntSlider, resample_btn: Button, out: Output",
+        "fig_train_vs_all: last Figure rendered (overlaid train/all loss curves)",
+        "h_train: int — last empirical argmin threshold (lives inside redraw scope; reported, not exported)"
+      ],
+      "error_handling": [
+        "Use sampling WITH replacement so N may exceed len(e_all) without error; document this is i.i.d. from the empirical universe.",
+        "If a drawn D_train happens to contain a single class, loss is still well-defined (in [0,1]); guard only the printed per-class breakdown against empty slices.",
+        "Debounce: recompute only when N actually changes or the button is pressed, to avoid redundant heavy recomputation during slider drags.",
+        "Wrap rendering in 'with out:' and clear_output(wait=True) to prevent stacked figures/output on repeated interactions.",
+        "Fallback to a single static draw + printout if interact/Button is unavailable."
+      ],
+      "test_checks": [
+        "e_tr, y_tr = sample_train(100); assert e_tr.shape == (100,) and y_tr.shape == (100,)",
+        "assert loss(h_train_local, e_tr, y_tr) <= loss(h_all, e_tr, y_tr) + 1e-12  # h_train is optimal on its own D_train",
+        "assert L_train_all >= L_h_all - 1e-9  # empirical hypothesis cannot beat the universe-optimal on D_all (gap is non-negative up to noise)",
+        "Behavioral: two consecutive Resample clicks at fixed N generally yield different h_train/gap, demonstrating sampling variability."
+      ]
+    },
+    {
+      "cell_id": "C09",
+      "cell_type": "markdown",
+      "implementation_plan": "Derivation markdown bridging C08 and C10-C12. State the goal L(h_train, D_all) - L(h_all, D_all) <= delta. Introduce the sufficient 'good training set' (uniform deviation) condition: for all h in H, |L(h, D_train) - L(h, D_all)| <= epsilon. Show the chained inequality: L(h_train, D_all) <= L(h_train, D_train) + epsilon <= L(h_all, D_train) + epsilon <= L(h_all, D_all) + 2*epsilon, hence choosing epsilon = delta/2 yields the goal. Record epsilon_delta_relation: epsilon = delta/2. Emphasize the argument is model-agnostic, distribution-free, and loss-agnostic (only needs loss in [0,1]). Use LaTeX for all inequalities; keep symbols consistent with code (H, h_train, h_all, epsilon, delta).",
+      "function_signatures": [],
+      "state_variables": [
+        "concept_good_training_set (uniform-deviation definition consumed by C10)",
+        "concept_uniform_deviation (the max-over-h deviation criterion consumed by C10/C11)",
+        "epsilon_delta_relation: epsilon = delta/2 (used numerically in C10/C13)"
+      ],
+      "error_handling": [
+        "Not applicable: non-executing markdown. Mitigation: ensure the chained inequality's three steps are each justified (optimality of h_train on D_train, then the two uniform-deviation bounds) so the epsilon=delta/2 choice is unambiguous to a coder using it in C13."
+      ],
+      "test_checks": [
+        "Content: goal inequality, uniform-deviation condition, the four-term chain, and epsilon = delta/2 all present.",
+        "Cross-cell: epsilon=delta/2 here is exactly the relation used when C13 reproduces the N>=610 example."
+      ]
+    },
+    {
+      "cell_id": "C10",
+      "cell_type": "code",
+      "implementation_plan": "Monte Carlo estimate of P(D_train is bad). (1) subsample_H(h_size) -> (H_sub: np.ndarray, all_curve_sub: np.ndarray): pick h_size thresholds evenly spaced across H_grid (np.linspace indices, unique), and slice loss_curve_all at those indices so the universe losses are precomputed (no recompute per trial). (2) estimate_p_bad(N, epsilon, M, h_size, rng=None) -> (p_bad: float, worst_devs: np.ndarray): for trial in range(M): e_tr,y_tr = sample_train(N, rng); train_curve_sub = loss_curve_over(e_tr, y_tr, H=H_sub); dev = max(abs(train_curve_sub - all_curve_sub)); record; a trial is 'bad' if dev > epsilon; return mean(bad_flags) and the array of worst deviations. (3) plot_p_bad(N, epsilon, M, h_size): call estimate_p_bad, draw a histogram of worst_devs with a vertical line at epsilon, title shows empirical P(bad). (4) interact(plot_p_bad, N=IntSlider(10,2000,step=10,value=200), epsilon=FloatSlider(0.01,0.3,step=0.01,value=0.1), M=IntSlider(50,1000,step=50,value=300), h_size=IntSlider(2, 10000 capped at e.g. 2000, step=..., value=200)). Export estimate_p_bad and the last p_bad_empirical + fig_p_bad_histogram for reuse in C12.",
+      "function_signatures": [
+        "subsample_H(h_size: int) -> tuple[numpy.ndarray, numpy.ndarray]",
+        "estimate_p_bad(N: int, epsilon: float, M: int, h_size: int, rng: numpy.random.Generator | None = None) -> tuple[float, numpy.ndarray]",
+        "plot_p_bad(N: int, epsilon: float, M: int, h_size: int) -> None"
+      ],
+      "state_variables": [
+        "p_bad_empirical: float — most recent empirical P(D_train is bad)",
+        "fig_p_bad_histogram: Figure — worst-deviation histogram with epsilon cutoff",
+        "H_sub / all_curve_sub: current subsampled threshold grid and its universe losses"
+      ],
+      "error_handling": [
+        "Cap the compute budget: if M * N * h_size exceeds a threshold (e.g. 2e8), reduce M (and warn via print) so a slider extreme cannot hang the kernel.",
+        "Clamp epsilon to (0, 1) and h_size to [2, len(H_grid)] before use.",
+        "Reuse precomputed all_curve_sub (sliced from loss_curve_all) rather than recomputing the universe loss in every trial — both correctness and performance.",
+        "Use the shared rng (advancing state) so resampling across interactions is genuinely independent; allow an explicit rng arg for reproducible tests.",
+        "Guard the histogram against an all-equal worst_devs array (use a sensible default bin count)."
+      ],
+      "test_checks": [
+        "p, devs = estimate_p_bad(200, 0.1, 100, 200, rng=set_seed(1)); assert 0.0 <= p <= 1.0 and devs.shape == (100,) and (devs >= 0).all()",
+        "Monotonicity sanity: with larger N the empirical p_bad does not increase on average (run N=100 vs N=1000, fixed seed/epsilon).",
+        "Monotonicity sanity: larger epsilon yields smaller-or-equal p_bad.",
+        "Consistency: every worst deviation is < 1.0 (losses in [0,1]), so the epsilon cutoff is meaningful."
+      ]
+    },
+    {
+      "cell_id": "C11",
+      "cell_type": "markdown",
+      "implementation_plan": "Union-bound + Hoeffding derivation markdown. Step 1: 'D_train is bad' iff there exists h in H with |L(h,D_train)-L(h,D_all)| > epsilon, so by the union bound P(bad) <= sum over h in H of P(|L(h,D_train)-L(h,D_all)| > epsilon). Step 2: each L(h,D_train) is a mean of N i.i.d. [0,1]-bounded indicator losses with expectation L(h,D_all), so Hoeffding's inequality gives P(deviation > epsilon) <= 2*exp(-2*N*epsilon^2). Step 3: combine to P(D_train is bad) <= |H| * 2 * exp(-2*N*epsilon^2). Conclude both larger N (exponential decay) and smaller |H| (linear factor) shrink the bound. Record generalization_bound_formula = |H| * 2 * exp(-2*N*epsilon^2). LaTeX throughout.",
+      "function_signatures": [],
+      "state_variables": [
+        "concept_union_bound (consumed conceptually by C12)",
+        "concept_hoeffding (consumed conceptually by C12)",
+        "generalization_bound_formula: the closed form |H|*2*exp(-2*N*epsilon^2) implemented numerically in C12/C13"
+      ],
+      "error_handling": [
+        "Not applicable: non-executing markdown. Mitigation: explicitly state the Hoeffding precondition (loss in [0,1], i.i.d. sampling) so the C12 implementation's clip-to-1 of the bound is justified."
+      ],
+      "test_checks": [
+        "Content: union-bound step, Hoeffding step, and the combined bound all present with the exact factor 2*exp(-2*N*epsilon^2).",
+        "Cross-cell: the formula stated here is the one coded in hoeffding_bound (C12) and required_n (C13)."
+      ]
+    },
+    {
+      "cell_id": "C12",
+      "cell_type": "code",
+      "implementation_plan": "Theory-vs-experiment comparison. (1) hoeffding_bound(N, h_size, epsilon) -> float: return min(1.0, h_size * 2.0 * math.exp(-2.0 * N * epsilon**2)); accept array N via np.minimum(1.0, h_size*2*np.exp(-2*N*epsilon**2)) for the curve. (2) Build N_axis = np.unique(np.round(np.logspace(log10(10), log10(2000), 30)).astype(int)). (3) For a small set of overlay N values (e.g. [100, 500, 1000]) call estimate_p_bad(N, epsilon, M=300, h_size) to get empirical points. (4) plot_bound_vs_empirical(h_size, epsilon): plot hoeffding_bound over N_axis (semilogy), overlay the empirical points as markers, annotate the N in {100,500,1000} examples, and add a legend distinguishing 'Hoeffding/union bound' vs 'Monte Carlo P(bad)'. Show the bound stays above the empirical curve (valid) but is loose. (5) interact(plot_bound_vs_empirical, h_size=IntSlider(2, 2000, value=200), epsilon=FloatSlider(0.02, 0.3, step=0.01, value=0.1)). Export hoeffding_bound, fig_bound_vs_empirical.",
+      "function_signatures": [
+        "hoeffding_bound(N: int | numpy.ndarray, h_size: int, epsilon: float) -> float | numpy.ndarray",
+        "plot_bound_vs_empirical(h_size: int, epsilon: float) -> None"
+      ],
+      "state_variables": [
+        "N_axis: np.ndarray — log-spaced sample sizes for the bound curve",
+        "fig_bound_vs_empirical: Figure — semilogy bound curve with empirical overlay",
+        "overlay_Ns: list[int] = [100, 500, 1000] — lecture example points"
+      ],
+      "error_handling": [
+        "Clip the bound to [0,1] with min/np.minimum so the probability interpretation holds (the raw formula exceeds 1 for small N).",
+        "exp(-2*N*epsilon^2) cannot overflow (non-positive exponent); still guard epsilon>0 to avoid a degenerate all-ones bound.",
+        "Keep the empirical overlay cheap: reuse a modest M and the same h_size as the bound so theory and experiment are comparable; print the M used.",
+        "Use semilogy only when all plotted y>0; if a bound value underflows to 0, add a small floor (e.g. 1e-12) before logging or switch that point to a marker on the axis."
+      ],
+      "test_checks": [
+        "assert 0.0 <= hoeffding_bound(100, 200, 0.1) <= 1.0",
+        "Validity: for the overlay Ns, hoeffding_bound(N, h_size, epsilon) >= empirical_p_bad(N) - sampling_noise (assert bound >= emp - 0.05).",
+        "Decay: hoeffding_bound is non-increasing in N and non-increasing as h_size decreases (check endpoints).",
+        "Visual: bound curve lies above the Monte Carlo points across N_axis."
+      ]
+    },
+    {
+      "cell_id": "C13",
+      "cell_type": "code",
+      "implementation_plan": "Sample-complexity design tool. (1) required_n(h_size, delta, epsilon) -> int: return math.ceil(math.log(2.0 * h_size / delta) / (2.0 * epsilon**2)) (natural log, inverting the Hoeffding/union bound H*2*exp(-2*N*eps^2) <= delta). (2) report(h_size, delta, epsilon): print the required N and the plugged-in bound value; also print the lecture sanity example. (3) plot_sample_complexity(h_size, delta, epsilon): compute required_n across an epsilon sweep (e.g. 0.02..0.3) and across an |H| sweep (log-spaced), and draw two small subplots (required N vs epsilon; required N vs |H|) with the current operating point marked. (4) interact(plot_sample_complexity, h_size=IntSlider(10, 100000, step=10, value=10000), delta=FloatSlider(0.01, 0.5, step=0.01, value=0.1), epsilon=FloatSlider(0.02, 0.3, step=0.01, value=0.1)). Export required_n, fig_sample_complexity. Must reproduce |H|=10000, delta=0.1, epsilon=0.1 -> N approx 610 (formula gives 611 via ceil; note the lecture's ~610).",
+      "function_signatures": [
+        "required_n(h_size: int, delta: float, epsilon: float) -> int",
+        "report(h_size: int, delta: float, epsilon: float) -> None",
+        "plot_sample_complexity(h_size: int, delta: float, epsilon: float) -> None"
+      ],
+      "state_variables": [
+        "required_n: callable design-rule used in the summary (C15)",
+        "fig_sample_complexity: Figure — required N vs epsilon and vs |H|"
+      ],
+      "error_handling": [
+        "Validate epsilon in (0, 0.5], delta in (0, 1), h_size >= 1; raise ValueError with guidance instead of producing inf/NaN.",
+        "Guard the log argument: 2*h_size/delta must be > 0 (true given the validations) so math.log never receives <= 0.",
+        "Avoid division by zero for epsilon -> 0 by the lower-bound validation; reflect the epsilon^-2 blow-up honestly in the plot (do not silently cap).",
+        "Return an int via math.ceil so the answer is a usable count of examples; note ceil vs the lecture's rounded 610."
+      ],
+      "test_checks": [
+        "assert 600 <= required_n(10000, 0.1, 0.1) <= 620  # reproduces the lecture's ~610 (ceil gives 611)",
+        "Monotonicity: required_n increases as epsilon decreases, as delta decreases, and as |H| increases (check three pairs).",
+        "Type: required_n returns a Python int >= 1.",
+        "Consistency: hoeffding_bound(required_n(H,delta,eps), H, eps) <= delta + 1e-9 (the N actually meets the target)."
+      ]
+    },
+    {
+      "cell_id": "C14",
+      "cell_type": "code",
+      "implementation_plan": "Bias-complexity tradeoff and answer to C03's overfitting question. (1) Define a complexity sweep H_sizes = sorted unique values, e.g. [2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000], each realized by subsample_H(h_size) (evenly spaced thresholds, with the universe losses sliced from loss_curve_all). (2) For a chosen training size N and n_trials (e.g. 30) repetitions: for each h_size, ideal_loss = min(all_curve_sub) (universe-optimal restricted to the subgrid; falls as |H| grows); for each trial draw D_train via sample_train(N, rng), compute train_curve_sub, pick h_train_sub = argmin, accumulate test_loss = all_curve_sub[h_train_sub]; expected_test = mean over trials; gen_gap = expected_test - ideal_loss. (3) Plot three curves vs |H| (log-x): ideal_loss (decreasing), gen_gap (increasing), expected_test = ideal+gap (U-shape); mark best_complexity = H_sizes[argmin(expected_test)]. (4) interact over N (IntSlider 20..2000, value=100); recompute and redraw. Add a caption tying the U-shape back to C03 ('more parameters -> overfit') and the closing 'Yes, Deep Learning'. Export fig_complexity_tradeoff, best_complexity.",
+      "function_signatures": [
+        "tradeoff_curves(N: int, H_sizes: list[int], n_trials: int = 30, rng: numpy.random.Generator | None = None) -> dict",
+        "plot_tradeoff(N: int) -> None  # interact callback that calls tradeoff_curves and renders"
+      ],
+      "state_variables": [
+        "H_sizes: list[int] — the complexity sweep (effective |H| values)",
+        "best_complexity: int — argmin of the expected test loss for the current N",
+        "fig_complexity_tradeoff: Figure — the three-curve U-shape plot"
+      ],
+      "error_handling": [
+        "Keep n_trials modest and reuse sliced universe losses (no per-trial universe recompute) so the nested sweep stays interactive; print that curves are Monte Carlo estimates with the n_trials used.",
+        "Clamp each h_size to [2, len(H_grid)] and de-duplicate H_sizes after subsampling so identical grids are not plotted twice.",
+        "Average over n_trials draws (advancing rng) to denoise the generalization-gap estimate; allow an rng arg for reproducible tests.",
+        "If N is tiny relative to class structure the gap is noisy — note this in the caption rather than hiding it.",
+        "Use make_universe only if a fresh universe is desired; default to the fixed e_all/y_all so the tradeoff is comparable across N."
+      ],
+      "test_checks": [
+        "out = tradeoff_curves(100, [2, 100, 10000], n_trials=10, rng=set_seed(2)); assert len(out['ideal']) == 3",
+        "Shape sanity: ideal_loss is non-increasing in |H| and gen_gap is non-decreasing in |H| (allow small Monte Carlo noise via tolerance).",
+        "U-shape: expected_test attains its minimum at an interior or boundary best_complexity that is consistent across two seeds within +/- a few grid steps.",
+        "Reconciliation: expected_test[k] approx ideal[k] + gap[k] for every k (definitional identity, exact up to float)."
+      ]
+    },
+    {
+      "cell_id": "C15",
+      "cell_type": "markdown",
+      "implementation_plan": "Summary markdown. Recap the key results in a compact bulleted list: (a) loss is a function of the chosen h; (b) ideal h_all (on D_all) vs empirical h_train (on D_train) and the generalization gap; (c) the good-training-set / uniform-deviation condition with epsilon = delta/2; (d) the bound P(bad) <= |H|*2*exp(-2*N*epsilon^2); (e) the sample-complexity rule N >= log(2|H|/delta)/(2 epsilon^2) with the |H|=10000,delta=0.1,epsilon=0.1 -> N~610 example; (f) the bias-complexity (U-shape) tradeoff. Restate the 'larger N, smaller |H|' guidance and the tension (smaller |H| raises bias). End on the lecture punchline (can we have the fish and the bear's paw both? Yes, Deep Learning). Provide a References section linking the Hung-yi Lee course video and noting the synthetic-data caveat. Reference the concrete handles produced earlier (fig_complexity_tradeoff, generalization_bound_formula, required_n) so the summary is grounded in what was computed.",
+      "function_signatures": [],
+      "state_variables": [
+        "concept_summary (final recap; not a Python object)"
+      ],
+      "error_handling": [
+        "Not applicable: non-executing markdown. Mitigation: include the synthetic-universe caveat (numbers are illustrative, not measured Pokemon/Digimon statistics) so learners do not over-interpret exact values; ensure external links are plain URLs that render."
+      ],
+      "test_checks": [
+        "Content: all six recap items, the 'larger N / smaller |H|' guidance, the Deep Learning punchline, and a References section are present.",
+        "Honesty: the synthetic-data caveat is stated so the reproduced numeric examples are framed as illustrative."
+      ]
+    }
+  ],
+  "cross_cell_invariants": [
+    "Label encoding is fixed everywhere: y = 1 for Digimon, y = 0 for Pokemon (defined in C04/C05, used by f_h and loss in C07 and all downstream cells).",
+    "Classifier orientation is fixed: f_h(e) predicts Digimon (1) iff e >= h, else Pokemon (0). All loss computations (C06, C07, C08, C10, C12, C14) use this single definition.",
+    "f_h and loss are defined exactly once (C07) and imported by reference into C08, C10, C12, C14 — no cell redefines the loss semantics.",
+    "All randomness flows through the single shared rng / set_seed(SEED) from C02; the universe D_all (C05) is materialized with set_seed(SEED) so it is identical on every run regardless of how much rng was consumed earlier.",
+    "H_grid = np.arange(1, 10001) is the canonical hypothesis set with baseline |H| = 10000; any cell using a smaller effective complexity does so by subsampling H_grid (subsample_H), never by redefining EDGE_RANGE.",
+    "All loss/error values are in [0,1], satisfying the Hoeffding boundedness assumption that C11/C12 rely on; this is asserted in C07.",
+    "epsilon = delta/2 (C09) is the single relation linking the uniform-deviation tolerance to the generalization target, and is the relation reproduced numerically in C13.",
+    "The bound formula |H|*2*exp(-2*N*epsilon^2) is implemented identically in hoeffding_bound (C12) and inverted in required_n (C13); both clip/round to valid ranges.",
+    "Universe loss curves are precomputed once (loss_curve_all in C07) and SLICED for any subsampled grid (C10, C12, C14) rather than recomputed per trial, guaranteeing consistency and bounded compute.",
+    "Data and symbols only flow forward (C01->C15); no cell references a variable defined later, so kernel-restart-and-run-all succeeds."
+  ],
+  "assumptions": [
+    "Classifier orientation was corrected for executability: stage 2's C04 literally writes 'predict Pokemon if e >= h', but since the same artifact states Digimon have larger edge counts e, the implemented f_h predicts Digimon when e >= h (label 1) so the classifier is correctly oriented to the data. The generalization argument (gap, uniform deviation, Hoeffding bound, sample complexity) is invariant to this orientation, so no pedagogical point changes.",
+    "The synthetic universe uses Pokemon ~ Normal(120, 40) and Digimon ~ Normal(200, 48) edge counts (2000 per class), rounded and clipped to [1, 10000], giving partial overlap and an irreducible loss L_h_all > 0; these constants are tunable in make_universe and chosen only to produce a clear-but-imperfect separation.",
+    "Loss is the 0/1 error rate in [0,1] (cross-entropy is mentioned in stage 2 but not implemented) so empirical deviations are directly comparable to the Hoeffding bound's [0,1] assumption.",
+    "Monte Carlo cells (C10, C12, C14) use finite trial counts (M ~ 50-1000, n_trials ~ 30) with explicit per-cell compute caps; estimates are approximations that should sit below the Hoeffding bound but may be noisy at small M/N, and this is surfaced to the learner in captions/prints rather than hidden.",
+    "Threshold sliders in interactive cells span the data window (roughly the min/max observed edge counts) for usability, while the conceptual hypothesis set remains the full H = {1..10000}; thresholds outside the data window only trivially relabel all points and are covered by the full-grid loss curves.",
+    "ipywidgets/interact is available in the target Google Colab runtime (verified by the C02 import probe); each interactive cell includes a static fallback path (compute once + print/plot) if the widget stack is missing so the notebook still renders end-to-end.",
+    "required_n uses natural log and math.ceil, so |H|=10000, delta=0.1, epsilon=0.1 yields 611, which is reported as the lecture's ~610 (the small difference is the ceiling of 610.3).",
+    "Effective model complexity is realized by evenly subsampling the integer threshold grid (subsample_H), treating |H| as the discrete count of candidate threshold functions per the slides' 'everything is discrete' note; VC-dimension is intentionally out of scope."
+  ]
+}

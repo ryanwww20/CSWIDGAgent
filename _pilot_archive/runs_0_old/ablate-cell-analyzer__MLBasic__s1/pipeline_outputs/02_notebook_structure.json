@@ -1,0 +1,307 @@
+{
+  "notebook_title": "Why Training Generalizes: Model Complexity & the Generalization Bound (Pokemon vs. Digimon)",
+  "learning_objectives": [
+    "Turn an image's visual complexity into a single measurable feature (edge-pixel count e) and see why Pokemon look 'simpler' than Digimon.",
+    "Define a threshold classifier f_h and understand the hypothesis set H = {1,...,10000} and its size |H| as model complexity.",
+    "Measure how good a threshold is with the empirical 0-1 loss L(h,D), and find the loss-minimizing threshold.",
+    "Distinguish training loss L(h,D_train) from real loss L(h,D_all) and observe the generalization gap when we optimize on a finite sample.",
+    "Bound how often a random training set misleads us using the union bound + Hoeffding inequality, and confirm P(bad) <= |H|*2*exp(-2*N*eps^2) by Monte-Carlo.",
+    "Explain the model-complexity tradeoff: larger |H| lowers the best achievable loss but widens the train-vs-all gap."
+  ],
+  "cells": [
+    {
+      "cell_id": "C01",
+      "cell_type": "markdown",
+      "goal": "Set the scene: the Pokemon-vs-Digimon classification story, the central question 'why does low training error tell us anything about unseen data?', and a roadmap mapping the six sections to the learning objectives.",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None (narrative intro with an inline roadmap list).",
+      "estimated_lines": 18,
+      "depends_on": []
+    },
+    {
+      "cell_id": "C02",
+      "cell_type": "code",
+      "goal": "Environment setup: import numpy, matplotlib, scipy.ndimage and ipywidgets; set a fixed RNG seed for reproducibility; define global constants E_MAX=10000 and the hypothesis grid H = {1,...,10000}; configure inline plotting.",
+      "inputs": [],
+      "outputs": [
+        "np",
+        "plt",
+        "rng",
+        "E_MAX",
+        "H_GRID",
+        "interact"
+      ],
+      "widget_plan": "None (imports and constants only). Wrap ipywidgets import in a try/except install fallback so the notebook runs on a fresh Colab runtime.",
+      "estimated_lines": 22,
+      "depends_on": []
+    },
+    {
+      "cell_id": "C03",
+      "cell_type": "markdown",
+      "goal": "Introduce Section 1 and the intuition from slides p.8-9: Digimon have busier outlines, so edge detection (grayscale -> Canny/Sobel) yields more edge pixels; this edge count e becomes the scalar feature feeding every later step (p.9: e=3558 vs 7389).",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None.",
+      "estimated_lines": 10,
+      "depends_on": [
+        "C01"
+      ]
+    },
+    {
+      "cell_id": "C04",
+      "cell_type": "code",
+      "goal": "Make the feature tangible: synthesize two small grayscale images (a 'simple' Pokemon-like blob and a 'busy' Digimon-like shape), apply a Sobel/threshold edge detector with scipy.ndimage, count edge pixels to get e for each, and display the originals alongside their edge maps with e annotated (mirroring p.9 e=3558 vs 7389).",
+      "inputs": [
+        "np",
+        "plt",
+        "rng"
+      ],
+      "outputs": [
+        "edge_count",
+        "example_simple_e",
+        "example_busy_e"
+      ],
+      "widget_plan": "Optional ipywidgets slider on the edge-detection threshold to show how e responds; default to a static 2x2 figure if widgets are unavailable.",
+      "estimated_lines": 40,
+      "depends_on": [
+        "C02"
+      ]
+    },
+    {
+      "cell_id": "C05",
+      "cell_type": "markdown",
+      "goal": "Bridge from single images to a population: explain that the original Kaggle/Qiita image sets are not bundled, so we simulate each class's edge-count distribution from the slide histograms (p.14-16: Pokemon ~819, Digimon ~971 images; overlapping e distributions) so the demo runs fully offline.",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None.",
+      "estimated_lines": 9,
+      "depends_on": [
+        "C03"
+      ]
+    },
+    {
+      "cell_id": "C06",
+      "cell_type": "code",
+      "goal": "Build the universe D_all: sample edge counts e for ~819 Pokemon (label 0) and ~971 Digimon (label 1) from two overlapping, clipped Gaussian-like distributions calibrated to the slides, assemble (e, y) arrays, and plot overlaid class histograms over e in [0, E_MAX] to expose the overlap that makes perfect separation impossible.",
+      "inputs": [
+        "np",
+        "plt",
+        "rng",
+        "E_MAX"
+      ],
+      "outputs": [
+        "D_all",
+        "e_all",
+        "y_all",
+        "N_all"
+      ],
+      "widget_plan": "None (static overlaid histogram); reuse this fixed D_all as the 'ground truth' population for all later sampling.",
+      "estimated_lines": 34,
+      "depends_on": [
+        "C04"
+      ]
+    },
+    {
+      "cell_id": "C07",
+      "cell_type": "markdown",
+      "goal": "Introduce Section 2 (Step 1 of ML, 'function with an unknown parameter'): define f_h that predicts Digimon when e>=h else Pokemon (p.10), and present H = {1,...,10000} so |H| = 10000 is the model's complexity — the single quantity the whole generalization argument hinges on.",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None.",
+      "estimated_lines": 11,
+      "depends_on": [
+        "C05"
+      ]
+    },
+    {
+      "cell_id": "C08",
+      "cell_type": "code",
+      "goal": "Implement the threshold classifier f_h(e) = 1[e >= h] and let students move the threshold over D_all to watch predictions and the decision boundary on the histogram; report |H| = len(H_GRID) to make model complexity concrete.",
+      "inputs": [
+        "np",
+        "plt",
+        "interact",
+        "H_GRID",
+        "e_all",
+        "y_all",
+        "E_MAX"
+      ],
+      "outputs": [
+        "f_h",
+        "predict"
+      ],
+      "widget_plan": "ipywidgets.interact slider for h over H_GRID that redraws the class histograms with a vertical decision-boundary line and shows the resulting predicted-class regions.",
+      "estimated_lines": 30,
+      "depends_on": [
+        "C06"
+      ]
+    },
+    {
+      "cell_id": "C09",
+      "cell_type": "markdown",
+      "goal": "Introduce Section 3 (Step 2 of ML): define the empirical 0-1 loss L(h,D) = (1/N) sum 1[f_h(x) != y] (p.11) as the objective measuring how good a threshold is, and note cross-entropy as an alternative loss.",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None.",
+      "estimated_lines": 9,
+      "depends_on": [
+        "C07"
+      ]
+    },
+    {
+      "cell_id": "C10",
+      "cell_type": "code",
+      "goal": "Define vectorized L(h, e, y) for the 0-1 error rate, sweep it over the full H_GRID on D_all to draw the loss-vs-threshold curve, and compute the ideal classifier h_all = argmin_h L(h, D_all) and its loss L(h_all, D_all) (expected ~0.28 / h_all~4824 per the slides), marking the minimum on the plot.",
+      "inputs": [
+        "np",
+        "plt",
+        "f_h",
+        "H_GRID",
+        "e_all",
+        "y_all"
+      ],
+      "outputs": [
+        "loss_L",
+        "loss_curve_all",
+        "h_all",
+        "L_all"
+      ],
+      "widget_plan": "Optional interactive slider that echoes L(h, D_all) for the chosen h next to the curve; static curve with the argmin marked is the fallback.",
+      "estimated_lines": 32,
+      "depends_on": [
+        "C08"
+      ]
+    },
+    {
+      "cell_id": "C11",
+      "cell_type": "markdown",
+      "goal": "Introduce Section 4, the central problem (p.12-16): we can only optimize h_train = argmin L(h, D_train) on an i.i.d. sample, but we care about L(h, D_all); worked slide examples show train loss can mislead (0.20 on train vs 0.37 on all).",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None.",
+      "estimated_lines": 11,
+      "depends_on": [
+        "C09"
+      ]
+    },
+    {
+      "cell_id": "C12",
+      "cell_type": "code",
+      "goal": "Demonstrate the generalization gap: draw an i.i.d. training sample D_train of size N from D_all, fit h_train = argmin L(h, D_train), then compare L(h_train, D_train) against L(h_train, D_all) and against the ideal L(h_all, D_all); visualize train vs all loss curves with both minima to expose the gap.",
+      "inputs": [
+        "np",
+        "plt",
+        "interact",
+        "loss_L",
+        "H_GRID",
+        "e_all",
+        "y_all",
+        "rng",
+        "h_all",
+        "L_all"
+      ],
+      "outputs": [
+        "sample_D_train",
+        "h_train",
+        "gap_demo"
+      ],
+      "widget_plan": "ipywidgets.interact with a training-size slider N (e.g., 50-1000) and a 'resample' integer/seed control; each interaction redraws both loss curves and prints L(h_train,D_train), L(h_train,D_all), and the gap.",
+      "estimated_lines": 42,
+      "depends_on": [
+        "C10"
+      ]
+    },
+    {
+      "cell_id": "C13",
+      "cell_type": "markdown",
+      "goal": "Introduce Section 5 (p.22-30): a training set is 'bad' if some h has |L(h,D_train)-L(h,D_all)| > eps; the union bound (p.24) over H plus Hoeffding's per-hypothesis inequality (p.26) give P(D_train bad) <= |H|*2*exp(-2*N*eps^2), tying sample size N and complexity |H| to reliability.",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None (states the single-hypothesis Hoeffding bound and union bound as the building blocks aggregated here).",
+      "estimated_lines": 13,
+      "depends_on": [
+        "C11"
+      ]
+    },
+    {
+      "cell_id": "C14",
+      "cell_type": "code",
+      "goal": "Empirically verify the bound by Monte-Carlo: over many trials, sample D_train of size N, compute the worst-case deviation max_h |L(h,D_train)-L(h,D_all)|, estimate P(bad) = fraction of trials exceeding eps, and overlay it against the theoretical |H|*2*exp(-2*N*eps^2) (clipped at 1) as N and eps vary, confirming the bound is a valid upper envelope.",
+      "inputs": [
+        "np",
+        "plt",
+        "interact",
+        "loss_L",
+        "H_GRID",
+        "e_all",
+        "y_all",
+        "rng"
+      ],
+      "outputs": [
+        "monte_carlo_bad_prob",
+        "bound_compare_fig"
+      ],
+      "widget_plan": "ipywidgets.interact sliders for N and eps (and a trials count) that redraw empirical P(bad) vs the Hoeffding/union bound; use a coarse subset of H_GRID for the inner max to keep the simulation responsive and note the approximation.",
+      "estimated_lines": 46,
+      "depends_on": [
+        "C12"
+      ]
+    },
+    {
+      "cell_id": "C15",
+      "cell_type": "markdown",
+      "goal": "Introduce Section 6, the payoff (p.33-34): larger |H| lowers the best achievable loss L(h_all,D_all) but widens the train-all gap (bigger bound), while smaller |H| does the reverse — the core complexity/bias tradeoff that motivates 'Yes, Deep Learning' as a way to push both down.",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None.",
+      "estimated_lines": 11,
+      "depends_on": [
+        "C13"
+      ]
+    },
+    {
+      "cell_id": "C16",
+      "cell_type": "code",
+      "goal": "Visualize the tradeoff: for a range of hypothesis-set sizes |H| (e.g., coarsening the threshold grid so fewer/more candidate functions are allowed), plot the best achievable loss min_h L(h,D_all) decreasing while the generalization-gap term (the Hoeffding bound at fixed N, eps, scaling with log|H|) increases, and mark the sweet spot where their sum is minimized.",
+      "inputs": [
+        "np",
+        "plt",
+        "interact",
+        "loss_L",
+        "e_all",
+        "y_all",
+        "E_MAX"
+      ],
+      "outputs": [
+        "complexity_tradeoff_fig",
+        "tradeoff_table"
+      ],
+      "widget_plan": "ipywidgets.interact slider for N (and eps) showing how the bound curve and the optimal |H| shift; static dual-curve plot (achievable loss vs gap bound) with their sum highlighted as the fallback.",
+      "estimated_lines": 40,
+      "depends_on": [
+        "C14"
+      ]
+    },
+    {
+      "cell_id": "C17",
+      "cell_type": "markdown",
+      "goal": "Wrap up: recap the arc (edge-count feature -> threshold classifier & |H| -> 0-1 loss -> generalization gap -> Hoeffding/union bound -> complexity tradeoff), restate the three-step ML framework (function, loss, optimization, p.2) as the organizing skeleton, and close with the 'Yes, Deep Learning' takeaway and pointers to the optional asides (single-hypothesis Hoeffding, sample complexity N>=log(2|H|/delta)/(2eps^2)).",
+      "inputs": [],
+      "outputs": [],
+      "widget_plan": "None.",
+      "estimated_lines": 16,
+      "depends_on": [
+        "C16"
+      ]
+    }
+  ],
+  "global_flow_notes": "Strictly top-to-bottom executable. C02 establishes shared imports/RNG/constants that every code cell reuses. C04 makes the edge-count feature concrete on synthetic images (no external dataset, no cv2/skimage dependency), then C06 builds the fixed ground-truth population D_all by simulating the slide histograms; D_all (e_all, y_all) is the single source of truth for all downstream sampling, so the narrative stays self-consistent. C08 defines f_h, C10 defines the loss and the ideal h_all/L_all, C12 reuses both to show the gap, C14 reuses the loss over D_all for the Monte-Carlo bound check, and C16 reuses the loss to trace the complexity tradeoff. Interactivity escalates deliberately: threshold slider (C08) -> loss readout (C10) -> resample/N for the gap (C12) -> N,eps for the bound (C14) -> N for the tradeoff (C16). Every ipywidgets cell degrades to a static plot if widgets are unavailable so verification never blocks on interactivity. The deprioritized concepts (single-hypothesis Hoeffding, union bound, sample complexity, 3-step recap) appear as connective tissue inside C13/C17 rather than as headline cells, matching the concept-selection rationale.",
+  "assumptions": [
+    "No external image dataset is bundled, so the population D_all is simulated from the slide histograms (Pokemon ~819 images, Digimon ~971 images; overlapping edge-count distributions; ideal h_all~4824 with L(h_all,D_all)~0.28) to keep the notebook fully offline and deterministic under a fixed seed.",
+    "Edge detection in C04 uses numpy + scipy.ndimage (Sobel/gradient magnitude with a threshold) rather than OpenCV/skimage to avoid heavy Colab-incompatible dependencies; exact edge counts are illustrative of the p.9 e=3558 vs 7389 contrast, not reproductions of specific slide images.",
+    "The hypothesis set is the integer threshold grid H = {1,...,10000} so |H| = 10000; the loss sweep may sub-sample this grid for responsiveness in interactive/Monte-Carlo cells, with the approximation noted in-cell.",
+    "Model complexity in C16 is varied by coarsening/refining the candidate-threshold grid (changing the count of allowed thresholds = |H|); the achievable-loss-vs-gap tradeoff is a faithful 1-D illustration of the general |H| tradeoff on p.33-34 rather than a multi-feature model family.",
+    "ipywidgets is available on Colab; each interactive cell still falls back to a static rendering so deterministic top-to-bottom verification (no manual widget interaction) succeeds."
+  ]
+}

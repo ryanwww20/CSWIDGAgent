@@ -1,0 +1,121 @@
+run dir: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1
+
+=== stage A: execution ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/S0__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --config /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1
+
+[IPKernelApp] ERROR | KeyboardInterrupt caught in kernel.
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-21T14:51:07.855434+00:00",
+  "input_notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/S0__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb",
+  "executed_notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 2.5133,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 6,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "python_version": "3.11.15",
+    "machine": "arm64",
+    "processor": "arm",
+    "gpu_name": null,
+    "gpu_memory_total": null,
+    "cuda_hint": null
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/S0__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --out /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/interactivity --max-points 3 --source slides
+
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 6 code cells, 6 clean, total 2.2s
+  widgets: 33 enumerated, 8 drivable
+  widget planner: +9 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1951, 'out': 278}, 'raw_count': 9, 'kept': 9}
+  #@param fields: 0
+  semantic planner: +1 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4371, 'out': 302}, 'raw_count': 3, 'kept': 1, 'dropped': ['N:covered_or_empty', 'H_size:not_assigned']}
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/interactivity/filmstrip.json  (+ frames in /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/interactivity/frames)
+  controls scored: 9 (0 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=3.5 flags=['dead_control:eps#2', 'weak_control:N#1', 'redundant:|H| vs |H|#1', 'redundant:eps vs eps#1', 'strong_concept_link:eps', 'strong_concept_link:N']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 11621, 'out': 1176}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    |H| [widget/executed] = 4.0
+    eps [widget/executed] = 5.0
+    delta [widget/executed] = 4.0
+    N [widget/executed] = 4.0
+    |H|#1 [widget/executed] = 4.0
+    eps#1 [widget/executed] = 3.0
+    N#1 [widget/executed] = 2.0
+    eps#2 [widget/executed] = 1.0
+    M [constant/executed] = 3.0
+
+#5 Interactivity = 3.33  (effectiveness, mean of 9 controls; 0 reasoned)
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/S0__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --out /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/quality --max-images 6 --judge-samples 1 --executed /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/exec/executed.ipynb --slides /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf --frames /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/interactivity/frames
+
+WARNING: image-heavy deck (5742 extractable chars over 35 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf
+digest: notebook=19788 chars (executed.ipynb), 6 image(s); slides=6186 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=1
+
+#2 Faithfulness&Correctness = 4.62  (2a=5.0 2b=4.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 15640, 'out': 327}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0}
+   rationale: Notebook content closely tracks the slides. Cells 0-2 and 8-15 restate the lecture’s Pokémon/Digimon threshold classifier, loss, training vs ideal loss, Hoeffding/union-bound generalization bound, and the model-complexity tradeoff. I did not find any direct contradiction with the source slides. Mino
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A concrete simulated Pokémon-vs-Digimon universe with a visible class-separation histogram and the ideal threshold marked in IMAGE 1, which grounds the abstract loss-minimization idea.', 'A worked comparison of multiple small training samples versus the full universe, showing different learned thresholds and their true-vs-training loss gaps in the printed table from code cell 7.', 'A visual plot of the Hoeffding generalization bound shrinking with sample size and a marked sample requirement in IMAGE 2, making the N-vs-risk relationship explicit.', 'An empirical Monte-Carlo check of the failure probability against the bound in IMAGE 3, showing the bound is an upper limit and illustrating how loose it can be.', 'A direct tradeoff visualization in IMAGE 4 / IMAGE 5 / IMAGE 6 where increasing |H| lowers best training loss while the red bound rises, exposing the complexity vs. generalization tension beyond the slide.']
+   rationale: The notebook adds substantial pedagogical depth over the slide deck by turning the lecture’s symbolic statements into runnable, visible evidence. IMAGE 1 does more than restate the Pokémon/Digimon threshold idea: it shows the two edge-complexity distributions and the loss curve over thresholds, so a
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: The notebook chose a genuinely central lecture concept: the core machine-learning tradeoff behind "more parameters, easier to overfit" in the Pokémon-vs-Digimon classifier, including hypothesis-set size, training-vs-true loss, and the generalization bound. (A) CENTRALITY is strong because this is no
+
+#7 Clarity = 4.62  (7a=4.0 7b=5.0 7c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 9500, 'out': 314}, 'n_citations': 1}
+   rationale: Overall the notebook is cleanly presented and easy to follow. The prose is well scaffolded with clear headings and short paragraphs (cells 0, 1, 2, 4, 6, 8, 10, 12, 14, 15), equations render correctly, and the code cells are readable with comments that explain what each block is doing (cells 3, 5, 7
+   visual: IMAGE 5: Default interactive view is somewhat compressed vertically: the blue training-loss curve and red bound curve sit tight a
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.62
+  2a_assertional         5.0
+  2b_computational       4.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        3.33
+  5_effectiveness        3.33
+  6_duration_seconds     2.5133
+  7_clarity              4.62
+  7a_visual              4.0
+  7b_textual             5.0
+  7c_code_explanation    5.0
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/S0/MLBasic__s1/summary.json

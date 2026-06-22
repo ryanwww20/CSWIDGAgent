@@ -1,0 +1,7 @@
+{
+  "run_tag": "B+bug_solver__MLBasic__s1",
+  "condition": "B+bug_solver",
+  "topic": "MLBasic",
+  "seed": 1,
+  "source_pdf": "MLBasic.pdf"
+}

@@ -1,0 +1,14 @@
+{
+  "notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-cell-analyzer__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb",
+  "ran_to_completion": false,
+  "error_type": "environment_dependency",
+  "error_name": "ModuleNotFoundError",
+  "error_value": "No module named 'scipy'",
+  "first_failed_cell_index": 1,
+  "first_failed_code_cell": 1,
+  "n_code_cells": 8,
+  "executed_code_cells": 8,
+  "wall_seconds": 1.32,
+  "per_cell_timeout": 300,
+  "kernel": "python3"
+}

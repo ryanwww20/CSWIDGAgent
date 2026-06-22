@@ -1,0 +1,97 @@
+{
+  "final_notebook_path": "notebooks/MLBasic_interactive_skill.ipynb",
+  "generated_cells": [
+    {
+      "cell_id": "C01",
+      "status": "generated",
+      "notes": "Markdown: title, motivation, seven objectives, 7-row roadmap table, synthetic-data note."
+    },
+    {
+      "cell_id": "C02",
+      "status": "generated",
+      "notes": "Setup-only code cell: imports (guarded ipywidgets), %matplotlib inline, SEED/set_seed/rng, COLORS + new_axes/style_axes, version print."
+    },
+    {
+      "cell_id": "C03",
+      "status": "generated",
+      "notes": "Markdown: f_h cases, Digimon=1/Pokémon=0 convention, H={1,...,10000} with |H|=10000, forward-reference to C14."
+    },
+    {
+      "cell_id": "C04",
+      "status": "generated",
+      "notes": "make_universe + materialized e_all/y_all/EDGE_RANGE; tuned pk_mean=4300, dg_mean=6200, std=1900 so h_all=4816, L=0.2816; clip-before-round, domain asserts, static histogram preview."
+    },
+    {
+      "cell_id": "C05",
+      "status": "generated",
+      "notes": "Canonical f_h and loss (reused downstream) + interactive IntSlider threshold explorer with decision-region shading and live error annotation."
+    },
+    {
+      "cell_id": "C06",
+      "status": "generated",
+      "notes": "Vectorized sweep_loss (cumulative-count, matches scalar loss to 1e-9); H_grid=arange(1,10001) so |H|=10000; h_all/L_h_all baseline and annotated loss curve."
+    },
+    {
+      "cell_id": "C07",
+      "status": "generated",
+      "notes": "Markdown: h_train definition, generalization-gap formula, lucky/unlucky lecture draws flagged approximate."
+    },
+    {
+      "cell_id": "C08",
+      "status": "generated",
+      "notes": "sample_train + best_h; N slider and 'Resample D_train' button into an Output region; train/all losses and gap printed; reproducible per-draw RNG."
+    },
+    {
+      "cell_id": "C09",
+      "status": "generated",
+      "notes": "Markdown: uniform-deviation 'good training set' condition, three-step chained inequality, ε=δ/2, 'bad' negation."
+    },
+    {
+      "cell_id": "C10",
+      "status": "generated",
+      "notes": "estimate_p_bad Monte Carlo over a subsampled grid (same sub-grid train/universe); interact_manual sliders (N, eps, M, |H|); histogram + module-level p_bad_empirical with explicit initial render."
+    },
+    {
+      "cell_id": "C11",
+      "status": "generated",
+      "notes": "Markdown: union bound → Hoeffding (2·exp(-2Nε²)) → sum over |H|, boxed final bound matching C12's hoeffding_bound()."
+    },
+    {
+      "cell_id": "C12",
+      "status": "generated",
+      "notes": "hoeffding_bound (unclipped, log-scaled) with y=1 reference and Monte Carlo overlay; lecture N=100/500/1000 values reproduced (2707 / 0.908 / 4.1e-5); sliders for |H|, eps."
+    },
+    {
+      "cell_id": "C13",
+      "status": "generated",
+      "notes": "required_n inverted bound (natural log) reproducing |H|=10000,δ=0.1,ε=0.1 → N≥611; 1/ε² and log|H| sensitivity plots; sliders for |H|, delta, eps."
+    },
+    {
+      "cell_id": "C14",
+      "status": "generated",
+      "notes": "complexity_curves over log-spaced |H| (ideal loss, expected gap via T=15 resamples, expected test loss); U-shape plot with best_complexity marked; N slider. Closes C03's question."
+    },
+    {
+      "cell_id": "C15",
+      "status": "generated",
+      "notes": "Markdown: seven-point numbered recap, 'larger N / smaller |H|' takeaway, bilingual punchline, references."
+    }
+  ],
+  "execution_status": {
+    "top_to_bottom_runnable": true,
+    "failed_cell_ids": []
+  },
+  "dependency_notes": [
+    "Strict forward-only variable flow: C02 (np/plt/widgets/rng/SEED/set_seed/COLORS/helpers) → C04 (make_universe, e_all, y_all, EDGE_RANGE) → C05 (f_h, loss) → C06 (sweep_loss, H_grid, h_all, L_h_all) → C08 (sample_train, best_h) and C10 (estimate_p_bad, p_bad_empirical) reused by C12; C13/C14 closed-form/self-contained. No later cell redefines imports, the RNG, f_h, loss, or sweep_loss.",
+    "Fixed a spec inconsistency: stage-3 said H_grid = arange(EDGE_LO, EDGE_HI+1) (9001 elements) while every formula cell uses |H|=10000. Set H_grid = arange(1, 10001) so len(H_grid)==10000 matches C03/C11/C12/C13 and the lecture's H={1,...,10000}.",
+    "Verified by executing all 9 code cells top-to-bottom on numpy 2.4.6 (PCG64 stream is stable to the Colab 2.0.2 pin) with a stubbed ipywidgets that fires each interact() callback once at default values; all asserts passed and figures rendered without error. Authoritative top_to_bottom_runnable comes from Stage 5 on the colab kernel.",
+    "interact()/interact_manual render once at construction on a headless kernel; C08 and C10 additionally invoke their callbacks directly so a static figure and the module-level p_bad_empirical exist after a kernel-restart-and-run-all."
+  ],
+  "assumptions": [
+    "Universe parameters (pk_mean=4300, dg_mean=6200, std=1900, 819 Pokémon / 971 Digimon, SEED=7) were tuned so h_all=4816 (lecture ≈4824) and L(h_all,D_all)=0.2816 (≈0.28); embedded asserts check only structural invariants (counts, domain bounds, sweep-vs-scalar agreement), not fragile exact values, so the notebook stays robust across numpy versions.",
+    "Reproduced lecture numbers are approximate, seed-dependent targets of the synthetic universe: required_n→611 (≈610), Hoeffding bound 2707/0.908/4.1e-5 at N=100/500/1000, empirical P(bad)≈0.04 at N=200/ε=0.1, best_complexity≈5011; the C07 lucky/unlucky h_train values are phrased as approximate.",
+    "Heavy cells (C10, C12, C14) bound cost by subsampling the threshold grid and using interact_manual / continuous_update=False; train-side and universe-side losses share the same sub-grid within each estimate.",
+    "Code-cell string literals use single quotes throughout (no embedded apostrophes) to keep the JSON payload free of escaped double quotes; markdown LaTeX uses $...$/$$...$$ for Colab MathJax.",
+    "ipywidgets is assumed available in Colab (import is guarded with a pip hint); the design targets a live kernel with static renders as the fallback."
+  ]
+}

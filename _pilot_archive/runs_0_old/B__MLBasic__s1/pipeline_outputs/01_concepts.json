@@ -1,0 +1,131 @@
+{
+  "course": "Machine Learning Basics — Why Generalization Works (Pokémon vs. Digimon Classifier)",
+  "source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf",
+  "score_scale": "All importance_score and demo_feasibility_score values are integers on a 0-100 scale (higher is better).",
+  "candidates": [
+    {
+      "concept": "Three-step ML framework (model with unknown parameters → define loss → optimization)",
+      "importance_score": 70,
+      "demo_feasibility_score": 85,
+      "prerequisites": [
+        "functions and parameters",
+        "basic notion of a predictive model"
+      ],
+      "why_it_matters": "Frames the entire deck: every later idea (threshold model, loss, optimization) is an instance of these three steps. Foundational but presented only as review.",
+      "transcript_summary": "Slides 2-3 review the three-step recipe (function with unknown, define loss, optimization) and flag that more parameters make overfitting easier."
+    },
+    {
+      "concept": "Edge-count feature extraction (domain-knowledge feature design)",
+      "importance_score": 55,
+      "demo_feasibility_score": 60,
+      "prerequisites": [
+        "images as numeric arrays",
+        "basic image processing / edge detection"
+      ],
+      "why_it_matters": "Motivates turning a raw image into a single informative scalar e via edge detection, grounded in the observation that Digimon line art is more complex than Pokémon. Illustrates feature engineering before modeling.",
+      "transcript_summary": "Slides 8-9: Digimon have 'more complex lines', Pokémon 'simpler'; edge detection maps two example sprites to edge counts e=3558 and e=7389."
+    },
+    {
+      "concept": "Threshold classifier and hypothesis set H (function with unknown parameters)",
+      "importance_score": 80,
+      "demo_feasibility_score": 95,
+      "prerequisites": [
+        "scalar feature e per example",
+        "comparison/threshold logic",
+        "indicator output"
+      ],
+      "why_it_matters": "Defines the concrete model used throughout: f_h predicts Digimon if e≥h else Pokémon, with H={1,...,10000}. |H| is introduced as the count of candidate functions, i.e. model 'complexity'—the lever for the whole later analysis.",
+      "transcript_summary": "Slides 7,10: f(image)=Pokémon/Digimon; f_h thresholds the edge count e at h; H={1,2,...,10000}, |H| = number of candidate functions (model complexity)."
+    },
+    {
+      "concept": "Loss as error rate (0/1 loss) over a dataset",
+      "importance_score": 75,
+      "demo_feasibility_score": 90,
+      "prerequisites": [
+        "threshold classifier",
+        "indicator function",
+        "averaging over a dataset"
+      ],
+      "why_it_matters": "Operationalizes 'how good is h': L(h,D)=(1/N)Σ I(f_h(x_n)≠ŷ_n), the error rate. Provides the objective that optimization minimizes and that the generalization analysis bounds; notes cross-entropy as an alternative.",
+      "transcript_summary": "Slide 11: dataset D={(x_n,ŷ_n)}; L(h,D) is the averaged per-example loss; 0/1 indicator loss = error rate, with cross-entropy offered as an option."
+    },
+    {
+      "concept": "Empirical vs ideal risk: D_train vs D_all and the generalization gap",
+      "importance_score": 92,
+      "demo_feasibility_score": 92,
+      "prerequisites": [
+        "error-rate loss",
+        "i.i.d. sampling",
+        "argmin / model selection"
+      ],
+      "why_it_matters": "Core problem statement: we can only minimize L on a sampled D_train (giving h_train) but truly care about L(h_train, D_all). Different samples give very different h_train and very different true loss, which is exactly overfitting.",
+      "transcript_summary": "Slides 12-16: h_all=argmin L(h,D_all) is ideal but D_all is unobtainable; D_train is i.i.d. from D_all; two 200-sample draws give h_train=4727 (true loss 0.28, matches h_all) vs h_train=3642 (train loss 0.20 but true loss 0.37)."
+    },
+    {
+      "concept": "Good vs bad training set (uniform deviation condition)",
+      "importance_score": 85,
+      "demo_feasibility_score": 88,
+      "prerequisites": [
+        "generalization gap",
+        "tolerance parameters ε and δ",
+        "quantifying over all h in H"
+      ],
+      "why_it_matters": "Reduces 'will h_train generalize?' to a checkable property of the sample: D_train is good iff ∀h∈H, |L(h,D_train)-L(h,D_all)|≤ε. Shows that picking ε=δ/2 guarantees L(h_train,D_all)-L(h_all,D_all)≤δ. Turns a per-h question into a uniform-convergence question.",
+      "transcript_summary": "Slides 17-22: derive that if ∀h |L(h,D_train)-L(h,D_all)|≤δ/2 then the chosen h_train is within δ of optimal; define 'bad' D_train and visualize P(D_train is bad) over the space of training sets."
+    },
+    {
+      "concept": "Hoeffding's inequality + union bound generalization guarantee",
+      "importance_score": 95,
+      "demo_feasibility_score": 85,
+      "prerequisites": [
+        "probability of events",
+        "union bound",
+        "exponential functions",
+        "good/bad training set definition"
+      ],
+      "why_it_matters": "The theoretical heart: P(D_train is bad) ≤ |H|·2exp(-2Nε²). Explains rigorously why larger N and smaller |H| make a misleading sample unlikely. The bound is distribution-free, model-agnostic, and works for any bounded loss—and is empirically verifiable (valid but loose) via Monte Carlo over many sampled training sets.",
+      "transcript_summary": "Slides 20,23-30: model-agnostic / no distribution assumption; union bound over h then per-h Hoeffding P(bad due to h)≤2exp(-2Nε²); summed to |H|·2exp(-2Nε²); worked numbers show the bound collapsing from >1 (vacuous) to 0.00004 as N grows 100→500→1000."
+    },
+    {
+      "concept": "Sample complexity: how many examples are needed",
+      "importance_score": 78,
+      "demo_feasibility_score": 90,
+      "prerequisites": [
+        "Hoeffding/union bound",
+        "logarithms",
+        "algebraic inversion of an inequality"
+      ],
+      "why_it_matters": "Inverts the bound into an actionable dataset-size requirement: N ≥ log(2|H|/δ)/(2ε²). Makes 'collect more data' quantitative and exposes the (mild, logarithmic) dependence on |H| and the strong 1/ε² dependence on the tolerance.",
+      "transcript_summary": "Slide 31: set |H|·2exp(-2Nε²)≤δ and solve for N; for |H|=10000, δ=0.1, ε=0.1 this gives N≥610."
+    },
+    {
+      "concept": "Model complexity tradeoff (bias vs generalization)",
+      "importance_score": 90,
+      "demo_feasibility_score": 85,
+      "prerequisites": [
+        "generalization gap",
+        "role of |H|",
+        "ideal loss L(h_all,D_all)"
+      ],
+      "why_it_matters": "The punchline of the deck. Larger |H| lowers the best achievable loss L(h_all,D_all) but widens the train/true gap; smaller |H| shrinks the gap but raises the floor. This is the classic complexity/generalization tradeoff, with deep learning framed as the attempt to get both.",
+      "transcript_summary": "Slides 32-34: |H| = number of selectable functions (VC-dimension noted as out of scope); 'why not just use a tiny |H|?' — because fewer candidates raise L(h_all,D_all); larger vs smaller |H| diagrams show the bias/gap tradeoff, ending with 'Yes, Deep Learning.'"
+    }
+  ],
+  "selected_concepts": [
+    "Threshold classifier and hypothesis set H (function with unknown parameters)",
+    "Loss as error rate (0/1 loss) over a dataset",
+    "Empirical vs ideal risk: D_train vs D_all and the generalization gap",
+    "Good vs bad training set (uniform deviation condition)",
+    "Hoeffding's inequality + union bound generalization guarantee",
+    "Sample complexity: how many examples are needed",
+    "Model complexity tradeoff (bias vs generalization)"
+  ],
+  "selection_rationale": "The deck's spine is a single, self-contained story: a threshold classifier on an edge-count feature is used to derive a distribution-free generalization guarantee and the resulting model-complexity tradeoff. The seven selected concepts form that exact arc (model → loss → empirical-vs-ideal risk → good/bad sample → Hoeffding bound → required N → complexity tradeoff), so each notebook section feeds the next. They were also chosen for executability and interactivity (Priorities 1, 3): the whole story can be reproduced from two synthetic edge-count distributions that mimic the slide histograms—no image assets, no model training, no GPU—while still yielding rich, slider-driven visuals (histograms + threshold sweep, h_train vs h_all over many draws, empirical failure rate vs the Hoeffding bound, N∈{100,500,1000} reproducing the slide numbers, and a |H|-vs-gap tradeoff curve). The 'three-step framework' is kept only as framing (review, generic) and 'edge-count feature extraction' is deferred because faithful demoing needs image assets and edge detection, lowering self-contained executability; both remain candidates for optional enrichment.",
+  "assumptions": [
+    "Source is a slide deck (Hung-yi Lee-style ML lecture) in mixed English/Traditional Chinese; concepts were inferred from slide text and the running Pokémon-vs-Digimon example, not from an accompanying instructor transcript (none was provided).",
+    "The target artifact is one interactive Colab notebook, so concept selection favors a single coherent narrative over breadth.",
+    "Scores are 0-100 integers; importance reflects centrality to this specific deck's argument, and demo_feasibility reflects how cleanly the concept can be made executable and interactive in a self-contained Colab notebook.",
+    "The Pokémon/Digimon edge-count distributions will be re-created synthetically (two overlapping histograms over ~[1000,10000] with the slide's counts: ~819 Pokémon, ~971 Digimon, h_all≈4824, L(h_all,D_all)≈0.28) rather than downloaded, since the original image datasets are external links and not required to teach the concepts.",
+    "Loss is the bounded [0,1] error rate as in the slides; the Hoeffding analysis assumes i.i.d. sampling of D_train from D_all, matching the deck."
+  ]
+}

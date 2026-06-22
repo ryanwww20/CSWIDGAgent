@@ -1,0 +1,98 @@
+{
+  "course": "淺談機器學習原理 (Introduction to Machine Learning Principles) — Pokémon vs. Digimon Classifier case study (Hung-yi Lee ML course)",
+  "source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf",
+  "candidates": [
+    {
+      "concept": "Threshold classifier on an edge-count feature (f_h)",
+      "importance_score": 8,
+      "demo_feasibility_score": 9,
+      "prerequisites": [],
+      "why_it_matters": "Provides the single concrete model that anchors the entire lecture: a one-parameter classifier f_h(x) that outputs Digimon if e(x) >= h and Pokemon if e(x) < h, where e(x) is the number of edge pixels. It turns an abstract 'function with unknown parameters' into something students can see and manipulate, and makes |H| = {1,...,10000} a tangible hypothesis set.",
+      "transcript_summary": "Slides 7-10: domain knowledge says Digimon have more complex lines than Pokemon, so edge detection yields a scalar feature e(x) (e=3558 for a Pokemon, e=7389 for a Digimon). The classifier thresholds e at h; the candidate set H={1,2,...,10000} defines model complexity."
+    },
+    {
+      "concept": "Loss function and error rate (0/1 loss)",
+      "importance_score": 7,
+      "demo_feasibility_score": 9,
+      "prerequisites": [
+        "Threshold classifier on an edge-count feature (f_h)"
+      ],
+      "why_it_matters": "Defines how a hypothesis is scored: L(h,D) = (1/N) sum l(h, x_n, y_n) with l being the 0/1 indicator (error rate), optionally cross-entropy. It is the quantity minimized to pick h and the quantity whose [0,1] range is later required by Hoeffding's inequality.",
+      "transcript_summary": "Slide 11: L(h,D) is the average per-example loss; the example loss outputs 1 when f_h(x_n) != y_n and 0 otherwise, giving the error rate. Slide 26 notes the loss range [0,1] is what makes Hoeffding applicable."
+    },
+    {
+      "concept": "Generalization gap: training data vs. all data (h_train vs. h_all)",
+      "importance_score": 10,
+      "demo_feasibility_score": 9,
+      "prerequisites": [
+        "Threshold classifier on an edge-count feature (f_h)",
+        "Loss function and error rate (0/1 loss)"
+      ],
+      "why_it_matters": "This is the central question of the lecture: we can only minimize loss on a finite i.i.d. sample D_train (giving h_train) but care about performance on D_all (giving h_all). The empirical demo shows h_train and its true loss fluctuate with the sampled dataset, sometimes looking deceptively good (lower train loss than h_all's true loss).",
+      "transcript_summary": "Slides 12-16: h_all=argmin L(h,D_all), h_train=argmin L(h,D_train), (x_n,y_n)~D_all i.i.d. With D_all (819 Pokemon, 971 Digimon) h_all=4824, L=0.28. Two sampled training sets of 200 give h_train1=4727 (true loss 0.28) and h_train2=3642 (train loss 0.20 but true loss 0.37), illustrating sampling variability."
+    },
+    {
+      "concept": "Good-dataset condition and uniform convergence (proof chain)",
+      "importance_score": 8,
+      "demo_feasibility_score": 6,
+      "prerequisites": [
+        "Generalization gap: training data vs. all data (h_train vs. h_all)"
+      ],
+      "why_it_matters": "Bridges the empirical gap to a provable guarantee: if for ALL h in H, |L(h,D_train) - L(h,D_all)| <= eps = delta/2, then L(h_train,D_all) - L(h_all,D_all) <= delta. It justifies why 'D_train is a good proxy of D_all for every h' is the right thing to ask for, independent of model or distribution.",
+      "transcript_summary": "Slides 17-20: states the target gap <= delta, the sufficient uniform condition with eps=delta/2, and the three-step inequality proof L(h_train,D_all) <= L(h_train,D_train)+eps <= L(h_all,D_train)+eps <= L(h_all,D_all)+2eps. Slide 20 stresses the argument is model-agnostic and distribution-free."
+    },
+    {
+      "concept": "Probability of a bad training set: union bound + Hoeffding's inequality",
+      "importance_score": 9,
+      "demo_feasibility_score": 8,
+      "prerequisites": [
+        "Good-dataset condition and uniform convergence (proof chain)"
+      ],
+      "why_it_matters": "Quantifies how likely sampling fails: P(D_train is bad) <= sum over h of P(bad due to h) (union bound) and each term <= 2exp(-2*N*eps^2) (Hoeffding), giving P(bad) <= |H| * 2exp(-2*N*eps^2). This is the key generalization bound and shows exactly how N and |H| control failure probability.",
+      "transcript_summary": "Slides 21-30: a bad D_train is bad due to at least one h; union bound caps the probability by the sum; Hoeffding (loss range [0,1], N examples) gives 2exp(-2*N*eps^2) per h; combining yields |H|*2exp(-2*N*eps^2). Numerical example (slide 30): |H|=10000, eps=0.1 gives a vacuous bound at N=100 but ~0.91 at N=500 and ~0.00004 at N=1000."
+    },
+    {
+      "concept": "Sample complexity: N >= log(2|H|/delta) / (2 eps^2)",
+      "importance_score": 6,
+      "demo_feasibility_score": 8,
+      "prerequisites": [
+        "Probability of a bad training set: union bound + Hoeffding's inequality"
+      ],
+      "why_it_matters": "Inverts the bound to answer a practical question: to guarantee P(bad) <= delta, how many examples are needed? Makes the abstract bound actionable and shows N grows with log|H| and 1/eps^2.",
+      "transcript_summary": "Slide 31: solving |H|*2exp(-2*N*eps^2) <= delta gives N >= log(2|H|/delta)/(2*eps^2); with |H|=10000, delta=0.1, eps=0.1 this yields N >= 610."
+    },
+    {
+      "concept": "Model complexity and the bias-complexity tradeoff",
+      "importance_score": 9,
+      "demo_feasibility_score": 7,
+      "prerequisites": [
+        "Probability of a bad training set: union bound + Hoeffding's inequality",
+        "Generalization gap: training data vs. all data (h_train vs. h_all)"
+      ],
+      "why_it_matters": "The conceptual payoff: |H| measures model complexity (number of selectable functions). Smaller |H| shrinks the generalization gap but raises the best achievable loss L(h_all,D_all); larger |H| does the reverse. This is the bias-complexity tradeoff and motivates deep learning as a way to get both.",
+      "transcript_summary": "Slides 32-34: |H| is the number of possible functions (continuous params handled via discreteness/VC-dimension, out of scope). Smaller |H| => larger L(h_all,D_all) ('ideal collapses'); larger |H| => larger gap between L(h_train,D_all) and L(h_all,D_all). Slide 34 frames it as a tradeoff resolved by 'Yes, Deep Learning.'"
+    },
+    {
+      "concept": "Three-step ML framework (function with unknown parameters, loss, optimization)",
+      "importance_score": 5,
+      "demo_feasibility_score": 5,
+      "prerequisites": [],
+      "why_it_matters": "Reviews the standard ML recipe that frames where the threshold model and its loss come from, orienting students before the theory. Useful scaffolding but largely conceptual review with limited standalone interactivity.",
+      "transcript_summary": "Slides 2-3 (review): Step 1 define a function with unknown parameters, Step 2 define a loss, Step 3 optimization; plus the note that more parameters make overfitting easier, foreshadowing the model-complexity discussion."
+    }
+  ],
+  "selected_concepts": [
+    "Threshold classifier on an edge-count feature (f_h)",
+    "Generalization gap: training data vs. all data (h_train vs. h_all)",
+    "Probability of a bad training set: union bound + Hoeffding's inequality",
+    "Model complexity and the bias-complexity tradeoff"
+  ],
+  "selection_rationale": "These four concepts form the lecture's pedagogical spine and rank highest on combined importance and demo-feasibility. (1) The edge-count threshold classifier is the concrete, highly visual anchor (slider over h, edge-count histograms) that makes every later abstraction tangible. (2) The train-vs-all generalization gap is the lecture's core question and an outstanding interactive demo: repeatedly sample D_train from a synthetic D_all, compute h_train and its true loss, and watch the sampling variability. (3) The union-bound + Hoeffding result is the headline theorem and is ideal for a Monte Carlo demo that empirically verifies P(bad) <= |H|*2exp(-2*N*eps^2) and shows the roles of N and |H|. (4) The bias-complexity tradeoff is the conceptual climax and can be simulated by sweeping |H|. The 0/1 loss/error-rate concept is foundational but is naturally demonstrated inside concept (1) and (2) rather than as a standalone section; the good-dataset proof chain and sample-complexity formula are best presented as supporting derivations attached to concept (3); and the three-step framework is review-level framing. Selecting these four keeps the notebook coherent: concrete model -> why finite training works -> the bound -> the tradeoff.",
+  "assumptions": [
+    "No separate instructor transcript was supplied; transcript_summary fields summarize evidence drawn directly from the slide text and figures.",
+    "Source figures (Pokemon/Digimon images, edge-detection outputs, loss histograms) cannot be redistributed in the notebook, so demos will reproduce the same phenomena with synthetic or procedurally generated edge-count data matching the slides' setup (e.g., feature range ~[0,10000], h_all~4824, L~0.28).",
+    "Scores use a 0-10 integer scale where importance_score = pedagogical centrality to this lecture and demo_feasibility_score = ease of building an executable, interactive Colab demonstration.",
+    "Target audience is introductory-ML students; demos should favor visualization and interactivity (sliders, Monte Carlo simulation) over heavy mathematical derivation.",
+    "This run is part of an ablation that targets the notebook-architect stage; concept extraction is kept standard so downstream stage differences are attributable to the architect, not to concept selection."
+  ]
+}

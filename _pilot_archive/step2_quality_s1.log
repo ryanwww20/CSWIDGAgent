@@ -1,0 +1,594 @@
+[ablation] === S0__MLBasic__s1 ===
+[ablation] SKIP S0__MLBasic__s1 (notebook already present — resume)
+[ablation] === ablate-concept-extractor__MLBasic__s1 ===
+[run_pipeline][ERROR] cell-analyzer output failed validation: cell_specs[2] must be an object
+[run_pipeline] Ablation: dropping 'concept-extractor' (merge mode)
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+{
+  "notebook_title": "Why Does Training Data Work? Generalization Theory with the Pokemon vs. Digimon Classifier",
+  "learning_objectives": [
+    "Recall the 3-step ML recipe (function with unknown parameters, loss, optimization) and frame a classifier as choosing a hypothesis h from a hypothesis set H.",
+    "Build the single-parameter threshold classifier f_h from the lecture (decide Pokemon vs. Digimon by an edge-complexity feature) and compute its 0-1 error-rate loss on a dataset.",
+    "Di
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-concept-extractor__MLBasic__s1/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+{
+  "cell_specs": [
+    {
+      "cell_id": "C02",
+      "implementation_plan": "Environment + reproducibility setup. (1) import numpy as np, matplotlib.pyplot as plt, ipywidgets as widgets, and `from ipywidgets import interact, interactive, FloatSlider, IntSlider, Dropdown, Button, Output`. (2) Try to enable the Colab custom-widget manager: `try: from google.colab import output as _colab_output; _colab_output.enable_custom_widget_manager() except Exception: pass` so the same cell runs in plain J
+[ablation] generation failed/no notebook for ablate-concept-extractor__MLBasic__s1; recording empty exec result
+[ablation] === ablate-notebook-architect__MLBasic__s1 ===
+[run_pipeline] Ablation: dropping 'notebook-architect' (merge mode)
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+{
+  "course": "Hung-yi Lee Machine Learning — 淺談機器學習原理 (Principles of Machine Learning): Why model complexity causes overfitting, via the Pokemon vs. Digimon classifier",
+  "source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf",
+  "candidates": [
+    {
+      "concept": "Generalization and the probability of a bad training set",
+      "importance_score": 98,
+      "demo_feasibility_score": 95,
+      "prerequisites": [
+        "Empirical loss / error rate",
+       
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+{
+  "cell_specs": [
+    {
+      "cell_id": "C02",
+      "implementation_plan": "Import numpy as np, matplotlib.pyplot as plt, and ipywidgets as widgets inside a try/except (set WIDGETS_OK=False on ImportError). Enable inline display via the IPython magic '%matplotlib inline' (keep it as a literal magic line so the IPython-magic-aware syntax check recognizes it). Create a module-level seeded generator rng = np.random.default_rng(SEED) with SEED=20240621. Define constants: H_MAX=10000, H_MIN=1, N_
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+All 15 cells execute end-to-end (verified with `ipywidgets` present, all asserts passing: `emp_loss=0.284`, `emp_threshold=4801`, `h_all=4796`, `N≥611`, monotone tradeoff). Returning the generation report.
+
+{
+  "final_notebook_path": "notebooks/MLBasic_interactive_skill.ipynb",
+  "generated_cells": [
+    {"cell_id": "C01", "status": "generated", "notes": "Markdown: title, motivating question, roadmap table, synthetic-data note."},
+    {"cell_id": "C02", "status": "generated", "notes": "Setup: gu
+[run_pipeline] Assembled notebook: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb (15 cells, 34805 bytes)
+[run_pipeline] Stage 4 complete: 15 cells (9 code, 6 markdown)
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260621T131141Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/pipeline_outputs/run_log.json
+/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/.venv/lib/python3.12/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1
+
+=== stage A: execution ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --config /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1
+
+/Users/ryan/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-21T13:34:39.112299+00:00",
+  "input_notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb",
+  "executed_notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 4.0314,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 9,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "python_version": "3.11.15",
+    "machine": "arm64",
+    "processor": "arm",
+    "gpu_name": null,
+    "gpu_memory_total": null,
+    "cuda_hint": null
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --out /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/interactivity --max-points 3 --source slides
+
+/Users/ryan/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 9 code cells, 9 clean, total 5.2s
+  widgets: 45 enumerated, 11 drivable
+  widget planner: +10 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 2074, 'out': 446}, 'raw_count': 10, 'kept': 10}
+  #@param fields: 0
+  semantic planner: +2 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 3659, 'out': 167}, 'raw_count': 2, 'kept': 2, 'dropped': []}
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/interactivity/filmstrip.json  (+ frames in /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/interactivity/frames)
+  controls scored: 13 (1 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.0 flags=['strong_concept_link', 'redundant_controls:epsilon,epsilon#1,epsilon#2', 'redundant_controls:|H|,|H|#1', 'redundant_controls:delta,delta#1', 'speculative:gap_grid']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 12545, 'out': 1426}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    threshold h [widget/executed] = 5.0
+    train N [widget/executed] = 5.0
+    epsilon [widget/executed] = 4.0
+    seed [widget/executed] = 3.0
+    |H| [widget/executed] = 4.0
+    epsilon#1 [widget/executed] = 4.0
+    N_max [widget/executed] = 4.0
+    delta [widget/executed] = 4.0
+    |H|#1 [widget/executed] = 4.0
+    epsilon#2 [widget/executed] = 4.0
+    delta#1 [widget/executed] = 4.0
+    SIGMA [constant/executed] = 2.0
+    gap_grid [constant/reasoned] = 2.0
+
+#5 Interactivity = 3.77  (effectiveness, mean of 13 controls; 1 reasoned)
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --out /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/quality --max-images 6 --judge-samples 1 --executed /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/exec/executed.ipynb --slides /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf --frames /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/interactivity/frames
+
+WARNING: image-heavy deck (5742 extractable chars over 35 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf
+digest: notebook=30396 chars (executed.ipynb), 6 image(s); slides=6186 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=1
+
+#2 Faithfulness&Correctness = 4.62  (2a=5.0 2b=4.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 18979, 'out': 291}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0}
+   rationale: Notebook content closely follows slides 1–35: it defines a threshold classifier, 0-1 loss, training-vs-all-data generalization, Hoeffding + union bound, and the complexity/data tradeoff (cells 2, 5, 8, 11, 14). The numeric slide checkpoints are reproduced consistently: e.g. cell 6 prints h_all = 479
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A concrete synthetic Pokémon-vs-Digimon population with a visible edge-count histogram and optimal threshold line, grounding the abstract classifier in IMAGE 1.', "A Monte-Carlo histogram of worst-case generalization gaps for many training draws, with the epsilon cutoff marked, making 'bad training set' tangible in IMAGE 2.", 'A worked single-draw comparison plot of L(h, D_all) vs L(h, D_train) across thresholds, showing how the training optimum can differ from the population optimum and where the bad-set condition comes from in IMAGE 3.', 'A side-by-side empirical-vs-Hoeffding/union-bound plot across sample sizes, demonstrating the bound’s scaling and how it tracks the tail behavior qualitatively in IMAGE 4.', 'A sample-complexity calculator visualization that marks the crossing point N* and turns the inequality into a concrete required-data number in IMAGE 5.', 'A complexity tradeoff plot showing both best-in-class loss and the generalization bound as |H| grows, revealing the floor-vs-gap tension and the sweet spot in IMAGE 6.']
+   rationale: Compared with the slide deck, the notebook substantially deepens understanding by making the abstract symbols operational and visible. The slide states the Pokémon/Digimon threshold story, the bad-training-set definition, Hoeffding + union bound, and the complexity tradeoff; the notebook adds realiz
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: The notebook chose a highly central lecture concept: the full generalization story behind "more parameters overfit" via a toy Pokémon-vs-Digimon classifier, covering hypothesis classes, empirical loss, bad training sets, Hoeffding’s inequality, union bound, and the complexity/sample-size tradeoff. (
+
+#7 Clarity = 4.0  (7a=4.0 7b=4.0 7c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 12839, 'out': 443}, 'n_citations': 3}
+   rationale: Overall the notebook is clear and well scaffolded, but it is not perfect. The prose is organized with headings, roadmap, and short explanatory paragraphs, so textual clarity is strong. Code is mostly readable with descriptive names and comments, and each major step is narrated. Visually, the figures
+   visual: IMAGE 4 / code cell 9: Legend label for the analytic bound is compact and somewhat cramped relative to the plot, making the small '|H|=10' text
+   visual: IMAGE 5 / code cell 10: The green 'N* = 611' annotation sits very close to the plotted curve and the top of the axes, creating a slightly crampe
+   code_explanation: code cell 12: This is the densest cell in the notebook: nested-class construction, tradeoff table, twin-axis plot, and summary printou
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.62
+  2a_assertional         5.0
+  2b_computational       4.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        3.77
+  5_effectiveness        3.77
+  6_duration_seconds     4.0314
+  7_clarity              4.0
+  7a_visual              4.0
+  7b_textual             4.0
+  7c_code_explanation    4.0
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/summary.json
+[ablation] === ablate-cell-analyzer__MLBasic__s1 ===
+[run_pipeline] Ablation: dropping 'cell-analyzer' (merge mode)
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+{
+  "course": "淺談機器學習原理 (Why Deep? / Basic Idea of ML) — Pokémon vs. Digimon Classifier case study",
+  "source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf",
+  "candidates": [
+    {
+      "concept": "Three-step ML framework (function with unknown, define loss, optimization)",
+      "importance_score": 7,
+      "demo_feasibility_score": 6,
+      "prerequisites": ["functions", "basic optimization intuition"],
+      "why_it_matters": "Provides the scaffolding the w
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-cell-analyzer__MLBasic__s1/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+{
+  "notebook_title": "Why Deep? The Basic Idea of ML — A Pokémon vs. Digimon Generalization Lab",
+  "learning_objectives": [
+    "Build a concrete one-parameter threshold classifier f_h(x) on a single edge-complexity feature and predict Pokémon vs. Digimon.",
+    "Define the empirical 0/1 loss (error rate) L(h, D) and use it to pick the best threshold h_all on the full population.",
+    "Distinguish the ideal h_all (argmin over D_all) from the realized h_train (argmin over a sampled D_train) an
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-cell-analyzer__MLBasic__s1/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+Verification passed: JSON is valid, all 19 cells match stage 2 in count/order/`cell_id`/`cell_type`, and every code cell executes top-to-bottom on a headless kernel through the ipywidgets static-fallback path (`h_all=4846`, `L*≈0.271`, lucky/unlucky gaps 0.012 vs 0.202, P(bad) decreasing with N, U-shaped tradeoff with a sharply rising right arm at |H|=10000). The only output noise is the benign Agg "cannot be shown" warning, which does not occur on a real inline/Colab kernel.
+
+{
+  "final_noteboo
+[run_pipeline] Assembled notebook: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-cell-analyzer__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb (19 cells, 27041 bytes)
+[run_pipeline] Stage 4 complete: 19 cells (11 code, 8 markdown)
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-cell-analyzer__MLBasic__s1/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260621T133556Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-cell-analyzer__MLBasic__s1/pipeline_outputs/run_log.json
+/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/.venv/lib/python3.12/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1
+
+=== stage A: execution ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-cell-analyzer__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --config /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1
+
+/Users/ryan/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+[IPKernelApp] ERROR | KeyboardInterrupt caught in kernel.
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-21T13:55:44.011885+00:00",
+  "input_notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-cell-analyzer__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb",
+  "executed_notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 2.6388,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 11,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "python_version": "3.11.15",
+    "machine": "arm64",
+    "processor": "arm",
+    "gpu_name": null,
+    "gpu_memory_total": null,
+    "cuda_hint": null
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-cell-analyzer__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --out /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1/interactivity --max-points 3 --source slides
+
+/Users/ryan/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 11 code cells, 11 clean, total 4.5s
+  widgets: 39 enumerated, 8 drivable
+  widget planner: +10 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1776, 'out': 354}, 'raw_count': 10, 'kept': 10}
+  #@param fields: 0
+  semantic planner: +8 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4408, 'out': 751}, 'raw_count': 10, 'kept': 8, 'dropped': []}
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1/interactivity/filmstrip.json  (+ frames in /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1/interactivity/frames)
+  controls scored: 16 (1 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.0 flags=['dead_control:raw_poke', 'dead_control:raw_digi', 'only_cosmetic:bins@c5', 'only_cosmetic:_plot_threshold', 'strong_concept_link:h', 'strong_concept_link:h#1', 'strong_concept_link:eps', 'strong_concept_link:H_size', 'strong_concept_link:level_index', 'strong_concept_link:N_DRAW']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 13212, 'out': 1327}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    h [widget/executed] = 5.0
+    h#1 [widget/executed] = 5.0
+    N [widget/executed] = 5.0
+    seed [widget/executed] = 4.0
+    N#1 [widget/executed] = 4.0
+    eps [widget/executed] = 5.0
+    H_size [widget/executed] = 5.0
+    level_index [widget/executed] = 5.0
+    N_PER_CLASS [constant/executed] = 3.0
+    raw_poke [constant/executed] = 1.0
+    raw_digi [constant/executed] = 1.0
+    bins@c5 [constant/executed] = 1.0
+    _plot_threshold [input/executed] = 1.0
+    bins@c5 [constant/executed] = 1.0
+    loss_curve_all [view_only/reasoned] = 1.0
+    N_DRAW [constant/executed] = 5.0
+
+#5 Interactivity = 3.25  (effectiveness, mean of 16 controls; 1 reasoned)
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/ablate-cell-analyzer__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --out /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1/quality --max-images 6 --judge-samples 1 --executed /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1/exec/executed.ipynb --slides /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf --frames /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1/interactivity/frames
+
+WARNING: image-heavy deck (5742 extractable chars over 35 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf
+digest: notebook=23580 chars (executed.ipynb), 6 image(s); slides=6186 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=1
+
+#2 Faithfulness&Correctness = 4.62  (2a=5.0 2b=4.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 16983, 'out': 260}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0}
+   rationale: The notebook is broadly faithful to the slides and the explained ML concepts are correct. It follows the lecture’s arc: unknown-parameter classifier, 0/1 loss, training vs population error, Hoeffding + union bound, and model-complexity tradeoff (slides 2, 10–34; notebook cells 3, 6, 9, 12, 15, 18). 
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A concrete synthetic Pokémon-vs-Digimon edge-count dataset is shown as overlapping histograms, making the one-feature classifier idea tangible beyond the slide’s abstract example (IMAGE 1).', 'The notebook plots the full population loss curve L(h, D_all) and marks the optimal threshold h_all, so learners can see why a particular threshold is best and that the loss is a staircase/V-shape over h (IMAGE 2).', 'It contrasts lucky vs unlucky sampled training sets, showing side-by-side training-loss and population-loss curves with explicit h_train, train loss, true loss, and generalization gap values, which clarifies why empirical minima can generalize differently (IMAGE 3).', 'It empirically estimates P(bad) with Monte Carlo and compares it to the Hoeffding + union-bound expression across N, making the abstract bound feel operational and revealing how loose/tight it is in practice (IMAGE 4).', 'It visualizes the approximation-vs-estimation tradeoff across model sizes as a U-shaped total-error curve, directly illustrating the complexity tradeoff and why neither tiny nor huge H is ideal (IMAGE 5 and IMAGE 6).']
+   rationale: Compared with the slides, this notebook adds several realized, visible mechanisms that deepen understanding: a synthetic but concrete 1-D feature space with class overlap (IMAGE 1), the exact population loss landscape and optimum threshold (IMAGE 2), worked examples of lucky/unlucky samples with exp
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: The notebook chose a very strong demo concept: the full basic machine-learning arc, using Pokémon vs. Digimon as a concrete vehicle. (A) CENTRALITY: this is not a side example; it is the lecture’s core throughline, covering classifier selection, loss, optimization, generalization, Hoeffding/union bo
+
+#7 Clarity = 3.0  (7a=2.0 7b=4.0 7c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 10843, 'out': 410}, 'n_citations': 3}
+   rationale: The notebook is generally well laid out, with clear sectioning and mostly readable plots, but there are two serious visual clarity problems. In IMAGE 3 (cell 10), the figure titles run into each other across the two side-by-side panels: the long left title and the long right title are crowded, and t
+   visual: IMAGE 3 / code cell 10: Two-panel figure has title crowding/overlap at the top; the long subplot titles are cramped and one is effectively clipp
+   code_explanation: code cell 13: Dense Monte-Carlo loop and bound computation are presented with only a brief header comment; the step-by-step reasoning 
+   code_explanation: code cell 16: The complexity sweep is a compact computation block with minimal commentary; the construction of nested hypothesis sets 
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.62
+  2a_assertional         5.0
+  2b_computational       4.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        3.25
+  5_effectiveness        3.25
+  6_duration_seconds     2.6388
+  7_clarity              3.0
+  7a_visual              2.0
+  7b_textual             4.0
+  7c_code_explanation    4.0
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/ablate-cell-analyzer/MLBasic__s1/summary.json
+[ablation] === B__MLBasic__s1 ===
+[validator] note: cell_specs include 7 non-code (markdown) cell id(s) ['C01', 'C03', 'C05', 'C07', 'C10', 'C13', 'C15']; ignored by stage 4
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+{
+  "course": "Machine Learning (Hung-yi Lee) — 淺談機器學習原理: Why/When Does a Model Generalize (Pokémon vs. Digimon Classifier)",
+  "source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf",
+  "candidates": [
+    {
+      "concept": "Pokémon vs. Digimon threshold classifier (function with an unknown parameter)",
+      "importance_score": 9,
+      "demo_feasibility_score": 10,
+      "prerequisites": ["functions / piecewise functions", "binary classification idea", "1-D fe
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B__MLBasic__s1/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+Stage 2 output written to `runs/B__MLBasic__s1/pipeline_outputs/02_notebook_structure.json` — valid JSON, 15 cells, 5 learning objectives, all dependencies reference earlier cells (verified executable top-to-bottom).
+
+Design summary:
+- **Concept coverage** — each of the 5 selected concepts gets a markdown explanation before its demo: threshold classifier (C03–C04, C06), 0-1 loss (C05–C06), sampling variability (C07–C09), generalization bound with Hoeffding/union-bound/sample-complexity folded in
+[run_pipeline] notebook-architect: stdout was not a JSON object (no valid JSON payload found in model output); using the on-disk artifact 02_notebook_structure.json
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B__MLBasic__s1/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+{
+  "cell_specs": [
+    {
+      "cell_id": "C01",
+      "implementation_plan": "Markdown only. Render: (1) the notebook title; (2) the motivating puzzle 'more parameters make overfitting easier - why?'; (3) a 5-section roadmap mapping the concept chain threshold classifier -> 0-1 loss -> sampling variability -> generalization bound -> complexity tradeoff to the notebook sections (Concept 1 -> C03/C04/C06, Concept 2 -> C05/C06, Concept 3 -> C07/C08/C09, Concept 4 -> C10/C11/C12, Concept 5 -> C13/
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B__MLBasic__s1/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+The artifact is written and verified: all 15 cells execute top-to-bottom via their static fallbacks, calibration lands at h_all=4775 / ideal loss 0.297 (within tolerance of 4824/0.28), and the bound checkpoints reproduce the slide numbers exactly (2706.7, 0.908, 4.12e-5; N≥611). Returning the generation report.
+
+{
+  "final_notebook_path": "notebooks/MLBasic_interactive_skill.ipynb",
+  "generated_cells": [
+    {"cell_id": "C01", "status": "generated", "notes": "Markdown: title, motivating puzzle,
+[run_pipeline] Assembled notebook: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb (15 cells, 30132 bytes)
+[run_pipeline] Stage 4 complete: 15 cells (8 code, 7 markdown)
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B__MLBasic__s1/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260621T135834Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B__MLBasic__s1/pipeline_outputs/run_log.json
+/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/.venv/lib/python3.12/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1
+
+=== stage A: execution ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --config /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1
+
+/Users/ryan/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-21T14:26:47.364441+00:00",
+  "input_notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb",
+  "executed_notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 2.6498,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 8,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "python_version": "3.11.15",
+    "machine": "arm64",
+    "processor": "arm",
+    "gpu_name": null,
+    "gpu_memory_total": null,
+    "cuda_hint": null
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --out /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1/interactivity --max-points 3 --source slides
+
+/Users/ryan/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 8 code cells, 8 clean, total 3.1s
+  widgets: 33 enumerated, 7 drivable
+  widget planner: +9 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1715, 'out': 305}, 'raw_count': 9, 'kept': 9}
+  #@param fields: 0
+  semantic planner: +5 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4216, 'out': 433}, 'raw_count': 5, 'kept': 5, 'dropped': []}
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1/interactivity/filmstrip.json  (+ frames in /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1/interactivity/frames)
+  controls scored: 12 (0 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.0 flags=['dead_control:mu_p', 'dead_control:sigma', 'only_cosmetic:N_TRIALS', 'strong_concept_link:h', 'strong_concept_link:H_size']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 11599, 'out': 1205}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    h [widget/executed] = 5.0
+    N [widget/executed] = 4.0
+    seed [widget/executed] = 4.0
+    H_size [widget/executed] = 5.0
+    epsilon [widget/executed] = 4.0
+    delta [widget/executed] = 4.0
+    idx [widget/executed] = 4.0
+    mu_p [constant/executed] = 1.0
+    mu_d [constant/executed] = 3.0
+    sigma [constant/executed] = 1.0
+    N_TRAIN [constant/executed] = 4.0
+    N_TRIALS [constant/executed] = 2.0
+
+#5 Interactivity = 3.42  (effectiveness, mean of 12 controls; 0 reasoned)
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /Users/ryan/miniconda3/envs/ml-colab-eval/bin/python /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --out /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1/quality --max-images 6 --judge-samples 1 --executed /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1/exec/executed.ipynb --slides /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf --frames /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1/interactivity/frames
+
+WARNING: image-heavy deck (5742 extractable chars over 35 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf
+digest: notebook=26085 chars (executed.ipynb), 6 image(s); slides=6186 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=1
+
+#2 Faithfulness&Correctness = 4.09  (2a=5.0 2b=3.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 17595, 'out': 328}, 'assertional_raw': 4.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0}
+   rationale: Notebook is broadly faithful to slides: it covers the same threshold-classifier story, 0-1 loss, sampling variability, Hoeffding/union-bound derivation, and complexity tradeoff (cells 2,4,6,9,12,14). The main source-matching issue is not a contradiction but an implementation discrepancy: the noteboo
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A concrete worked synthetic population in IMAGE 1 that makes the abstract threshold model visible: overlapping Pokemon vs. Digimon edge-count distributions with the optimal threshold marked.', 'A direct visualization of 0-1 loss and decision boundaries in the visible plots from IMAGE 1 and the interactive boundary viewer (IMAGE 4), so learners see how moving h changes classification error.', 'A Monte-Carlo display of sampling variability in IMAGE 2 / IMAGE 5 / IMAGE 6: the fitted h_train histogram and the split training-loss vs real-world-loss histograms show that the same model can look good on train but worse on D_all.', 'A numerical/graphical verification of the union-bound + Hoeffding generalization story in IMAGE 3, including the slide’s checkpoint values and an empirical-vs-analytic comparison across N.', "A tradeoff visualization in IMAGE 4 that makes the complexity tension concrete: as |H| grows, the best achievable population loss plateaus while the bound worsens, illustrating the 'fish vs bear paw' point beyond the slide text."]
+   rationale: The notebook adds substantial pedagogical depth beyond the slides by turning the Pokemon/Digimon toy story into realized, inspectable evidence. IMAGE 1 grounds the threshold classifier in an actual overlapping distribution and shows the optimum threshold visually. IMAGE 2 then goes beyond the slide’
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: The notebook chose a genuinely central lecture idea: why more parameters can overfit, framed through the Pokémon-vs-Digimon classifier and the generalization bound. (A) CENTRALITY is very strong because the slides build the whole segment around this example as the main vehicle for introducing loss, 
+
+#7 Clarity = 3.6  (7a=3.0 7b=4.0 7c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 11455, 'out': 589}, 'n_citations': 5}
+   rationale: Visual clarity is pulled down by a real overlap defect in the default/hero interactive tradeoff plot: IMAGE 4 shows the title 'Tradeoff at |H|=200: loss floor 0.298, bound 0.0182' sitting very close to the top of the axes, with the title and upper plotting region crowded, and the right-hand legend/s
+   visual: IMAGE 4 (interaction frame step00_baseline_0): Default/hero tradeoff plot uses a scale that compresses the red best-loss curve into a near-flat sliver around 0.30, mak
+   visual: IMAGE 4 (interaction frame step00_baseline_0): Title and plotting region are tightly packed at the top of the figure; the figure is visually crowded rather than cleanl
+   textual: markdown cell 9: Dense block of theorem statements and formulas with multiple bullets in one section; it is still organized, but it is cl
+   code_explanation: code cell 10: Long calculation cell with several numerical experiments and plotting steps, but only a brief heading and inline comment
+   code_explanation: code cell 13: Another dense computational cell that computes the tradeoff curves and plotting outputs with limited prose scaffolding a
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.09
+  2a_assertional         5.0
+  2b_computational       3.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        3.42
+  5_effectiveness        3.42
+  6_duration_seconds     2.6498
+  7_clarity              3.6
+  7a_visual              3.0
+  7b_textual             4.0
+  7c_code_explanation    4.0
+
+wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/evalkit/results/B/MLBasic__s1/summary.json
+[ablation] === B+bug_solver__MLBasic__s1 ===
+[run_pipeline][ERROR] demo-coder must return a JSON object
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+{
+  "course": "淺談機器學習原理 (Basic Principles of Machine Learning) — Pokémon vs. Digimon Classifier Case Study",
+  "source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf",
+  "candidates": [
+    {
+      "concept": "Threshold classifier with an unknown parameter on a 1-D feature (edge count e)",
+      "importance_score": 9,
+      "demo_feasibility_score": 10,
+      "prerequisites": ["Basic idea of ML (function + loss + optimization)", "Simple feature extraction"],
+     
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B+bug_solver__MLBasic__s1/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+{
+  "notebook_title": "Why Training Generalizes: A Pokémon-vs-Digimon Tour of Statistical Learning Theory",
+  "learning_objectives": [
+    "Build a 1-D threshold classifier f_h on an edge-count feature and recognize the candidate set H as the model, with |H| its complexity.",
+    "Define the 0/1 loss (error rate) L(h, D) and find the best whole-population threshold h_all.",
+    "Distinguish training data D_train (sampled i.i.d. from D_all) from all data, and see why h_train can be lucky or unluc
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B+bug_solver__MLBasic__s1/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+{
+  "cell_specs": [
+    {
+      "cell_id": "C02",
+      "implementation_plan": "Environment setup. (1) import numpy as np, matplotlib.pyplot as plt, and ipywidgets as widgets; also `from ipywidgets import interact, IntSlider, FloatSlider, SelectionSlider`. (2) Enable inline rendering with the IPython magic line `%matplotlib inline` (must be the very first executable statement so the syntax checker treats it as a magic, not a modulo). (3) Define SEED = 42 as a module-level constant. (4) Create th
+[run_pipeline] Wrote /Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/B+bug_solver__MLBasic__s1/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+All 19 cells verified: counts/ids/types/order match stage 2, every code cell parses, and a full non-interactive top-to-bottom dry-run runs without exceptions. Calibration lands inside the soft gates (h_all=4646 ∈ [4500,5200], L_h_all=0.268 ∈ [0.24,0.32]), `required_N=611`, the bound numbers match the slides (N=500→0.908, N=1000→4.1e-5), and the tradeoff table shows the intended monotone crossover (best_loss ↓ 0.277→0.268, bound ↑ 0.001→0.908). The artifact is written to disk.
+
+{
+  "final_noteboo
+[ablation] generation failed/no notebook for B+bug_solver__MLBasic__s1; recording empty exec result
+[ablation] generated 3 / processed 6 (skipped 1)
+[ablation] aggregating...
+[aggregate] 6 runs across 6 conditions
+[aggregate] wrote results/summary.csv, summary.md, *.png
+wrote results/evalkit_runs.csv (4 runs)
+wrote results/evalkit_by_condition.md
+[ablation] done. See results/evalkit_by_condition.md (7-metric vector + paired deltas vs B)

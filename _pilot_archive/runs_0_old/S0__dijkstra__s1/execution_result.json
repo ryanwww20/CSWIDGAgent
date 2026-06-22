@@ -1,0 +1,14 @@
+{
+  "notebook": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/runs/S0__dijkstra__s1/notebooks/dijkstra_interactive_skill.ipynb",
+  "ran_to_completion": true,
+  "error_type": null,
+  "error_name": null,
+  "error_value": null,
+  "first_failed_cell_index": null,
+  "first_failed_code_cell": null,
+  "n_code_cells": 9,
+  "executed_code_cells": 9,
+  "wall_seconds": 1.66,
+  "per_cell_timeout": 300,
+  "kernel": "python3"
+}

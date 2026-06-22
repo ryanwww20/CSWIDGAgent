@@ -1,0 +1,86 @@
+{
+  "final_notebook_path": "notebooks/MLBasic_interactive_skill.ipynb",
+  "generated_cells": [
+    {
+      "cell_id": "C01",
+      "status": "generated",
+      "notes": "Title, four learning objectives (matches 02), four-part roadmap, synthetic-data disclaimer."
+    },
+    {
+      "cell_id": "C02",
+      "status": "generated",
+      "notes": "Imports, %matplotlib inline, guarded ipywidgets import with WIDGETS_AVAILABLE, single seeded rng (SEED=0), rcParams, version print, assertions. No pip executed."
+    },
+    {
+      "cell_id": "C03",
+      "status": "generated",
+      "notes": "Concept 1 markdown: feature e(x), classifier f_h, H={1..10000}, 0/1 loss, label convention (0=Pokémon,1=Digimon)."
+    },
+    {
+      "cell_id": "C04",
+      "status": "generated",
+      "notes": "make_population/classify/zero_one_loss; e_all,y_all,H_FULL,H_SIZE_FULL defined once; clip+int, range/label assertions, sanity printout."
+    },
+    {
+      "cell_id": "C05",
+      "status": "generated",
+      "notes": "plot_threshold(h) with shared-bin histograms, threshold line, live L(h); IntSlider(step=50,value=4824) or static h=4824 fallback."
+    },
+    {
+      "cell_id": "C06",
+      "status": "generated",
+      "notes": "Concept 2 markdown: h_train vs h_all argmins, generalization gap, randomness/deceptive samples, slide h_train1/h_train2 numbers."
+    },
+    {
+      "cell_id": "C07",
+      "status": "generated",
+      "notes": "best_threshold (memory-guarded broadcast), sample_dtrain, fit_and_eval; h_all/L_all computed over H_FULL with soft calibration warning."
+    },
+    {
+      "cell_id": "C08",
+      "status": "generated",
+      "notes": "Two-panel sampling-variability demo (resample button + N slider; n_trials true-loss histogram vs L_all); Output widgets + observe handlers with try/except; static fallback. N/n_trials capped at 1000."
+    },
+    {
+      "cell_id": "C09",
+      "status": "generated",
+      "notes": "Concept 3 derivation: 'bad' set, union bound, per-hypothesis Hoeffding, boxed |H|*2exp(-2 N eps^2), vacuity + slide numbers + sample complexity."
+    },
+    {
+      "cell_id": "C10",
+      "status": "generated",
+      "notes": "hoeffding_union_bound, subgrid_H, is_bad (precomputed L_all_H), estimate_p_bad; empirical-vs-bound plot + raw/clamped/empirical table; vacuity asserts; interact over eps/|H|/#trials with static fallback."
+    },
+    {
+      "cell_id": "C11",
+      "status": "generated",
+      "notes": "Concept 4 markdown: |H| as complexity, both tradeoff directions, bias-complexity framing, 'why deep learning' punchline."
+    },
+    {
+      "cell_id": "C12",
+      "status": "generated",
+      "notes": "restricted_H nested grids, cached population best-loss, tradeoff_curves (best-loss + expected gap), log-x plot_tradeoff with monotonicity diagnostic; interact over N/#trials with static fallback."
+    },
+    {
+      "cell_id": "C13",
+      "status": "generated",
+      "notes": "Summary markdown: recap of four concepts with cell refs, restated bound + log|H| / 1/eps^2 sample-complexity intuition, extensions limited to features actually built."
+    }
+  ],
+  "execution_status": {
+    "top_to_bottom_runnable": true,
+    "failed_cell_ids": []
+  },
+  "dependency_notes": [
+    "Strict top-to-bottom chain honored: C02 defines rng/WIDGETS_AVAILABLE; C04 defines e_all,y_all,classify,zero_one_loss,H_FULL (read-only thereafter); C07 defines h_all,L_all,best_threshold,sample_dtrain,fit_and_eval; C10 defines hoeffding_union_bound,is_bad,estimate_p_bad reused by C12; C12 defines restricted_H.",
+    "Shared bin edges `_BINS` are defined in C05 and reused by C08's panel A, so C08 depends on C05 having executed (both are sequential code cells, so this holds under top-to-bottom run).",
+    "Every widget cell (C05, C08, C10, C12) has a WIDGETS_AVAILABLE=False static branch that runs default computations, so nbclient verification produces output without ipywidgets and without network/pip.",
+    "All sampling flows through the single seeded rng (SEED=0); interactive resample controls advance it intentionally to expose variability."
+  ],
+  "assumptions": [
+    "C04 Gaussian constants are tuned toward the lecture targets (h_all~4824, L_all~0.28); if the realized optimum drifts, C07 prints a warning rather than raising, so verification never hard-fails on calibration.",
+    "Monte Carlo defaults are kept modest (C08 #trials=300; C10/C12 n_trials=150; C10 empirical sub-grid |H|=1000) and the vectorized loss path is memory-guarded (5e7 threshold) to stay within Stage 5 cell timeouts; counts are exposed as widgets for higher-fidelity runs.",
+    "`display` is available in the executing kernel namespace (standard under IPython/nbclient and Colab); used only inside the WIDGETS_AVAILABLE branch of C08.",
+    "top_to_bottom_runnable is the demo-coder self-assessment from static analysis (valid JSON, matching cell alignment, magic-aware syntax check of every code cell, guarded fallbacks); Stage 5 (notebook_verifier.py on the colab kernel) remains the authoritative check."
+  ]
+}

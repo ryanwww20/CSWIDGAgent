@@ -1,0 +1,135 @@
+{
+  "course": "Introduction to Machine Learning - Why Training Generalizes: Model Complexity & the Generalization Bound (Pokemon vs. Digimon case study)",
+  "source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/MLBasic.pdf",
+  "candidates": [
+    {
+      "concept": "Edge-count feature extraction (image complexity -> scalar feature e)",
+      "importance_score": 80,
+      "demo_feasibility_score": 88,
+      "prerequisites": [
+        "image as a pixel array",
+        "grayscale conversion",
+        "edge detection (Canny/Sobel)"
+      ],
+      "why_it_matters": "Turns the intuition 'Pokemon look simpler, Digimon look busier' (p.8) into one measurable number e = count of edge pixels (p.9: e=3558 vs 7389). This scalar is the input to every later step, so it grounds the whole pipeline in something students can compute and visualize.",
+      "transcript_summary": "Slides p.8-9: Digimon have more complex outlines; edge detection yields an edge-pixel count e used as the classification feature."
+    },
+    {
+      "concept": "Threshold classifier f_h and model complexity |H|",
+      "importance_score": 90,
+      "demo_feasibility_score": 95,
+      "prerequisites": [
+        "edge-count feature e",
+        "binary classification",
+        "decision rule / threshold"
+      ],
+      "why_it_matters": "Defines Step 1 of ML, a 'function with an unknown parameter': f_h predicts Digimon if e>=h else Pokemon (p.10). The hypothesis set H={1,...,10000} introduces |H| as the number of candidate functions = model 'complexity', the single quantity the entire generalization argument hinges on.",
+      "transcript_summary": "Slides p.10: f_h thresholds the edge count; H={1,...,10000}, |H| = number of candidate functions (model complexity)."
+    },
+    {
+      "concept": "Empirical loss and 0-1 error rate L(h, D)",
+      "importance_score": 85,
+      "demo_feasibility_score": 95,
+      "prerequisites": [
+        "labeled dataset",
+        "indicator function",
+        "threshold classifier f_h"
+      ],
+      "why_it_matters": "Step 2 of ML: how good is a threshold? L(h,D) = mean over examples of the 0-1 loss I(f_h(x) != y_hat) (p.11). Gives students a concrete objective to minimize and the bridge from a single classifier to evaluating it on data; cross-entropy is noted as an alternative loss.",
+      "transcript_summary": "Slides p.11: L(h,D)=(1/N) sum l(h,x^n,y_hat^n), error-rate (0-1) loss; cross-entropy optional."
+    },
+    {
+      "concept": "Generalization gap: D_train vs D_all and h_train vs h_all",
+      "importance_score": 95,
+      "demo_feasibility_score": 90,
+      "prerequisites": [
+        "empirical loss L(h,D)",
+        "i.i.d. sampling",
+        "argmin over H"
+      ],
+      "why_it_matters": "The central problem: we optimize h_train on a sample D_train but care about loss on the full universe D_all (p.12-16). Concretely shows low training loss can mean high real loss (p.16: 0.20 on train vs 0.37 on all), motivating why generalization, not training accuracy, is the goal.",
+      "transcript_summary": "Slides p.12-16: h_train=argmin L(h,D_train) vs ideal h_all; i.i.d. sampling; we hope L(h_train,D_all)~L(h_all,D_all). Worked examples show train loss can mislead."
+    },
+    {
+      "concept": "Probability of a bad training set and the Hoeffding generalization bound",
+      "importance_score": 92,
+      "demo_feasibility_score": 86,
+      "prerequisites": [
+        "generalization gap",
+        "union bound (Boole's inequality)",
+        "Hoeffding's inequality"
+      ],
+      "why_it_matters": "Quantifies how often a random sample misleads us: P(D_train is bad) <= |H| * 2 * exp(-2*N*eps^2) (p.22-30). This is the key theoretical result tying sample size N and complexity |H| to reliability, and a Monte-Carlo simulation can empirically confirm the bound holds.",
+      "transcript_summary": "Slides p.22-30: a bad D_train means some h has |L(h,D_train)-L(h,D_all)|>eps; union bound + Hoeffding give P(bad) <= |H|*2exp(-2N eps^2); numeric examples for N=100/500/1000."
+    },
+    {
+      "concept": "Hoeffding's inequality for a single hypothesis",
+      "importance_score": 78,
+      "demo_feasibility_score": 85,
+      "prerequisites": [
+        "empirical vs expected loss",
+        "loss bounded in [0,1]",
+        "i.i.d. samples"
+      ],
+      "why_it_matters": "The concentration result P(|L(h,D_train)-L(h,D_all)|>eps) <= 2exp(-2N eps^2) for one fixed h (p.26). It is the per-hypothesis building block the union bound aggregates, and is easy to verify empirically by resampling.",
+      "transcript_summary": "Slides p.26: Hoeffding bounds per-hypothesis deviation; loss range [0,1], N=|D_train|."
+    },
+    {
+      "concept": "Sample complexity N >= log(2|H|/delta)/(2 eps^2)",
+      "importance_score": 76,
+      "demo_feasibility_score": 90,
+      "prerequisites": [
+        "Hoeffding generalization bound",
+        "logarithms / algebra"
+      ],
+      "why_it_matters": "Inverts the bound to answer 'how much data do we need?' (p.31): for |H|=10000, delta=eps=0.1, N>=610. Lets students interactively see how required data grows with complexity and shrinks with looser tolerance, which is directly actionable.",
+      "transcript_summary": "Slides p.31: solving |H|*2exp(-2N eps^2)<=delta gives N>=log(2|H|/delta)/(2 eps^2); example N>=610."
+    },
+    {
+      "concept": "Model complexity tradeoff (bias vs. generalization in |H|)",
+      "importance_score": 93,
+      "demo_feasibility_score": 88,
+      "prerequisites": [
+        "generalization bound",
+        "ideal loss L(h_all,D_all)",
+        "generalization gap"
+      ],
+      "why_it_matters": "The payoff of the whole lecture: larger |H| lowers the best achievable loss L(h_all,D_all) but widens the train-all gap, while smaller |H| does the reverse (p.33-34). Captures the core complexity/bias tradeoff and motivates deep learning as a way to 'have both'.",
+      "transcript_summary": "Slides p.33-34: smaller |H| -> larger L(h_all,D_all) but smaller gap; tradeoff of model complexity; 'Yes, Deep Learning' as the resolution."
+    },
+    {
+      "concept": "Three-step ML framework (function, loss, optimization)",
+      "importance_score": 58,
+      "demo_feasibility_score": 55,
+      "prerequisites": [],
+      "why_it_matters": "Recap framing (p.2): every model = unknown-parameter function -> define loss -> optimize. Useful as the notebook's organizing skeleton but is review material with little standalone interactivity.",
+      "transcript_summary": "Slides p.2: review of the 3-step ML recipe (function with unknown, define loss, optimization)."
+    },
+    {
+      "concept": "Union bound (Boole's inequality) over the hypothesis set",
+      "importance_score": 68,
+      "demo_feasibility_score": 62,
+      "prerequisites": [
+        "probability of events",
+        "set union"
+      ],
+      "why_it_matters": "Justifies summing per-hypothesis failure probabilities: P(union of bad events) <= sum of P (p.24). A reusable probability tool, but mostly a stepping stone inside the bound derivation rather than a standalone demo.",
+      "transcript_summary": "Slides p.23-24: a D_train is bad if any h fails; the union bound turns the union over H into a sum over H."
+    }
+  ],
+  "selected_concepts": [
+    "Edge-count feature extraction (image complexity -> scalar feature e)",
+    "Threshold classifier f_h and model complexity |H|",
+    "Empirical loss and 0-1 error rate L(h, D)",
+    "Generalization gap: D_train vs D_all and h_train vs h_all",
+    "Probability of a bad training set and the Hoeffding generalization bound",
+    "Model complexity tradeoff (bias vs. generalization in |H|)"
+  ],
+  "selection_rationale": "The selected six form one self-contained, executable storyline that mirrors the lecture's arc: (1) a concrete edge-count feature makes the problem tangible and visual; (2) a threshold classifier introduces the hypothesis and |H|; (3) empirical 0-1 loss gives an objective; (4) the train-vs-all generalization gap states the real problem (interactive sampling + histograms); (5) the Hoeffding/union-bound result explains and bounds it (Monte-Carlo verifiable); and (6) the model-complexity tradeoff delivers the punchline. Each step is interactive (threshold slider, resampling, Monte-Carlo, complexity-vs-loss curves) and directly grounded in specific slides, maximizing executability and pedagogical payoff. Ranking is by importance x demo-feasibility, with narrative coherence as the tiebreaker. Deprioritized candidates - single-hypothesis Hoeffding (p.26), sample complexity (p.31), and the union bound (p.24) - are valuable but fit best as optional asides inside the generalization-bound section, and the 3-step recap (p.2) is review framing with low standalone interactivity, so they serve as the notebook's connective tissue rather than headline demos.",
+  "assumptions": [
+    "No instructor transcript was provided; all concepts and evidence are drawn solely from the 35 lecture slides in MLBasic.pdf.",
+    "The original Pokemon/Digimon image datasets (Kaggle/Qiita, p.14) are not bundled with the run, so a self-contained Colab demo should either download a small image sample or, more robustly, simulate the edge-count distributions directly from the histograms on p.14-16 (Pokemon ~819, Digimon ~971; h_all=4824, L(h_all,D_all)=0.28) so the notebook runs fully offline.",
+    "Scores are integers on a 0-100 scale: importance reflects centrality to the lecture's thesis (generalization and model complexity); demo_feasibility reflects how easily the concept becomes an executable, interactive Colab cell.",
+    "Edge count e ranges roughly 0-10000 per the slide histograms, and the hypothesis set is H = {1, 2, ..., 10000} as stated on p.10/p.30."
+  ]
+}

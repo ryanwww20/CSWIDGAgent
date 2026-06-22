@@ -1,0 +1,90 @@
+{
+  "course": "Algorithms (EE4033-01), 113-2 (Spring 2025), NTU EE — Lecture 11: Dijkstra's Algorithm",
+  "source_path": "/Users/ryan/NTUEE_Local/114-2/ML/CSWIDGAgent/course_source/Dijkstra.pdf",
+  "candidates": [
+    {
+      "concept": "Dijkstra's single-source shortest-path algorithm (greedy main loop)",
+      "importance_score": 10,
+      "demo_feasibility_score": 10,
+      "prerequisites": [
+        "Weighted directed graphs G = (V, E) with non-negative edge weights",
+        "Adjacency-list graph representation",
+        "Priority queue / min-priority queue abstraction"
+      ],
+      "why_it_matters": "This is the central algorithm of the lecture: it finds the minimum-weight path from a source s to every other node when all edge weights are non-negative. It maintains a set S of vertices with finalized shortest-path distances, repeatedly Extract-Min's the closest unprocessed vertex u from Q = V - S, adds it to S, and relaxes every outgoing edge of u. It is the canonical example of a greedy graph algorithm and underpins routing, navigation, and network analysis.",
+      "transcript_summary": "Slides give the Goal (min-weight path from s to all nodes, non-negative weights), the Key idea (maintain finalized set S, repeatedly pick nearest u in V-S, relax its edges), the Greedy choice framing, and the full pseudocode: Initialize-Single-Source, S = empty, Q = G.V, while Q not empty { u = Extract-Min(Q); S = S U {u}; for v in Adj[u]: Relax(u,v,w) }."
+    },
+    {
+      "concept": "Edge relaxation (Relax / Initialize-Single-Source and the d, pi labels)",
+      "importance_score": 9,
+      "demo_feasibility_score": 10,
+      "prerequisites": [
+        "Shortest-path estimate v.d and predecessor v.pi attributes",
+        "Initialize-Single-Source (v.d = infinity, v.pi = NIL, s.d = 0)"
+      ],
+      "why_it_matters": "Relaxation is the atomic update that drives Dijkstra (and every shortest-path algorithm). Relax(u, v, w) tests whether the path to v through u is shorter (v.d > u.d + w(u,v)) and, if so, lowers v.d and sets v.pi = u. Understanding relaxation explains how distance estimates monotonically improve toward the true shortest-path distance delta(s, v) and how the predecessor tree is built. It is the most visualizable single step for a demo (watch a node's tentative distance drop).",
+      "transcript_summary": "Initialize-Single-Source sets v.d = infinity, v.pi = NIL for all v and s.d = 0. The Relax(u, v, w) box on the Practice slide gives: if v.d > u.d + w(u,v) then v.d = u.d + w(u,v); v.pi = u. The worked example annotates relaxations such as Relax(s,y,w), Relax(s,t,w), Relax(y,t,w), Relax(y,x,w) with the arithmetic (e.g., 5+3 = 8)."
+    },
+    {
+      "concept": "Step-by-step execution on an example graph (S, V-S, Extract-Min trace)",
+      "importance_score": 8,
+      "demo_feasibility_score": 10,
+      "prerequisites": [
+        "Dijkstra main loop",
+        "Edge relaxation",
+        "Extract-Min on the priority queue"
+      ],
+      "why_it_matters": "The lecture devotes a full worked Example plus a Practice slide to tracing the algorithm on a 5-vertex graph (s, t, x, y, z), showing the coloring of vertices in S (explored, black), the current u (gray), and V-S (white, in Q), plus predecessor edges. A faithful interactive trace/animation of this exact graph is the highest-value pedagogical demo: students see Extract-Min order, distance updates, and predecessor-tree growth iteration by iteration.",
+      "transcript_summary": "Example slide shows six snapshots of the 5-node graph with edge weights (10,5,1,2,3,9,4,6,7,2) evolving distances 0/inf -> 0/10/5 -> 8/5/14/7 -> ... -> final 0,8,9,5,7. Legend defines the three vertex states and 'Indicate predecessor values'. Practice slide repeats the structure on graph s,a,b,c,d,e for student practice with the Relax box provided."
+    },
+    {
+      "concept": "Time complexity vs. priority-queue implementation (array O(V^2), binary heap O(E lg V), Fibonacci heap O(E + V lg V))",
+      "importance_score": 9,
+      "demo_feasibility_score": 8,
+      "prerequisites": [
+        "Asymptotic / big-O analysis",
+        "Priority queue operations: Extract-Min and Decrease-Key",
+        "Binary heap and (conceptually) Fibonacci heap"
+      ],
+      "why_it_matters": "The choice of data structure for Q changes Dijkstra's running time dramatically. The lecture decomposes the cost into Extract-Min (V times) and Decrease-Key/relaxation (E times): a linear array gives O(V^2), a binary heap gives O(E lg V), and a Fibonacci heap gives O(E + V lg V) amortized. This teaches how data-structure choice interacts with algorithm cost and is highly demonstrable by empirically timing array-based vs. heap-based implementations on graphs of varying density.",
+      "transcript_summary": "Time Complexity slide: Q as linear array -> Extract-Min O(V) so O(V^2) over the loop, lines 7-8 O(E) at O(1) each; Q as binary heap -> Extract-Min O(lg V) so O(V lg V), lines 7-8 O(E) at O(lg V) each for Decrease-Key; Q as Fibonacci heap -> amortized O(E + V lg V)."
+    },
+    {
+      "concept": "Correctness proof: loop invariant v.d = delta(s,v) for v in S, by induction on |S|",
+      "importance_score": 7,
+      "demo_feasibility_score": 5,
+      "prerequisites": [
+        "Mathematical induction",
+        "Definition of shortest-path distance delta(s, v)",
+        "Non-negative edge weights (why the greedy choice is safe)"
+      ],
+      "why_it_matters": "Explains WHY the greedy choice is correct: once a vertex enters S its distance estimate equals the true shortest-path distance. The exchange-argument / cut-style proof (any alternative path P must leave S, and is already at least as long as Pv by the time it does) is the conceptual core that also reveals the non-negative-weight requirement. Important for rigor but harder to demo interactively; best supported with a guided visualization of the proof figure (s, u, v, x, y, set S) and a counterexample with a negative edge.",
+      "transcript_summary": "Correctness slide states the loop invariant (for each v in S, v.d = delta(s,v)) and a proof by induction on |S|: basis |S|=1 trivial; inductive step grows S by v with final edge (u,v), Pu shortest by hypothesis; any other s-v path P leaves S at first node y (predecessor x in S) and w(Pv) = v.d = u.d + w(u,v) <= x.d + w(x,y) = Py <= w(P). Figure shows s, x, y, u, v and set S."
+    },
+    {
+      "concept": "Relationship to Prim's MST algorithm (same greedy skeleton, different relaxation key)",
+      "importance_score": 6,
+      "demo_feasibility_score": 6,
+      "prerequisites": [
+        "Minimum spanning tree and Prim's algorithm",
+        "Dijkstra main loop"
+      ],
+      "why_it_matters": "The slides place MST-Prim's pseudocode directly beside Dijkstra's to highlight that the two run 'essentially the same': both grow a set via repeated Extract-Min and edge relaxation. Prim keys on the single edge weight w(u,v) (lightest crossing edge) while Dijkstra keys on cumulative distance u.d + w(u,v). Contrasting them deepens understanding of greedy graph algorithms and what the priority key represents.",
+      "transcript_summary": "MST-Prim(G, w, r) pseudocode shown alongside Dijkstra, with the note 'Executes essentially the same as Prim's algorithm'. Difference: Prim updates v.key = w(u,v); Dijkstra relaxes v.d = u.d + w(u,v)."
+    }
+  ],
+  "selected_concepts": [
+    "Dijkstra's single-source shortest-path algorithm (greedy main loop)",
+    "Edge relaxation (Relax / Initialize-Single-Source and the d, pi labels)",
+    "Step-by-step execution on an example graph (S, V-S, Extract-Min trace)",
+    "Time complexity vs. priority-queue implementation (array O(V^2), binary heap O(E lg V), Fibonacci heap O(E + V lg V))"
+  ],
+  "selection_rationale": "Selection follows the project quality priorities (executability and concept correctness first, then interactivity and pedagogical value). The four chosen concepts form a self-contained, highly demonstrable arc that matches the lecture's own structure: (1) the Dijkstra main loop is the lecture's thesis and the necessary backbone; (2) edge relaxation is its atomic, most-visualizable mechanism and a prerequisite for any faithful demo; (3) the worked example/Practice trace is the single highest-value interactive artifact — an animated, step-by-step run on the exact lecture graph showing S / V-S / current-u coloring and the predecessor tree; and (4) the priority-queue time-complexity comparison is directly executable as an empirical benchmark (array vs. binary heap) that reinforces how data-structure choice drives cost. The correctness proof (importance 7) and the Prim comparison (importance 6) were ranked highly for understanding but deprioritized for the demo because the induction/exchange argument is hard to make genuinely interactive and risks lowering executability; they are strong candidates for an optional 'going deeper' cell rather than core demo cells. Ranking key: importance_score weighted with demo_feasibility_score, breaking ties toward concepts the slides already illustrate concretely.",
+  "assumptions": [
+    "The single source file is the 6-page Lecture 11 PDF on Dijkstra's Algorithm; no separate instructor transcript was provided, so transcript_summary fields summarize the slide content (including handwritten annotations) directly.",
+    "Audience is an undergraduate Algorithms course that has already covered graph representations, big-O analysis, BFS/DFS, and Prim's MST (the slides reference Prim's algorithm as prior knowledge).",
+    "Edge weights are non-negative, as the lecture explicitly requires; a demo may include a negative-weight counterexample only to motivate this assumption, not as a supported input.",
+    "The example graph used for tracing has vertices {s, t, x, y, z} with the weights shown on the Example slide (10, 5, 1, 2, 3, 9, 4, 6, 7, 2); the Practice graph uses vertices {s, a, b, c, d, e}.",
+    "Scores are on a 0-10 scale where importance_score reflects centrality to the lecture and demo_feasibility_score reflects how readily the concept becomes an executable, interactive Colab cell."
+  ]
+}
