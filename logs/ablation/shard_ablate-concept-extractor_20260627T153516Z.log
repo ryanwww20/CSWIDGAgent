@@ -1,0 +1,448 @@
+[ablation] === ablate-concept-extractor__MLBasic__s1 ===
+[ablation] SKIP ablate-concept-extractor__MLBasic__s1 (notebook + score present — resume)
+[ablation] === ablate-concept-extractor__MLBasic__s2 ===
+[ablation] SKIP ablate-concept-extractor__MLBasic__s2 (notebook + score present — resume)
+[ablation] === ablate-concept-extractor__MLBasic__s3 ===
+[ablation] SKIP ablate-concept-extractor__MLBasic__s3 (notebook + score present — resume)
+[ablation] === ablate-concept-extractor__whydeeplearning__s1 ===
+[ablation] RESUME ablate-concept-extractor__whydeeplearning__s1 (notebook present; re-scoring with evalkit only)
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 587329 Killed                  "$PYTHON_BIN" "$ROOT_DIR/scripts/lib/execute_notebook.py" --notebook "$nb" --output "$run_dir/execution_result.json" --per-cell-timeout "$PER_CELL_TIMEOUT" --save-executed "$run_dir/executed.ipynb" > /dev/null
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-27T15:39:09.410579+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 183.5617,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 8,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 8 code cells, 8 clean, total 4.1s
+  widgets: 33 enumerated, 7 drivable
+  widget planner: +10 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1656, 'out': 355}, 'raw_count': 11, 'kept': 10}
+  #@param fields: 0
+  semantic planner: +1 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4245, 'out': 106}, 'raw_count': 1, 'kept': 1, 'dropped': []}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1/interactivity/frames)
+  controls scored: 8 (1 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=5.0 flags=['strong_concept_link']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 8629, 'out': 770}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    n_pieces [widget/executed] = 5.0
+    c [widget/executed] = 4.0
+    b [widget/executed] = 4.0
+    w [widget/executed] = 4.0
+    activation [widget/executed] = 4.0
+    n_units [widget/executed] = 5.0
+    K [widget/executed] = 5.0
+    tent [view_only/reasoned] = 4.5 (capped 5.0->4.5)
+
+#5 Interactivity = 4.44  (effectiveness, mean of 8 controls; 1 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1/interactivity/frames
+
+WARNING: image-heavy deck (3230 extractable chars over 24 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf
+digest: notebook=22486 chars (executed.ipynb), 6 image(s); slides=3531 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 4.62  (2a=5.0 2b=4.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 11873, 'out': 194}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [4.0, 4.0, 4.0], 'correctness': [5.0, 5.0, 5.0]}}
+   rationale: The notebook closely follows the slides: piecewise-linear approximation, hard sigmoid/sigmoid/ReLU building blocks, shallow-vs-deep expressivity, and the Seide et al. WER table all match the source (slides 2, 4-16, 23-24). No clear contradictions or fabricated claims were found. Code cells 3, 5, 7, 
+
+#3 Pedagogical Depth = 5.0
+   adds: ['IMAGE 1 gives a concrete worked example of the tent/fold map as a 2-piece function, making the abstract "2-neuron layer" construction visually explicit.', 'IMAGE 5 shows the piecewise-linear approximation idea with a real target curve, knots, and a displayed error value, so the learner sees how increasing pieces improves fit rather than just hearing the claim.', 'IMAGE 6 visualizes the key depth mechanism: composing the tent map and observing the piece count grow with layers, which directly supports the exponential-efficiency argument.', 'IMAGE 2 turns the depth-vs-width claim into a quantitative log-scale comparison of neurons needed for the same expressivity, clarifying the parameter-efficiency gap beyond the slide.', 'IMAGE 3 provides an empirical head-to-head plot of deep vs single-wide speech models, reinforcing the theoretical point with visible data rather than a static table.']
+   rationale: The notebook substantially deepens the slide’s message. The slides already state that depth can be more parameter-efficient, but the notebook *shows* the mechanism and consequences: a worked tent-map construction (IMAGE 1), a live approximation of a smooth target with shrinking error as pieces incre
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: The notebook chose a genuinely central lecture theme: why deep networks are preferred over shallow ones, framed through piecewise-linear approximation, universal approximation, and the exponential efficiency of depth. (A) CENTRALITY is very strong: this is the core thesis of the segment, not a side 
+
+#7 Clarity = 4.29  (7a=4.0 7b=5.0 7c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 9813, 'out': 588}, 'n_citations': 4, 'self_consistency_k': 3, 'raw_scores': {'visual': [4.0, 4.0, 3.0], 'textual': [5.0, 5.0, 5.0], 'code_explanation': [4.0, 4.0, 4.0]}}
+   rationale: Overall the notebook is clear and well scaffolded, but it does not earn a 5 because there are a few real clarity snags. Visually, IMAGE 3 and IMAGE 4 are mostly clean, but IMAGE 1 has the annotation text '2 linear pieces' placed close to the slanted arrow and curve; it is still readable, so this is 
+   visual: IMAGE 1 / code cell 9: The annotation '2 linear pieces' sits close to the descending line segment and arrow, making the figure a bit cramped, t
+   textual: markdown cell 4 and markdown cell 6: These sections bundle several concepts and formulas into dense paragraphs/tables; the flow is still understandable, but 
+   code_explanation: code cell 10: The cell contains nontrivial composition/counting logic with only brief inline comments; the important steps are readabl
+   code_explanation: code cell 14: The plotting of the Seide evidence is straightforward but fairly dense, with limited adjacent explanation of how the plo
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.62
+  2a_assertional         5.0
+  2b_computational       4.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        4.44
+  5_effectiveness        4.44
+  6_duration_seconds     183.5617
+  7_clarity              4.29
+  7a_visual              4.0
+  7b_textual             5.0
+  7c_code_explanation    4.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s1/summary.json
+[ablation] === ablate-concept-extractor__whydeeplearning__s2 ===
+[run_pipeline] Ablation: dropping 'concept-extractor' (merge mode)
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+{"notebook_title":"Why Deep Learning? Building Functions from Neurons and the Power of Depth","learning_objectives":["Explain how any continuous function can be approximated by a piecewise-linear function with enough pieces.","Describe how a single neuron with a Sigmoid (or Hard Sigmoid) activation forms a basic building block, and how a sum of such blocks plus a constant reconstructs a piecewise-linear target.","Connect the Sigmoid/Hard-Sigmoid building block to the ReLU building block and show
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s2/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+I read the Stage 2 notebook structure and produced Stage 3 cell analysis covering all 8 code cells (C03, C05, C07, C09, C11, C14, C16, C18). The output is written to `03_cell_analysis.json` with, per cell: an explicit implementation plan, function signatures, state variables, error handling, and executable test checks — plus cross-cell invariants and assumptions. No ambiguous placeholders; each non-trivial step has failure handling and in-notebook sanity checks.
+
+[run_pipeline] cell-analyzer: stdout was not a JSON object (no valid JSON payload found in model output); using the on-disk artifact 03_cell_analysis.json
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s2/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+All 19 cells match stage 2 in count, order, id, and type; sources are non-empty and code cells parse.
+
+{
+  "final_notebook_path": "notebooks/whydeeplearning_interactive_skill.ipynb",
+  "generated_cells": [
+    {"cell_id": "C01", "status": "generated", "notes": "Title + central 'why deep' question and storyline preview."},
+    {"cell_id": "C02", "status": "generated", "notes": "Learning objectives and roadmap."},
+    {"cell_id": "C03", "status": "generated", "notes": "Shared setup: %matplotlib in
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s2/notebooks/whydeeplearning_interactive_skill.ipynb (19 cells, 29018 bytes)
+[run_pipeline] Stage 4 complete: 19 cells (8 code, 11 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s2/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260627T154054Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s2/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 625060 Killed                  "$PYTHON_BIN" "$ROOT_DIR/scripts/lib/execute_notebook.py" --notebook "$nb" --output "$run_dir/execution_result.json" --per-cell-timeout "$PER_CELL_TIMEOUT" --save-executed "$run_dir/executed.ipynb" > /dev/null
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s2
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s2/notebooks/whydeeplearning_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s2
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+[IPKernelApp] ERROR | KeyboardInterrupt caught in kernel.
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-27T15:53:02.817756+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s2/notebooks/whydeeplearning_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s2/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 183.6065,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 8,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__whydeeplearning__s2/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/whydeeplearning__s2/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 783290 Killed                  "$EVALKIT_PY" "${ek_args[@]}"
+[ablation] evalkit scoring failed for ablate-concept-extractor__whydeeplearning__s2
+[ablation] === ablate-concept-extractor__whydeeplearning__s3 ===
+./scripts/run_ablation.sh: line 139: 1312865 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-concept-extractor__whydeeplearning__s3; recording empty exec result
+[ablation] === ablate-concept-extractor__ml2021_self_attention__s1 ===
+[run_pipeline] Ablation: dropping 'concept-extractor' (merge mode)
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+{"notebook_title":"Self-Attention from Scratch: Building the Core of the Transformer","status":"written","path":"runs/ablate-concept-extractor__ml2021_self_attention__s1/pipeline_outputs/02_notebook_structure.json","cells":22,"valid_json":true,"dependency_graph_executable_top_to_bottom":true,"concepts_extracted_directly_from_source":["vector-set input (text/speech/graph)","sequence-labeling output types","FC/window limitation → self-attention","query/key/value + dot-product attention scores + so
+[run_pipeline] notebook-architect failed validation (attempt 1/8): 02_notebook_structure.json missing required keys: ['assumptions', 'global_flow_notes', 'learning_objectives']; re-running stage
+[DEBUG] raw output:
+{
+  "notebook_title": "Self-Attention from Scratch: Building the Core of the Transformer",
+  "learning_objectives": [
+    "Explain why some ML problems take a variable-length set of vectors as input (text, speech, graphs) and what output types arise (per-vector labels, sequence label, seq2seq).",
+    "Articulate why a fully-connected layer with a fixed context window cannot capture whole-sequence dependencies, motivating self-attention.",
+    "Derive the self-attention mechanism step by step: qu
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__ml2021_self_attention__s1/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+Stage 3 complete. I read `02_notebook_structure.json` and produced `03_cell_analysis.json` with implementation-level specs for all 9 code cells (C03, C05, C09, C11, C12, C14, C16, C18, C20).
+
+```json
+{
+  "cell_specs": [
+    {"cell_id": "C03", "implementation_plan": "Environment + helpers: guarded ipywidgets import with pip-retry + WIDGETS_AVAILABLE fallback, numpy/matplotlib, seeded rng (seed 0), show_heatmap() helper.", "function_signatures": ["show_heatmap(M, title='', xticklabels=None, ytickl
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__ml2021_self_attention__s1/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+All 22 cells match the structure contract (count, `cell_id`, `cell_type` order) and every code cell parses. Here is the generation report:
+
+{
+  "final_notebook_path": "notebooks/ml2021_self_attention_interactive_skill.ipynb",
+  "generated_cells": [
+    {"cell_id": "C01", "status": "generated", "notes": "Title, objectives, orientation."},
+    {"cell_id": "C02", "status": "generated", "notes": "Set-of-vectors motivation; running example 'this is a cat'."},
+    {"cell_id": "C03", "status": "generat
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__ml2021_self_attention__s1/notebooks/ml2021_self_attention_interactive_skill.ipynb (22 cells, 24816 bytes)
+[run_pipeline] Stage 4 complete: 22 cells (9 code, 13 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__ml2021_self_attention__s1/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260627T155813Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__ml2021_self_attention__s1/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+[IPKernelApp] ERROR | KeyboardInterrupt caught in kernel.
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/ml2021_self_attention__s1
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__ml2021_self_attention__s1/notebooks/ml2021_self_attention_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/ml2021_self_attention__s1
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+[IPKernelApp] ERROR | KeyboardInterrupt caught in kernel.
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-27T16:09:04.440180+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__ml2021_self_attention__s1/notebooks/ml2021_self_attention_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/ml2021_self_attention__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 3.9863,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 9,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__ml2021_self_attention__s1/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/ml2021_self_attention__s1/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 9 code cells, 9 clean, total 5.8s
+  widgets: 21 enumerated, 4 drivable
+  widget planner: +9 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1455, 'out': 301}, 'raw_count': 9, 'kept': 9}
+  #@param fields: 0
+  semantic planner: +3 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 3799, 'out': 183}, 'raw_count': 3, 'kept': 3, 'dropped': []}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/ml2021_self_attention__s1/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/ml2021_self_attention__s1/interactivity/frames)
+  controls scored: 7 (0 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.0 flags=['strong_concept_link', 'some_shape_plumbing', 'regression_at_num_heads=4']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 10171, 'out': 837}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    query i [widget/executed] = 4.5
+    head [widget/executed] = 4.0
+    length [widget/executed] = 4.0
+    dim [widget/executed] = 3.5
+    d_model [constant/executed] = 3.5
+    d_k [constant/executed] = 3.0
+    num_heads [constant/executed] = 4.0
+
+#5 Interactivity = 3.79  (effectiveness, mean of 7 controls; 0 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/ml2021_self_attention__s1/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__ml2021_self_attention__s1/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/ml2021_self_attention__s1/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/ml2021_self_attention__s1/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/ml2021_self_attention__s1/interactivity/frames
+
+./scripts/run_ablation.sh: line 139: 1459235 Killed                  "$EVALKIT_PY" "${ek_args[@]}"
+[ablation] evalkit scoring failed for ablate-concept-extractor__ml2021_self_attention__s1
+[ablation] === ablate-concept-extractor__ml2021_self_attention__s2 ===
+./scripts/run_ablation.sh: line 139: 1684893 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-concept-extractor__ml2021_self_attention__s2; recording empty exec result
+[ablation] === ablate-concept-extractor__ml2021_self_attention__s3 ===
+./scripts/run_ablation.sh: line 139: 1851817 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-concept-extractor__ml2021_self_attention__s3; recording empty exec result
+[ablation] === ablate-concept-extractor__autoencoder__s1 ===
+./scripts/run_ablation.sh: line 139: 1873945 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-concept-extractor__autoencoder__s1; recording empty exec result
+[ablation] === ablate-concept-extractor__autoencoder__s2 ===
+[run_pipeline] Ablation: dropping 'concept-extractor' (merge mode)
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+{
+  "notebook_title": "Auto-encoders, Hands-on: Compression, Denoising & Anomaly Detection (MNIST)",
+  "learning_objectives": [
+    "Explain the encoder-decoder-bottleneck structure of an auto-encoder and the reconstruction objective (train without labels).",
+    "Show that the bottleneck forces the network to find and compress structure, and that a smaller code degrades reconstruction (dimension reduction).",
+    "Visualize and interactively navigate a learned 2D latent space, observing that si
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__autoencoder__s2/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+I've produced the Stage 3 cell analysis. It covers all 12 code cells (C03, C04, C06, C07, C08, C10, C12, C13, C15, C16, C18, C19) from the stage 2 structure, each with an explicit implementation plan, function signatures, state variables, error handling, and executable test checks — plus cross-cell invariants and assumptions. The output is written to `03_cell_analysis.json`.
+
+[run_pipeline] cell-analyzer: stdout was not a JSON object (no valid JSON payload found in model output); using the on-disk artifact 03_cell_analysis.json
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__autoencoder__s2/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+All 21 cells match the structure in count, order, and type, with non-empty sources.
+
+{
+  "final_notebook_path": "notebooks/autoencoder_interactive_skill.ipynb",
+  "generated_cells": [
+    {"cell_id": "C01", "status": "generated", "notes": "Title + framing markdown with encoder/bottleneck/decoder diagram, no-labels emphasis."},
+    {"cell_id": "C02", "status": "generated", "notes": "Learning objectives + roadmap table + self-supervised framing."},
+    {"cell_id": "C03", "status": "generated", "no
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__autoencoder__s2/notebooks/autoencoder_interactive_skill.ipynb (21 cells, 32883 bytes)
+[run_pipeline] Stage 4 complete: 21 cells (12 code, 9 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__autoencoder__s2/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260627T162127Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__autoencoder__s2/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 1903708 Killed                  "$PYTHON_BIN" "$ROOT_DIR/scripts/lib/execute_notebook.py" --notebook "$nb" --output "$run_dir/execution_result.json" --per-cell-timeout "$PER_CELL_TIMEOUT" --save-executed "$run_dir/executed.ipynb" > /dev/null
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/autoencoder__s2
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__autoencoder__s2/notebooks/autoencoder_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/ablate-concept-extractor/autoencoder__s2
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 1905434 Killed                  "$EVALKIT_PY" "${ek_args[@]}"
+[ablation] evalkit scoring failed for ablate-concept-extractor__autoencoder__s2
+[ablation] === ablate-concept-extractor__autoencoder__s3 ===
+[validator] note: cell_specs include 9 non-code (markdown) cell id(s) ['C01', 'C02', 'C06', 'C11', 'C13', 'C16', 'C18', 'C19', 'C20']; ignored by stage 4
+[run_pipeline] Ablation: dropping 'concept-extractor' (merge mode)
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+{
+  "notebook_title": "Auto-encoders, Hands-On: Reconstruction, Latent Space, Denoising & Anomaly Detection",
+  "learning_objectives": [
+    "Explain the encoder-decoder structure of an auto-encoder and why the reconstruction objective forces the bottleneck to learn a compact representation.",
+    "Train a small auto-encoder on MNIST and inspect reconstruction quality as a function of the bottleneck (latent) dimension.",
+    "Interpret the latent code as a learned, low-dimensional feature (embed
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__autoencoder__s3/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+Stage 3 complete. I read `02_notebook_structure.json` (20 cells, 11 of them code: C03–C05, C07–C10, C12, C14–C15, C17) and wrote `03_cell_analysis.json` with a spec for every cell.
+
+Key points covered, matching the cell-analyzer contract:
+
+- **Explicit implementation plans** for all 11 code cells — exact layer shapes (`784→128→latent→128→784`, Sigmoid output), the reusable `train_autoencoder(latent_dim, epochs, noise_std, X)` signature that doubles for the denoising (C14) and one-class anomaly (
+[run_pipeline] cell-analyzer: stdout was not a JSON object (top-level list); using the on-disk artifact 03_cell_analysis.json
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__autoencoder__s3/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+{"final_notebook_path": "notebooks/autoencoder_interactive_skill.ipynb", "generated_cells": [{"cell_id": "C01", "status": "generated", "notes": "Title, seven objectives, four-part TOC table, runnable/interactive note."}, {"cell_id": "C02", "status": "generated", "notes": "Encoder->code->decoder schematic, self-supervised framing, PCA/t-SNE contrast."}, {"cell_id": "C03", "status": "generated", "notes": "Defensive ipywidgets install, imports, set_seed, device select, version print, guarded %matpl
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__autoencoder__s3/notebooks/autoencoder_interactive_skill.ipynb (20 cells, 35622 bytes)
+[run_pipeline] Stage 4 complete: 20 cells (11 code, 9 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__autoencoder__s3/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260627T162944Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/ablate-concept-extractor__autoencoder__s3/pipeline_outputs/run_log.json

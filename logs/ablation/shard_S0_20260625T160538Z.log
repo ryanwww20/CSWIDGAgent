@@ -1,0 +1,1033 @@
+[ablation] === S0__MLBasic__s1 ===
+[ablation] SKIP S0__MLBasic__s1 (notebook + score present — resume)
+[ablation] === S0__MLBasic__s2 ===
+[ablation] RESUME S0__MLBasic__s2 (notebook present; re-scoring with evalkit only)
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/S0__MLBasic__s2/notebooks/MLBasic_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+[IPKernelApp] ERROR | KeyboardInterrupt caught in kernel.
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T16:23:50.755490+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/S0__MLBasic__s2/notebooks/MLBasic_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 183.7017,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 8,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/S0__MLBasic__s2/notebooks/MLBasic_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 8 code cells, 8 clean, total 23.5s
+  widgets: 33 enumerated, 7 drivable
+  widget planner: +10 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1879, 'out': 427}, 'raw_count': 10, 'kept': 10}
+  #@param fields: 0
+  semantic planner: +5 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 3729, 'out': 779}, 'raw_count': 8, 'kept': 5, 'dropped': ['seed:not_assigned', 'N:covered_or_empty', 'n_trials:not_assigned']}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2/interactivity/frames)
+  controls scored: 12 (0 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=3.5 flags=['strong_concept_link', 'dead_control:H', 'speculative:pokemon_all', 'speculative:digimon_all']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 13172, 'out': 984}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    N (sample) [widget/executed] = 4.0
+    random draw [widget/executed] = 4.0
+    N (sample)#1 [widget/executed] = 5.0
+    log10 |H| [widget/executed] = 4.0
+    N [widget/executed] = 5.0
+    eps [widget/executed] = 4.0
+    N#1 [widget/executed] = 4.0
+    N_POKEMON_ALL [constant/executed] = 2.0
+    N_DIGIMON_ALL [constant/executed] = 2.0
+    pokemon_all [constant/executed] = 1.0
+    digimon_all [constant/executed] = 1.0
+    H [constant/executed] = 1.0
+
+#5 Interactivity = 3.08  (effectiveness, mean of 12 controls; 0 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/S0__MLBasic__s2/notebooks/MLBasic_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2/interactivity/frames
+
+WARNING: image-heavy deck (5742 extractable chars over 35 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf
+digest: notebook=21715 chars (executed.ipynb), 6 image(s); slides=6186 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 4.09  (2a=5.0 2b=3.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 15642, 'out': 355}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [3.0, 4.0, 3.0], 'correctness': [5.0, 5.0, 5.0]}}
+   rationale: The notebook is broadly faithful to slides 1–35: it preserves the 3-step ML framing (cell 2 vs slides 2, 11–13), the ideal-vs-train threshold story (cells 4–9 vs slides 12–16), the bad-training-set bound and Hoeffding/union-bound narrative (cells 12–14 vs slides 17–31), and the model-complexity trad
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A visible histogram of the simulated Pokémon vs. Digimon edge-count universe with the learned ideal threshold marked (IMAGE 1), making the abstract classifier concrete.', 'A worked sample-vs-universe comparison where a drawn training set shows h_train, training loss, true loss on D_all, and the generalization gap, plus the note that training loss can be lower than the ideal loss (IMAGE 5).', "A repeated-sampling histogram of true losses across many training draws, showing how the spread shrinks as N grows, which goes beyond the slide's single-point examples.", "A live bound calculator/plot for P(D_train is bad) with the Hoeffding/union-bound recipe, including vacuous cases where the bound is capped at 1 and the slide's numeric checks for N=100,500,1000 and N>=610.", 'A tradeoff visualization with separate curves for ideal loss, gap, and their sum versus |H|, revealing the U-shaped complexity tradeoff and how the sweet spot shifts with more data (IMAGE 2/6).']
+   rationale: The notebook substantially deepens the lecture's theory by turning the Pokémon/Digimon story into realized visual evidence. IMAGE 1 makes the abstract notion of h_all tangible: the learner sees overlapping class distributions and why even the best threshold still errs. IMAGE 5 concretely contrasts a
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: A) CENTRALITY: The notebook’s choice is the lecture’s core story, not a side note: learning a classifier from limited samples, comparing h_all vs h_train, and explaining generalization/overfitting. B) RICHNESS / NON-TRIVIALITY: This is a genuinely multi-part mechanism with moving pieces—hypothesis s
+
+#7 Clarity = 4.29  (7a=4.0 7b=5.0 7c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 9502, 'out': 323}, 'n_citations': 2, 'self_consistency_k': 3, 'raw_scores': {'visual': [4.0, 4.0, 4.0], 'textual': [5.0, 5.0, 5.0], 'code_explanation': [4.0, 4.0, 4.0]}}
+   rationale: Overall the notebook is clearly written and mostly easy to follow. The prose is well-scaffolded with headings, a table, and stepwise exposition. I did not find any broken equations or major wall-of-text problems. The main visual issue is in IMAGE 4, where the default view of the bound plot is poorly
+   visual: IMAGE 4: Poor default scaling: the bound curve is pinned near 1 for most of the x-range, so the first view hides the main decay a
+   code_explanation: cells 11, 13, 16: Several longer interactive/code-heavy cells are only lightly narrated; the code is readable, but the step-by-step explan
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.09
+  2a_assertional         5.0
+  2b_computational       3.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        3.08
+  5_effectiveness        3.08
+  6_duration_seconds     183.7017
+  7_clarity              4.29
+  7a_visual              4.0
+  7b_textual             5.0
+  7c_code_explanation    4.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s2/summary.json
+[ablation] === S0__MLBasic__s3 ===
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/S0__MLBasic__s3/notebooks/MLBasic_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3
+
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T16:46:05.903490+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/S0__MLBasic__s3/notebooks/MLBasic_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 183.7105,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 9,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/S0__MLBasic__s3/notebooks/MLBasic_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3/interactivity --max-points 3 --source slides
+
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 9 code cells, 9 clean, total 4.6s
+  widgets: 36 enumerated, 8 drivable
+  widget planner: +10 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1902, 'out': 422}, 'raw_count': 10, 'kept': 10}
+  #@param fields: 0
+  semantic planner: +7 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4227, 'out': 1016}, 'raw_count': 8, 'kept': 7, 'dropped': ['seed:not_assigned']}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3/interactivity/frames)
+  controls scored: 15 (0 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.0 flags=['strong_concept_link', 'dead_control:N_POKEMON', 'dead_control:N_DIGIMON', 'only_cosmetic_or_error:e_pokemon', 'only_cosmetic_or_error:e_digimon', 'only_cosmetic_or_error:candidate_h', 'only_cosmetic_or_error:H_small']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 12631, 'out': 1357}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    h [widget/executed] = 5.0
+    N [widget/executed] = 5.0
+    resample [widget/executed] = 5.0
+    |H| [widget/executed] = 5.0
+    N#1 [widget/executed] = 5.0
+    epsilon [widget/executed] = 4.0
+    delta [widget/executed] = 4.0
+    k [widget/executed] = 4.0
+    N_POKEMON [constant/executed] = 1.0
+    N_DIGIMON [constant/executed] = 1.0
+    e_pokemon [constant/executed] = 1.0
+    e_digimon [constant/executed] = 1.0
+    candidate_h [constant/executed] = 1.0
+    H_small [constant/executed] = 1.0
+    N_TRIALS [constant/executed] = 2.0
+
+#5 Interactivity = 3.0  (effectiveness, mean of 15 controls; 0 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/S0__MLBasic__s3/notebooks/MLBasic_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3/interactivity/frames
+
+WARNING: image-heavy deck (5742 extractable chars over 35 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf
+digest: notebook=22176 chars (executed.ipynb), 6 image(s); slides=6186 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 4.09  (2a=5.0 2b=3.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 15998, 'out': 371}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [3.0, 3.0, 4.0], 'correctness': [5.0, 5.0, 5.0]}}
+   rationale: Notebook content is broadly faithful to the slides. Cell 0/1 correctly restate the 3-step ML pipeline from slides 2 and the learning goals. Cell 2 mirrors slides 7–11: edge-count feature, threshold classifier, and 0/1 loss. Cell 9 reproduces the optimization idea from slides 12–14 and finds an empir
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A concrete 1-D simulation of the Pokémon/Digimon universe with visible overlapping histograms of edge counts, grounding the abstract classifier in IMAGE 1.', 'A visible loss landscape over thresholds, including the marked optimum h_all and nonzero best error, which clarifies optimization and unavoidable overlap in IMAGE 2.', 'A Monte Carlo empirical-vs-Hoeffding comparison showing how the probability of a bad training set shrinks with larger N, visible in IMAGE 3.', 'A worked generalization-gap demonstration contrasting h_train on a sample versus h_all on the universe, with resampling behavior described in the notebook and supported by the interactive plotting outputs.', 'A clear underfitting-to-overfitting curve using a binned classifier, showing train error falling while test error becomes U-shaped as complexity k increases in IMAGE 4 and IMAGE 5.']
+   rationale: Compared with the slides, the notebook substantially deepens understanding by turning the lecture’s symbols into visible mechanisms. IMAGE 1 makes the domain-knowledge assumption concrete by showing the overlapping edge-count distributions that explain why classification is imperfect. IMAGE 2 adds a
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: The notebook chose a very strong concept: using the Pokémon-vs-Digimon classifier as a concrete vehicle to explain the core mechanics of machine learning generalization. (A) CENTRALITY: this is not a side example; it is the lecture’s main running case study and is tightly aligned with the slide arc 
+
+#7 Clarity = 4.62  (7a=4.0 7b=5.0 7c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 9858, 'out': 210}, 'n_citations': 0, 'self_consistency_k': 3, 'raw_scores': {'visual': [5.0, 4.0, 3.0], 'textual': [5.0, 5.0, 5.0], 'code_explanation': [5.0, 5.0, 5.0]}}
+   rationale: Overall the notebook is clear and student-facing. The markdown is well structured with headings, numbered steps, and short explanatory paragraphs, and the code cells are generally small and narrated. The main visual issue is in IMAGE 4 / IMAGE 5: the x-axis tick labels and the early points/green das
+   visual: IMAGE 4: Crowding on the left side of the plot: the first few k-values and the green dashed marker are packed closely together, m
+   visual: IMAGE 5: Same cramped default view as IMAGE 4: the early x-axis region is compressed, so the initial underfitting behavior is har
+   code_explanation: code cell 13: The Monte-Carlo loop is fairly dense relative to the adjacent narration; it is readable, but the prose does not walk thr
+   code_explanation: code cell 17: The binned-classifier implementation is a moderately dense block with only brief commentary; the mechanics of fitting an
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.09
+  2a_assertional         5.0
+  2b_computational       3.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        3.0
+  5_effectiveness        3.0
+  6_duration_seconds     183.7105
+  7_clarity              4.62
+  7a_visual              4.0
+  7b_textual             5.0
+  7c_code_explanation    5.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/MLBasic__s3/summary.json
+[ablation] === S0__whydeeplearning__s1 ===
+[ablation] RESUME S0__whydeeplearning__s1 (notebook present; re-scoring with evalkit only)
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1
+
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T16:55:46.527032+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 3.7787,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 6,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1/interactivity --max-points 3 --source slides
+
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 6 code cells, 6 clean, total 2.9s
+  widgets: 6 enumerated, 1 drivable
+  widget planner: +8 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1392, 'out': 262}, 'raw_count': 8, 'kept': 8}
+  #@param fields: 0
+  semantic planner: +1 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 3374, 'out': 93}, 'raw_count': 1, 'kept': 1, 'dropped': []}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1/interactivity/frames)
+  controls scored: 2 (1 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=5.0 flags=['strong_concept_link', 'speculative:tent']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4481, 'out': 322}, 'frames_shown': 3, 'parsed_ok': True}
+
+per-control effectiveness:
+    num_layers [widget/executed] = 5.0
+    tent [constant/reasoned] = 2.0
+
+#5 Interactivity = 3.5  (effectiveness, mean of 2 controls; 1 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1/interactivity/frames
+
+WARNING: image-heavy deck (3230 extractable chars over 24 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf
+digest: notebook=12967 chars (executed.ipynb), 6 image(s); slides=3531 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 4.62  (2a=5.0 2b=4.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 10166, 'out': 131}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [4.0, 4.0, 4.0], 'correctness': [5.0, 5.0, 5.0]}}
+   rationale: Notebook content closely matches the lecture slides and adds only supportive detail. The core claims about piecewise-linear approximation, depth vs. width efficiency, the exponential piece-count gap, and the speech WER table are consistent with slides 4–24. Code cells 4, 5, 7, and 10 implement the d
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A concrete worked example of depth creating exponentially many linear pieces: the visible sawtooth/tent-map plots in IMAGE 1 and the widget frames IMAGE 5–6 show 1, 2, 3, 4 layers turning into 2, 4, 8, 16 pieces with only 2 neurons per layer.', 'A direct numerical verification of the mechanism: the printed counts in cell 4 confirm 2^K pieces for K=1..5, making the abstract claim operational rather than just verbal.', 'A head-to-head parameter-efficiency comparison at equal expressiveness: IMAGE 2 visualizes deep vs. shallow neuron growth on a log scale, showing linear 2K cost versus exponential 2^K cost for the same number of pieces.', "A real empirical grounding from the lecture: IMAGE 3 compares WER across deeper 2k-wide networks versus single fat layers, making the 'deeper is better' claim concrete rather than purely theoretical.", "A synthesis of the slide’s 'fish and bear's paw' tradeoff into an explicit small-hypothesis-class/small-loss story, reinforced by the notebook’s explanations of why deep structure can keep parameters low while retaining expressiveness."]
+   rationale: This notebook substantially deepens the slide’s idea of why deep learning is useful. Beyond the slide’s high-level claim that deep nets can be more efficient, it visibly demonstrates the mechanism with a specific fold/tent-map construction in IMAGE 1 and the interactive frames IMAGE 5–6: each added 
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: It chose a central lecture idea: why deep networks are preferred over fat shallow ones because depth gives exponential efficiency. (A) CENTRALITY: this is the core argument of the segment, not a side note; the slides repeatedly build toward "Why we need deep?" and the fish/bear's paw trade-off. (B) 
+
+#7 Clarity = 5.0  (7a=5.0 7b=5.0 7c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 8106, 'out': 191}, 'n_citations': 0, 'self_consistency_k': 3, 'raw_scores': {'visual': [5.0, 5.0, 4.0], 'textual': [5.0, 5.0, 5.0], 'code_explanation': [5.0, 5.0, 4.0]}}
+   rationale: The notebook reads cleanly throughout. The prose is well-scaffolded with headings, numbered steps, a summary table, and short transition text between cells; I did not find a wall of text or broken equation in the visible markdown. The code cells are small, readable, and each major block is introduce
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.62
+  2a_assertional         5.0
+  2b_computational       4.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        3.5
+  5_effectiveness        3.5
+  6_duration_seconds     3.7787
+  7_clarity              5.0
+  7a_visual              5.0
+  7b_textual             5.0
+  7c_code_explanation    5.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s1/summary.json
+[ablation] === S0__whydeeplearning__s2 ===
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s2/notebooks/whydeeplearning_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T17:04:52.335788+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s2/notebooks/whydeeplearning_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 2.8984,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 6,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s2/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 6 code cells, 6 clean, total 1.6s
+  widgets: 12 enumerated, 2 drivable
+  widget planner: +8 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1508, 'out': 254}, 'raw_count': 8, 'kept': 8}
+  #@param fields: 0
+  semantic planner: +0 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 3331, 'out': 128}, 'raw_count': 1, 'kept': 0, 'dropped': ['2:not_assigned']}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2/interactivity/frames)
+  controls scored: 2 (0 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.5 flags=['strong_concept_link']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4267, 'out': 320}, 'frames_shown': 5, 'parsed_ok': True}
+
+per-control effectiveness:
+    N [widget/executed] = 4.0
+    K [widget/executed] = 5.0
+
+#5 Interactivity = 4.5  (effectiveness, mean of 2 controls; 0 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s2/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2/interactivity/frames
+
+WARNING: image-heavy deck (3230 extractable chars over 24 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf
+digest: notebook=13213 chars (executed.ipynb), 6 image(s); slides=3531 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 5.0  (2a=5.0 2b=5.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 8555, 'out': 253}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [5.0, 5.0, 5.0], 'correctness': [5.0, 4.0, 5.0]}}
+   rationale: Slides 2, 4–9, 11–12, 14, 15, 22–24 are faithfully reflected in the notebook: constant + sum of bent lines/ReLU bricks (cells 0, 2, 5, 6), piecewise-linear approximation and universal approximation framing (cell 8), and the deep-vs-fat exponential piece-count story (cells 9, 10, 12, 14). No source c
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A concrete visual of a single ReLU neuron as a bent line (IMAGE 1), making the "constant + sum of ReLU bricks" idea tangible.', 'A worked approximation of a sine wave by a one-hidden-layer piecewise-linear network, with visible control points and error reduction as N increases; the realized widget states N=2 gives high error and N=40 closely matches the target (IMAGE 4, IMAGE 6).', 'A direct visual and numerical demonstration of the deep-vs-fat exponential gap: the log-scale plot shows 2K neurons growing slowly while 2^K neurons explode (IMAGE 2).', 'An executable proof that the folding construction really yields 2^K linear pieces, with a printed table confirming measured pieces match 2^K for K=1..7.']
+   rationale: Compared with the slides, the notebook substantially deepens understanding by turning the abstract claims into visible mechanisms and quantitative checks. IMAGE 1 shows exactly what one ReLU contributes, rather than just stating piecewise linearity. The Demo 1 widget is especially valuable because t
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: Concept chosen: why deep networks are preferable to shallow/fat ones, focusing on ReLU piecewise-linearity, universal approximation, and especially the exponential depth-vs-width efficiency gap. (A) CENTRALITY: This is the core of the lecture segment, not a side point; the slides repeatedly return t
+
+#7 Clarity = 4.62  (7a=4.0 7b=5.0 7c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 6495, 'out': 365}, 'n_citations': 1, 'self_consistency_k': 3, 'raw_scores': {'visual': [4.0, 4.0, 4.0], 'textual': [5.0, 5.0, 5.0], 'code_explanation': [5.0, 5.0, 4.0]}}
+   rationale: Overall the notebook reads clearly and the code is well-narrated. The only meaningful visual issue I found is in IMAGE 2 / IMAGE 3: the plot is log-scaled and the x-axis is labeled with the target complexity, but at the default view the smaller blue series is visually compressed near the bottom whil
+   visual: IMAGE 2 / IMAGE 3: Default comparison plot is somewhat compressed by the log-scale layout: the deep curve sits near the bottom while the fa
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         5.0
+  2a_assertional         5.0
+  2b_computational       5.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        4.5
+  5_effectiveness        4.5
+  6_duration_seconds     2.8984
+  7_clarity              4.62
+  7a_visual              4.0
+  7b_textual             5.0
+  7c_code_explanation    5.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s2/summary.json
+[ablation] === S0__whydeeplearning__s3 ===
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3
+
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T17:12:09.885634+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 183.7865,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 6,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3/interactivity --max-points 3 --source slides
+
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 6 code cells, 6 clean, total 3.1s
+  widgets: 6 enumerated, 1 drivable
+  widget planner: +8 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1479, 'out': 251}, 'raw_count': 8, 'kept': 8}
+  #@param fields: 0
+  semantic planner: +1 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 3154, 'out': 79}, 'raw_count': 1, 'kept': 1, 'dropped': []}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3/interactivity/frames)
+  controls scored: 2 (0 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=5.0 flags=['dead_control:m', 'strong_concept_link']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 5286, 'out': 320}, 'frames_shown': 5, 'parsed_ok': True}
+
+per-control effectiveness:
+    depth K [widget/executed] = 5.0
+    m [input/executed] = 1.0
+
+#5 Interactivity = 3.0  (effectiveness, mean of 2 controls; 0 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/S0__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3/interactivity/frames
+
+WARNING: image-heavy deck (3230 extractable chars over 24 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf
+digest: notebook=12458 chars (executed.ipynb), 6 image(s); slides=3531 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 4.41  (2a=5.0 2b=4.0 2c=4.33)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 10211, 'out': 519}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 4.0, 'correctness_final': 4.33, 'n_errors': 3, 'n_confirmed': 2, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [4.0, 4.0, 5.0], 'correctness': [4.33, 4.0, 5.0]}}
+   rationale: Notebook mostly tracks slides closely and the plotted outputs are consistent with the toy construction. Minor deviations are present in cells 2/10/14, but no source contradictions. The main computational content is genuinely computed from code (cells 5, 7, 11, 13), though it uses a hand-crafted fold
+   2c error confirmed=True: Universal approximation theorems do not say a finite one-hidden-layer network can represent every continuous function ex
+   2c error confirmed=True: This is stated too broadly as a general fact. Modular decomposition can reduce complexity, but exponential shrinkage is 
+   2c error confirmed=False: The notebook presents a specific formula and error bound without qualification. While the broad idea of exponentially be
+
+#3 Pedagogical Depth = 5.0
+   adds: ["A concrete 2-neuron ReLU folding module is shown and plotted, making the abstract 'piecewise-linear' idea tangible in IMAGE 1.", "The notebook visibly demonstrates composition: as K increases, the curve folds into 2, 4, 8, 16 pieces with only 2K neurons, which is a much deeper mechanistic explanation than the slide's schematic.", "It gives a worked approximation of y = x^2 with a visible error curve that falls exponentially in depth, directly illustrating the lecture's claim that depth helps even on smooth functions (IMAGE 2).", "It includes a side-by-side parameter-budget comparison of deep vs. shallow speech models, making the 'thin + tall vs fat + short' point concrete with actual WER bars (IMAGE 3).", "It links the theory to the lecture's logic-circuit and paper-folding analogies, reinforcing why layered reuse can beat one-shot enumeration."]
+   rationale: This notebook adds substantial pedagogical depth beyond the slides because the realized outputs do more than restate 'deep is better': they show the mechanism. IMAGE 1 visibly plots the same fold module repeated across K=1..4, so learners can see the number of linear pieces doubling with each layer.
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: Chosen concept: why deep networks are preferable to shallow ones because depth can create exponentially more piecewise-linear regions (and thus expressiveness) per parameter, using ReLU folding/approximation. (A) CENTRALITY: This is the lecture’s core question, explicitly framed by the slides (“Why 
+
+#7 Clarity = 4.0  (7a=4.0 7b=4.0 7c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 8151, 'out': 353}, 'n_citations': 2, 'self_consistency_k': 3, 'raw_scores': {'visual': [4.0, 3.0, 4.0], 'textual': [4.0, 4.0, 4.0], 'code_explanation': [4.0, 4.0, 4.0]}}
+   rationale: Overall the notebook is clear and readable, with good headings, short sections, and code that is usually narrated well. I did not find any severe visual problems in the main figures: IMAGE 1, IMAGE 2, and IMAGE 3 are legible and the axes/legends do not visibly collide. The interactive frames IMAGE 4
+   textual: markdown cell 10: Advanced formula and explanation are compressed into a small block, making the transition from the fold map to the x^2 a
+   code_explanation: code cell 11: The approximation loop is readable, but the code is only lightly narrated; the step-by-step meaning of the recurrence is
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.41
+  2a_assertional         5.0
+  2b_computational       4.0
+  2c_correctness         4.33
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        3.0
+  5_effectiveness        3.0
+  6_duration_seconds     183.7865
+  7_clarity              4.0
+  7a_visual              4.0
+  7b_textual             4.0
+  7c_code_explanation    4.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/whydeeplearning__s3/summary.json
+[ablation] === S0__ml2021_self_attention__s1 ===
+[ablation] RESUME S0__ml2021_self_attention__s1 (notebook present; re-scoring with evalkit only)
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s1/notebooks/ml2021_self_attention_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T17:14:05.241930+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s1/notebooks/ml2021_self_attention_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 3.0578,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 8,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s1/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 8 code cells, 8 clean, total 1.7s
+  widgets: 9 enumerated, 2 drivable
+  widget planner: +8 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1481, 'out': 309}, 'raw_count': 8, 'kept': 8}
+  #@param fields: 0
+  semantic planner: +1 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4132, 'out': 166}, 'raw_count': 1, 'kept': 1, 'dropped': []}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1/interactivity/frames)
+  controls scored: 3 (1 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.5 flags=['strong_concept_link', 'speculative:emb']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 5021, 'out': 366}, 'frames_shown': 5, 'parsed_ok': True}
+
+per-control effectiveness:
+    query [widget/executed] = 4.5
+    temp T [widget/executed] = 5.0
+    emb [constant/reasoned] = 4.0
+
+#5 Interactivity = 4.5  (effectiveness, mean of 3 controls; 1 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s1/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1/interactivity/frames
+
+WARNING: image-heavy deck (7251 extractable chars over 43 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf
+digest: notebook=21141 chars (executed.ipynb), 6 image(s); slides=7786 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 5.0  (2a=5.0 2b=5.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 15167, 'out': 269}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [5.0, 5.0, 5.0], 'correctness': [5.0, 5.0, 5.0]}}
+   rationale: Notebook content is faithful to the slides and conceptually correct. It covers the same core ideas as the source: set/vector-sequence inputs (cells 1, 17, 20; slides 2–9), self-attention scoring/softmax/value aggregation (cells 2, 5, 11–12; slides 14–25), multi-head attention (cell 15; slides 26–28)
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A concrete worked example of attention on six hand-placed word embeddings, with visible cluster-specific weights in IMAGE 1.', 'A full matrix-view heatmap of the attention matrix, making the row/column interpretation and block structure explicit in IMAGE 1.', 'A live temperature effect demo showing sharp vs. diffuse attention and how the output embedding shifts in 2-D space, visible in IMAGE 5 and IMAGE 6.', 'A sinusoidal positional encoding visualization that shows how position information is encoded across dimensions, visible in IMAGE 2.', 'A matrix-form check that the vectorized self-attention computation matches the step-by-step version, reinforcing the algebraic formulation even though the output is only textual.']
+   rationale: The notebook adds substantial pedagogical depth beyond the slide by turning the abstract Q/K/V equations into concrete, readable behavior. IMAGE 1 is especially valuable: it shows a real attention matrix where the animal words attend to one another and the vehicle words attend to one another, so the
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: The notebook chose the lecture’s core concept: self-attention itself, including Q/K/V, softmax weighting, matrix form, multi-head attention, and positional encoding. (A) CENTRALITY is very strong: this is explicitly the focus of the lecture segment and the slides pivot around it. (B) RICHNESS / NON-
+
+#7 Clarity = 4.09  (7a=3.0 7b=5.0 7c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 9417, 'out': 342}, 'n_citations': 3, 'self_consistency_k': 3, 'raw_scores': {'visual': [3.0, 4.0, 3.0], 'textual': [5.0, 5.0, 5.0], 'code_explanation': [5.0, 5.0, 5.0]}}
+   rationale: The notebook reads clearly overall, with strong markdown scaffolding and well-chosen stepwise code. Textual prose is organized into numbered sections, equations render cleanly, and the flow from intuition to matrix form to interaction is easy to follow. The main visual issue is IMAGE 3/4, where the 
+   visual: IMAGE 3: Default interaction frame shows the positional-encoding heatmap with the title very close to the top edge under the fram
+   visual: IMAGE 4: Same interaction view remains cramped at the top banner/title boundary; the figure is still readable, but the default re
+   code_explanation: code cell 16: Multi-head attention is implemented in a relatively dense code block with only a brief docstring and little adjacent pro
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         5.0
+  2a_assertional         5.0
+  2b_computational       5.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        4.5
+  5_effectiveness        4.5
+  6_duration_seconds     3.0578
+  7_clarity              4.09
+  7a_visual              3.0
+  7b_textual             5.0
+  7c_code_explanation    5.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s1/summary.json
+[ablation] === S0__ml2021_self_attention__s2 ===
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s2/notebooks/ml2021_self_attention_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2
+
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T17:20:04.429676+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s2/notebooks/ml2021_self_attention_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 3.2681,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 9,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s2/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2/interactivity --max-points 3 --source slides
+
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 9 code cells, 9 clean, total 2.3s
+  widgets: 9 enumerated, 2 drivable
+  widget planner: +8 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1485, 'out': 277}, 'raw_count': 8, 'kept': 8}
+  #@param fields: 0
+  semantic planner: +3 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4024, 'out': 527}, 'raw_count': 4, 'kept': 3, 'dropped': ['temperature:not_assigned']}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2/interactivity/frames)
+  controls scored: 5 (3 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.0 flags=['strong_concept_link:query', 'strong_concept_link:T', 'speculative:X', 'speculative:heads', 'speculative:Wo']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4852, 'out': 563}, 'frames_shown': 5, 'parsed_ok': True}
+
+per-control effectiveness:
+    query [widget/executed] = 4.5
+    T [widget/executed] = 4.5
+    X [input/reasoned] = 2.0
+    heads [input/reasoned] = 2.0
+    Wo [constant/reasoned] = 1.0
+
+#5 Interactivity = 2.8  (effectiveness, mean of 5 controls; 3 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s2/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2/interactivity/frames
+
+WARNING: image-heavy deck (7251 extractable chars over 43 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf
+digest: notebook=20276 chars (executed.ipynb), 6 image(s); slides=7786 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 5.0  (2a=5.0 2b=5.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 14598, 'out': 186}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [5.0, 5.0, 5.0], 'correctness': [5.0, 5.0, 5.0]}}
+   rationale: Notebook content is faithful to the lecture and the code implements the described mechanisms. Cells 1–2 summarize the lecture’s input-as-vector-set framing, sequence labeling examples, and query/key/value attention exactly as on slides 2–18. Cells 11, 15, 17, and 19 compute attention, multi-head att
+
+#3 Pedagogical Depth = 5.0
+   adds: ["A concrete worked example of self-attention on six hand-placed word vectors, with printed raw scores, softmax weights, and the resulting output vector for the query 'cat' (cell 9).", 'A full attention-matrix heatmap that visually reveals block structure among the animal vs. vehicle words, which goes beyond the slide’s formula-only presentation (IMAGE 1).', 'A matrix-form derivation and numerical cross-check showing the per-token computation matches the batched implementation exactly, helping connect the equations to the GPU-friendly form (cell 11).', 'A temperature/scaling visualization where changing T alters how sharp or uniform the attention becomes; the visible low-T frame shows a very peaky distribution and the query-row highlight (IMAGE 6).', 'A two-head comparison with separate heatmaps, showing that different heads can learn different relevance patterns rather than just repeating the same attention map (IMAGE 2).', "A positional-encoding visualization that makes the abstract 'add a unique positional vector' idea concrete by showing the sinusoidal basis across dimensions and positions (IMAGE 3).", 'An explicit conceptual comparison with CNNs and RNNs that clarifies self-attention’s receptive-field and parallelism advantages in a table and summary (markdown cells 20-22).']
+   rationale: The notebook adds substantial pedagogical depth beyond the slides because it does not just restate the self-attention equations; it makes them operational and visible. In cells 7-13, the learner sees a hand-designed embedding space, computes q/k/v, prints the actual scores and softmax weights for on
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: The notebook chose self-attention as a demo, and that is highly worthy. (A) CENTRALITY: it is explicitly the focus of the lecture segment, with the slides building from vector-set inputs to Q/K/V, attention matrices, multi-head attention, positional encoding, and Transformer applications. (B) RICHNE
+
+#7 Clarity = 3.83  (7a=3.0 7b=5.0 7c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 8848, 'out': 398}, 'n_citations': 2, 'self_consistency_k': 3, 'raw_scores': {'visual': [3.0, 2.0, 4.0], 'textual': [5.0, 5.0, 5.0], 'code_explanation': [4.0, 4.0, 5.0]}}
+   rationale: Overall the notebook is clear and well scaffolded in prose, but the visual outputs have a real readability defect in the interactive frame, and the code narration is mostly good with one somewhat dense cell. IMAGE 6 (step16_0) has the red query highlight rectangle drawn across the heatmap, which is 
+   visual: IMAGE 6 / step16_0: The interactive default/swept frame is cramped: the heatmap and bar chart share a small canvas, making the right-side ba
+   code_explanation: cell 17: A comparatively dense code block implementing multi-head attention and plotting appears with only a short docstring and 
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         5.0
+  2a_assertional         5.0
+  2b_computational       5.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        2.8
+  5_effectiveness        2.8
+  6_duration_seconds     3.2681
+  7_clarity              3.83
+  7a_visual              3.0
+  7b_textual             5.0
+  7c_code_explanation    4.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s2/summary.json
+[ablation] === S0__ml2021_self_attention__s3 ===
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s3/notebooks/ml2021_self_attention_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3
+
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T17:26:30.739538+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s3/notebooks/ml2021_self_attention_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 3.0404,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 10,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s3/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3/interactivity --max-points 3 --source slides
+
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 10 code cells, 10 clean, total 1.9s
+  widgets: 12 enumerated, 3 drivable
+  widget planner: +8 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1606, 'out': 298}, 'raw_count': 8, 'kept': 8}
+  #@param fields: 0
+  semantic planner: +0 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4057, 'out': 167}, 'raw_count': 3, 'kept': 0, 'dropped': ['query_word:not_assigned', 'temperature:not_assigned', 'scale:covered_or_empty']}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3/interactivity/frames)
+  controls scored: 3 (0 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.0 flags=['strong_concept_link']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 5159, 'out': 423}, 'frames_shown': 7, 'parsed_ok': True}
+
+per-control effectiveness:
+    query [widget/executed] = 4.5
+    temp [widget/executed] = 4.0
+    scale [widget/executed] = 3.5
+
+#5 Interactivity = 4.0  (effectiveness, mean of 3 controls; 0 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/S0__ml2021_self_attention__s3/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3/interactivity/frames
+
+WARNING: image-heavy deck (7251 extractable chars over 43 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf
+digest: notebook=18853 chars (executed.ipynb), 6 image(s); slides=7786 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 4.62  (2a=5.0 2b=4.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 14277, 'out': 259}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 0, 'n_confirmed': 0, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [4.0, 4.0, 4.0], 'correctness': [5.0, 4.0, 5.0]}}
+   rationale: Notebook content is broadly faithful to slides 10-29 and 32-40, with helpful added explanation. The main self-attention mechanism in cells 2, 6-11, 16-17 matches slides 13-25: queries/keys/values, dot-product attention, softmax, weighted sum, and matrix form. Cell 18-19 correctly extends to multi-he
+
+#3 Pedagogical Depth = 5.0
+   adds: ["A concrete worked example with a tiny 4-token sequence ('river, bank, money, deposit') and interpretable dimensions, so the learner can see how ambiguous tokens get contextualized beyond the slide's abstract Q/K/V formulas.", 'A visible attention heatmap in IMAGE 1 that makes row-vs-column behavior concrete and shows the actual distribution of weights, not just the algebra.', "A live per-query bar-chart demo in IMAGE 5 and IMAGE 6 that shows how changing the query word changes the attended tokens, making the 'query asks / keys answer' mechanism much easier to internalize.", 'A clear matrix-form walkthrough plus a check that the step-by-step computation matches a compact self_attention function, helping connect the scalar equations on the slide to an executable implementation.', 'A visual multi-head example in IMAGE 2 showing two heads with different attention patterns, adding the idea that heads specialize in different relevance relations.', 'A positional-encoding visualization in IMAGE 3/4 that directly illustrates how order information is injected into otherwise order-agnostic self-attention.']
+   rationale: This notebook substantially deepens the concept beyond the slide. The slides define self-attention mostly abstractly through formulas and schematic diagrams; the notebook turns that into a fully worked, interpretable instance with visible outputs. IMAGE 1 concretely shows the attention matrix for a 
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: The notebook chose self-attention, which is the central mechanism of the lecture segment and the core building block of Transformers. (A) CENTRALITY: this is explicitly the focus of the lecture, not a side note. (B) RICHNESS / NON-TRIVIALITY: self-attention has multiple moving parts—Q/K/V projection
+
+#7 Clarity = 4.62  (7a=4.0 7b=5.0 7c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 8527, 'out': 268}, 'n_citations': 1, 'self_consistency_k': 3, 'raw_scores': {'visual': [4.0, 4.0, 5.0], 'textual': [5.0, 5.0, 5.0], 'code_explanation': [5.0, 4.0, 5.0]}}
+   rationale: The notebook is generally very clear, but the visual score is capped below 5 by a default-view issue in the interactive frames: IMAGE 4 shows the positional-encoding heatmap cropped into the notebook’s display frame with the title partially cut off at the top banner edge, so the initial view is not 
+   visual: IMAGE 4 / step00_baseline_0: Default rendered positional-encoding figure has the title clipped at the top edge of the displayed frame, reducing first
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.62
+  2a_assertional         5.0
+  2b_computational       4.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        4.0
+  5_effectiveness        4.0
+  6_duration_seconds     3.0404
+  7_clarity              4.62
+  7a_visual              4.0
+  7b_textual             5.0
+  7c_code_explanation    5.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/S0/ml2021_self_attention__s3/summary.json
+[ablation] === S0__autoencoder__s1 ===
+[ablation] RESUME S0__autoencoder__s1 (notebook present; re-scoring with evalkit only)
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/S0/autoencoder__s1
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/S0__autoencoder__s1/notebooks/autoencoder_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/S0/autoencoder__s1
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T17:28:39.666388+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/S0__autoencoder__s1/notebooks/autoencoder_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/S0/autoencoder__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 15.9213,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 12,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/S0__autoencoder__s1/notebooks/autoencoder_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/autoencoder__s1/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)

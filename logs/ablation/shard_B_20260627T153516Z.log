@@ -1,0 +1,241 @@
+[ablation] === B__MLBasic__s1 ===
+./scripts/run_ablation.sh: line 139: 587277 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B__MLBasic__s1; recording empty exec result
+[ablation] === B__MLBasic__s2 ===
+[ablation] SKIP B__MLBasic__s2 (notebook + score present — resume)
+[ablation] === B__MLBasic__s3 ===
+[ablation] SKIP B__MLBasic__s3 (notebook + score present — resume)
+[ablation] === B__whydeeplearning__s1 ===
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+The Stage 1 artifact already exists at the target path and is valid, complete, and consistent with my analysis of the lecture (it meets the schema and completion gate: 6 candidates, explicit ranking rationale, 4 selected concepts). Returning its contents:
+
+{
+  "course": "Machine Learning (Hung-yi Lee) — Why Deep Learning?",
+  "source_path": "/work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf",
+  "candidates": [
+    {
+      "concept": "Depth efficiency: exponential growth of linear pie
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s1/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+{
+  "notebook_title": "Why Deep Learning? Building Intuition for Depth Efficiency",
+  "learning_objectives": [
+    "Identify the three core activation building blocks — hard sigmoid, sigmoid, and ReLU — and explain the role of their shift (b), slope (w), and height (c) parameters.",
+    "Show that two opposite ReLUs sum to a single hard-sigmoid step.",
+    "Reconstruct an arbitrary piecewise-linear target as a constant plus a sum of scaled, shifted activation functions.",
+    "Demonstrate that s
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s1/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+The Stage 3 cell analysis has been written to `/work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s1/pipeline_outputs/03_cell_analysis.json`. It covers all 9 code cells (C02, C04, C05, C06, C08, C10, C11, C13, C14) from Stage 2 with explicit implementation plans, function signatures, state variables, error handling, and executable sanity checks, plus cross-cell invariants and assumptions.
+
+```json
+{
+  "cell_specs": [
+    {
+      "cell_id": "C02",
+      "implementation_plan": "Environment setup
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s1/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+{"final_notebook_path": "notebooks/whydeeplearning_interactive_skill.ipynb", "generated_cells": [{"cell_id": "C01", "status": "generated", "notes": "Title + roadmap markdown previewing the four demos."}, {"cell_id": "C02", "status": "generated", "notes": "Setup: numpy/matplotlib imports, ipywidgets with try/except fallback (WIDGETS_AVAILABLE + no-op interact/sliders), figure style, X_GRID and X_UNIT, version print; includes C02 assertions."}, {"cell_id": "C03", "status": "generated", "notes": "S
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb (15 cells, 23971 bytes)
+[run_pipeline] Stage 4 complete: 15 cells (9 code, 6 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s1/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260627T153605Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s1/pipeline_outputs/run_log.json
+./scripts/run_ablation.sh: line 139: 779777 Killed                  "$PYTHON_BIN" "$ROOT_DIR/scripts/lib/execute_notebook.py" --notebook "$nb" --output "$run_dir/execution_result.json" --per-cell-timeout "$PER_CELL_TIMEOUT" --save-executed "$run_dir/executed.ipynb" > /dev/null
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/B/whydeeplearning__s1
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/B/whydeeplearning__s1
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-27T15:53:02.514224+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/B/whydeeplearning__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": false,
+  "duration_seconds": 183.2551,
+  "error_message": "An error occurred while executing the following cell:\n------------------\n# Confirm C13 ran.\n_required = [\"deep_pred\", \"shallow_pred\", \"t\", \"deep_error\", \"shallow_error\", \"P_deep\", \"P_shallow\"]\n_missing = [v for v in _required if v not in dir()]\nassert not _missing, f\"Run cell C13 first; missing: {_missing}\"\n\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))\n\n# Left: fitted curves vs target.\nax1.plot(X_UNIT, t, label=\"target (2^3 sawtooth)\", lw=3, color=\"black\")\nax1.plot(X_UNIT, deep_pred, label=f\"deep fit (MSE={deep_error:.3g})\", lw=2, color=\"C0\")\nax1.plot(X_UNIT, shallow_pred, label=f\"shallow fit (MSE={shallow_error:.3g})\", lw=2, ls=\"--\", color=\"C3\")\nax1.set_xlabel(\"x\")\nax1.set_ylabel(\"output\")\nax1.set_title(f\"Deep vs. shallow fit at ~{P_deep} params\")\nax1.legend(loc=\"upper right\")\n\n# Right: error comparison.\nbars = ax2.bar([\"deep\", \"shallow\"], [deep_error, shallow_error], color=[\"C0\", \"C3\"])\nax2.set_ylabel(\"MSE\")\nax2.set_title(\"Fitting error (lower is better)\")\nfor rect, val in zip(bars, [deep_error, shallow_error]):\n    ax2.text(rect.get_x() + rect.get_width() / 2, rect.get_height(),\n             f\"{val:.2g}\", ha=\"center\", va=\"bottom\")\n\nplt.tight_layout()\nplt.show()\n\nif deep_error > 0:\n    print(f\"Deep MSE={deep_error:.4g} vs Shallow MSE={shallow_error:.4g} at ~{P_deep} params; \"\n          f\"deep is {shallow_error / deep_error:.1f}x lower error.\")\nelse:\n    print(f\"Deep MSE ~ 0 vs Shallow MSE={shallow_error:.4g} at ~{P_deep} params; deep fits essentially exactly.\")\n------------------\n\n\n\u001b[31m---------------------------------------------------------------------------\u001b[39m\n\u001b[31mAssertionError\u001b[39m                            Traceback (most recent call last)\n\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[9]\u001b[39m\u001b[32m, line 4\u001b[39m\n\u001b[32m      1\u001b[39m \u001b[38;5;66;03m# Confirm C13 ran.\u001b[39;00m\n\u001b[32m      2\u001b[39m _required = [\u001b[33m\"deep_pred\"\u001b[39m, \u001b[33m\"shallow_pred\"\u001b[39m, \u001b[33m\"t\"\u001b[39m, \u001b[33m\"deep_error\"\u001b[39m, \u001b[33m\"shallow_error\"\u001b[39m, \u001b[33m\"P_deep\"\u001b[39m, \u001b[33m\"P_shallow\"\u001b[39m]\n\u001b[32m      3\u001b[39m _missing = [v \u001b[38;5;28;01mfor\u001b[39;00m v \u001b[38;5;28;01min\u001b[39;00m _required \u001b[38;5;28;01mif\u001b[39;00m v \u001b[38;5;28;01mnot\u001b[39;00m \u001b[38;5;28;01min\u001b[39;00m dir()]\n\u001b[32m----> \u001b[39m\u001b[32m4\u001b[39m \u001b[38;5;28;01massert\u001b[39;00m \u001b[38;5;28;01mnot\u001b[39;00m _missing, \u001b[33mf\"Run cell C13 first; missing: {_missing}\"\u001b[39m\n\u001b[32m      5\u001b[39m \n\u001b[32m      6\u001b[39m fig, (ax1, ax2) = plt.subplots(\u001b[32m1\u001b[39m, \u001b[32m2\u001b[39m, figsize=(\u001b[32m13\u001b[39m, \u001b[32m5\u001b[39m))\n\u001b[32m      7\u001b[39m \n\n\u001b[31mAssertionError\u001b[39m: Run cell C13 first; missing: ['deep_pred', 'shallow_pred', 't', 'deep_error', 'shallow_error', 'P_deep', 'P_shallow']\n",
+  "stats": {
+    "code_cell_count": 9,
+    "error_cell_count": 1,
+    "errors": [
+      {
+        "cell_index": 13,
+        "ename": "AssertionError",
+        "evalue": "Run cell C13 first; missing: ['deep_pred', 'shallow_pred', 't', 'deep_error', 'shallow_error', 'P_deep', 'P_shallow']",
+        "traceback_excerpt": "---------------------------------------------------------------------------\nAssertionError                            Traceback (most recent call last)\nCell In[9], line 4\n      1 # Confirm C13 ran.\n      2 _required = [\"deep_pred\", \"shallow_pred\", \"t\", \"deep_error\", \"shallow_error\", \"P_deep\", \"P_shallow\"]\n      3 _missing = [v for v in _required if v not in dir()]\n----> 4 assert not _missing, f\"Run cell C13 first; missing: {_missing}\"\n      5 \n      6 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))\n      7 \n\nAssertionError: Run cell C13 first; missing: ['deep_pred', 'shallow_pred', 't', 'deep_error', 'shallow_error', 'P_deep', 'P_shallow']"
+      }
+    ]
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/B/whydeeplearning__s1/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 783284 Killed                  "$EVALKIT_PY" "${ek_args[@]}"
+[ablation] evalkit scoring failed for B__whydeeplearning__s1
+[ablation] === B__whydeeplearning__s2 ===
+./scripts/run_ablation.sh: line 139: 1312853 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B__whydeeplearning__s2; recording empty exec result
+[ablation] === B__whydeeplearning__s3 ===
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+The Stage 1 artifact already exists at the target path and fully satisfies the schema and completion gate (6 candidates, explicit ranking rationale, 4 selected concepts). Returning it:
+
+```json
+{
+  "course": "Machine Learning / Deep Learning (Hung-yi Lee) — \"Why Deep Learning?\"",
+  "source_path": "/work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf",
+  "candidates": [
+    {
+      "concept": "Piecewise-linear function approximation by summing activation functions",
+      "importance_s
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s3/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+The Stage 2 output already exists and is valid, complete, and conformant to the schema and completion gate. Returning its contents:
+
+{
+  "notebook_title": "Why Deep Learning? Building Functions from Bumps and the Power of Depth",
+  "learning_objectives": [
+    "Explain how any piecewise-linear target curve can be written as a constant plus a sum of activation 'bumps' (hard-sigmoid, sigmoid, ReLU).",
+    "Connect the math c*sigmoid(b+wx) and c*max(0, b+wx) to a concrete single-hidden-layer networ
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s3/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+Stage 3 complete. I read `02_notebook_structure.json` and wrote `03_cell_analysis.json` with implementation specs for all 9 code cells (C02, C04, C05, C07, C09, C10, C11, C13, C14).
+
+Each spec includes an explicit implementation plan, function signatures, state variables, error handling, and executable test checks — no placeholder language. The file also defines 8 cross-cell invariants (C02 as the single source of activations/seed, the `fold` building block shared by C09/C10/C13, the C07↔C05 equ
+[run_pipeline] cell-analyzer: stdout was not a JSON object (no valid JSON payload found in model output); using the on-disk artifact 03_cell_analysis.json
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s3/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+The artifact is written and verified (15 cells, matching ids/types/order, all non-empty, all code cells parse).
+
+{"final_notebook_path": "notebooks/whydeeplearning_interactive_skill.ipynb", "generated_cells": [{"cell_id": "C01", "status": "generated", "notes": "Title, motivation, roadmap, fish-and-bear's-paw framing."}, {"cell_id": "C02", "status": "generated", "notes": "Imports, no-op interact fallback, plotting style, stable sigmoid/hard_sigmoid/relu, global seed, sanity asserts."}, {"cell_id"
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb (15 cells, 23988 bytes)
+[run_pipeline] Stage 4 complete: 15 cells (9 code, 6 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s3/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260627T155813Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s3/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/B/whydeeplearning__s3
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/B/whydeeplearning__s3
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-27T16:09:06.628411+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/B/whydeeplearning__s3/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 10.2835,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 9,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/B__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/B/whydeeplearning__s3/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 1458967 Killed                  "$EVALKIT_PY" "${ek_args[@]}"
+[ablation] evalkit scoring failed for B__whydeeplearning__s3
+[ablation] === B__ml2021_self_attention__s1 ===
+[ablation] SKIP B__ml2021_self_attention__s1 (notebook + score present — resume)
+[ablation] === B__ml2021_self_attention__s2 ===
+./scripts/run_ablation.sh: line 139: 1684916 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B__ml2021_self_attention__s2; recording empty exec result
+[ablation] === B__ml2021_self_attention__s3 ===
+[ablation] SKIP B__ml2021_self_attention__s3 (notebook + score present — resume)
+[ablation] === B__autoencoder__s1 ===
+[validator] note: cell_specs include 8 non-code (markdown) cell id(s) ['C01', 'C02', 'C06', 'C10', 'C12', 'C15', 'C19', 'C24']; ignored by stage 4
+./scripts/run_ablation.sh: line 139: 1851842 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B__autoencoder__s1; recording empty exec result
+[ablation] === B__autoencoder__s2 ===
+./scripts/run_ablation.sh: line 139: 1873925 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B__autoencoder__s2; recording empty exec result
+[ablation] === B__autoencoder__s3 ===
+./scripts/run_ablation.sh: line 139: 1876238 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B__autoencoder__s3; recording empty exec result
+[ablation] === B__gan__s1 ===
+./scripts/run_ablation.sh: line 139: 1905444 Killed                  "$RUNNER" "${args[@]}"

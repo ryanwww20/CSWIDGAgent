@@ -1,0 +1,227 @@
+[ablation] === B+bug_solver__MLBasic__s1 ===
+[ablation] SKIP B+bug_solver__MLBasic__s1 (notebook + score present — resume)
+[ablation] === B+bug_solver__MLBasic__s2 ===
+[ablation] SKIP B+bug_solver__MLBasic__s2 (notebook + score present — resume)
+[ablation] === B+bug_solver__MLBasic__s3 ===
+./scripts/run_ablation.sh: line 139: 587306 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B+bug_solver__MLBasic__s3; recording empty exec result
+[ablation] === B+bug_solver__whydeeplearning__s1 ===
+[ablation] SKIP B+bug_solver__whydeeplearning__s1 (notebook + score present — resume)
+[ablation] === B+bug_solver__whydeeplearning__s2 ===
+[ablation] SKIP B+bug_solver__whydeeplearning__s2 (notebook + score present — resume)
+[ablation] === B+bug_solver__whydeeplearning__s3 ===
+[IPKernelApp] ERROR | KeyboardInterrupt caught in kernel.
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+{"course":"Machine Learning / Deep Learning (Hung-yi Lee) — \"Why Deep Learning?\"","source_path":"/work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf","candidates":[{"concept":"Piecewise-linear approximation of continuous functions","importance_score":9,"demo_feasibility_score":10,"prerequisites":["basic functions and plotting","linear functions"],"why_it_matters":"Establishes the central intuition of the lecture: any continuous 1D curve can be approximated arbitrarily well by enough 
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B+bug_solver__whydeeplearning__s3/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+{"notebook_title":"Why Deep Learning? Pieces, Activations, Universal Approximation, and the Power of Depth","status":"Stage 2 complete","output":"pipeline_outputs/02_notebook_structure.json","cells":13,"concepts_mapped":5}
+
+[run_pipeline] notebook-architect failed validation (attempt 1/8): 02_notebook_structure.json missing required keys: ['assumptions', 'global_flow_notes', 'learning_objectives']; re-running stage
+[DEBUG] raw output:
+The Stage 2 output already exists at the target path and is a complete, schema-valid notebook structure derived from the selected concepts. Returning it:
+
+{
+  "notebook_title": "Why Deep Learning? Pieces, Activations, Universal Approximation, and the Power of Depth",
+  "learning_objectives": [
+    "Explain how any continuous 1D function can be approximated arbitrarily well by enough piecewise-linear segments, and watch the error shrink as the number of pieces grows.",
+    "Describe how Hard Sigm
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B+bug_solver__whydeeplearning__s3/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+Stage 3 cell analysis written to `03_cell_analysis.json`. It covers all six code cells (C02, C04, C06, C08, C10, C12) with explicit implementation plans, function signatures, state variables, error handling, and executable test checks, plus cross-cell invariants and assumptions. No ambiguous placeholders; each interactive cell specifies a static-render fallback for deterministic Stage 5 verification.
+
+[run_pipeline] cell-analyzer: stdout was not a JSON object (no valid JSON payload found in model output); using the on-disk artifact 03_cell_analysis.json
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B+bug_solver__whydeeplearning__s3/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+The artifact is written and validated. Returning the generation report.
+
+{
+  "final_notebook_path": "notebooks/whydeeplearning_interactive_skill.ipynb",
+  "generated_cells": [
+    {"cell_id": "C01", "status": "generated", "notes": "Title + roadmap markdown posing the 'why deep' question and previewing the five demos."},
+    {"cell_id": "C02", "status": "generated", "notes": "Setup: numpy/matplotlib imports, guarded inline magic, ipywidgets import with pip-install fallback (None-degrade for headl
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/B+bug_solver__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb (13 cells, 28158 bytes)
+[run_pipeline] Stage 4 complete: 13 cells (6 code, 7 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B+bug_solver__whydeeplearning__s3/pipeline_outputs/04_generation_report.json
+[run_pipeline] Running stage: notebook-verifier
+[run_pipeline] Stage 5 verify [kernel=python3 (colab-match)]: syntax_ok=True runnable=True (syntax_failures=0, execution_failures=0, 3.1s)
+[run_pipeline] Stage 5 complete (completed): syntax_ok=True, runnable=True, fix_attempts=0
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B+bug_solver__whydeeplearning__s3/pipeline_outputs/05_execution_report.json
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260627T153605Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/B+bug_solver__whydeeplearning__s3/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 623813 Killed                  "$PYTHON_BIN" "$ROOT_DIR/scripts/lib/execute_notebook.py" --notebook "$nb" --output "$run_dir/execution_result.json" --per-cell-timeout "$PER_CELL_TIMEOUT" --save-executed "$run_dir/executed.ipynb" > /dev/null
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/whydeeplearning__s3
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/B+bug_solver__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/whydeeplearning__s3
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 783282 Killed                  "$EVALKIT_PY" "${ek_args[@]}"
+[ablation] evalkit scoring failed for B+bug_solver__whydeeplearning__s3
+[ablation] === B+bug_solver__ml2021_self_attention__s1 ===
+./scripts/run_ablation.sh: line 139: 1312854 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B+bug_solver__ml2021_self_attention__s1; recording empty exec result
+[ablation] === B+bug_solver__ml2021_self_attention__s2 ===
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+{
+  "course": "Machine Learning 2021 (Hung-yi Lee) — Self-Attention",
+  "source_path": "/work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf",
+  "candidates": [
+    {
+      "concept": "Vector-set input and sequence labeling output types",
+      "importance_score": 8,
+      "demo_feasibility_score": 9,
+      "prerequisites": ["Vectors and matrices", "Word embeddings / one-hot encoding"],
+      "why_it_matters": "Motivates the whole lecture: many real inputs (text, speech, graphs, m
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B+bug_solver__ml2021_self_attention__s2/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: notebook-architect
+[DEBUG] raw output:
+Stage 2 output written successfully.
+
+```json
+{
+  "notebook_title": "Self-Attention from Scratch: Query, Key, Value, and Beyond",
+  "learning_objectives": [
+    "Explain why variable-length vector-set inputs motivate self-attention over fixed windows",
+    "Derive and implement the core self-attention flow (query, key, value, dot-product scores, softmax, weighted sum) for a single output vector",
+    "Reformulate self-attention as efficient batched matrix operations (Q, K, V, attention matrix A'
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B+bug_solver__ml2021_self_attention__s2/pipeline_outputs/02_notebook_structure.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+Stage 3 cell analysis written to `pipeline_outputs/03_cell_analysis.json`.
+
+Specs cover all 10 code cells (C03, C04, C06, C07, C09, C10, C12, C13, C15, C16); the 7 markdown cells are noted as intentionally omitted. Key design decisions baked into the spec for executability:
+
+- **Row-major token convention** throughout (each row = one token), the numpy-natural transpose of the lecture's column form, applied uniformly so all matmuls compose.
+- **Scaling consistency** — `scale = sqrt(d_k)` defined 
+[run_pipeline] cell-analyzer: stdout was not a JSON object (top-level list); using the on-disk artifact 03_cell_analysis.json
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B+bug_solver__ml2021_self_attention__s2/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+All 17 cells match stage 2 in count, order, id, and type; every code cell parses.
+
+{"final_notebook_path": "notebooks/ml2021_self_attention_interactive_skill.ipynb", "generated_cells": [{"cell_id": "C01", "status": "generated", "notes": "Markdown: title, learning objectives, roadmap."}, {"cell_id": "C02", "status": "generated", "notes": "Markdown: motivation — variable-length vector sets, three output types, FC-window limitation."}, {"cell_id": "C03", "status": "generated", "notes": "Code: setup
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/B+bug_solver__ml2021_self_attention__s2/notebooks/ml2021_self_attention_interactive_skill.ipynb (17 cells, 29934 bytes)
+[run_pipeline] Stage 4 complete: 17 cells (10 code, 7 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B+bug_solver__ml2021_self_attention__s2/pipeline_outputs/04_generation_report.json
+[run_pipeline] Running stage: notebook-verifier
+[run_pipeline] Stage 5 verify [kernel=python3 (colab-match)]: syntax_ok=True runnable=False (syntax_failures=0, execution_failures=3, 3.4s)
+[run_pipeline] Stage 5: notebook not runnable; running notebook-fixer (attempt 1/2)
+[run_pipeline] Stage 5 verify [kernel=python3 (colab-match)]: syntax_ok=True runnable=True (syntax_failures=0, execution_failures=0, 3.8s)
+[run_pipeline] Stage 5 complete (completed): syntax_ok=True, runnable=True, fix_attempts=1
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/B+bug_solver__ml2021_self_attention__s2/pipeline_outputs/05_execution_report.json
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260627T155813Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/B+bug_solver__ml2021_self_attention__s2/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/ml2021_self_attention__s2
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/B+bug_solver__ml2021_self_attention__s2/notebooks/ml2021_self_attention_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/ml2021_self_attention__s2
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-27T16:08:01.228099+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/B+bug_solver__ml2021_self_attention__s2/notebooks/ml2021_self_attention_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/ml2021_self_attention__s2/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 3.8412,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 10,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/B+bug_solver__ml2021_self_attention__s2/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/ml2021_self_attention__s2/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 10 code cells, 10 clean, total 4.7s
+  widgets: 12 enumerated, 2 drivable
+  widget planner: +8 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1437, 'out': 281}, 'raw_count': 8, 'kept': 8}
+  #@param fields: 0
+  semantic planner: +6 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4070, 'out': 506}, 'raw_count': 6, 'kept': 6, 'dropped': []}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/ml2021_self_attention__s2/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/ml2021_self_attention__s2/interactivity/frames)
+  controls scored: 8 (1 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=3.7 flags=['strong_concept_link:query', 'strong_concept_link:scale', 'only_cosmetic:token_labels', 'unstable:seq_len']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 9587, 'out': 661}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    query [widget/executed] = 4.5
+    n_heads [widget/executed] = 4.0
+    seq_len [constant/executed] = 3.0
+    d_model [constant/executed] = 3.0
+    token_labels [constant/reasoned] = 1.0
+    d_k [constant/executed] = 4.0
+    d_v [constant/executed] = 3.5
+    scale [constant/executed] = 4.5
+
+#5 Interactivity = 3.44  (effectiveness, mean of 8 controls; 1 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/ml2021_self_attention__s2/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/B+bug_solver__ml2021_self_attention__s2/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/ml2021_self_attention__s2/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/ml2021_self_attention__s2/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/B+bug_solver/ml2021_self_attention__s2/interactivity/frames
+
+./scripts/run_ablation.sh: line 139: 1443318 Killed                  "$EVALKIT_PY" "${ek_args[@]}"
+[ablation] evalkit scoring failed for B+bug_solver__ml2021_self_attention__s2
+[ablation] === B+bug_solver__ml2021_self_attention__s3 ===
+./scripts/run_ablation.sh: line 139: 1684898 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B+bug_solver__ml2021_self_attention__s3; recording empty exec result
+[ablation] === B+bug_solver__autoencoder__s1 ===
+./scripts/run_ablation.sh: line 139: 1851825 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B+bug_solver__autoencoder__s1; recording empty exec result
+[ablation] === B+bug_solver__autoencoder__s2 ===
+./scripts/run_ablation.sh: line 139: 1873929 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B+bug_solver__autoencoder__s2; recording empty exec result
+[ablation] === B+bug_solver__autoencoder__s3 ===
+./scripts/run_ablation.sh: line 139: 1876236 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for B+bug_solver__autoencoder__s3; recording empty exec result
+[ablation] === B+bug_solver__gan__s1 ===
+./scripts/run_ablation.sh: line 139: 1905443 Killed                  "$RUNNER" "${args[@]}"

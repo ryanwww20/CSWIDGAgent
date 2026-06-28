@@ -1,0 +1,244 @@
+[ablation] === ablate-notebook-architect__MLBasic__s1 ===
+[ablation] SKIP ablate-notebook-architect__MLBasic__s1 (notebook + score present — resume)
+[ablation] === ablate-notebook-architect__MLBasic__s2 ===
+[ablation] SKIP ablate-notebook-architect__MLBasic__s2 (notebook + score present — resume)
+[ablation] === ablate-notebook-architect__MLBasic__s3 ===
+[ablation] SKIP ablate-notebook-architect__MLBasic__s3 (notebook + score present — resume)
+[ablation] === ablate-notebook-architect__whydeeplearning__s1 ===
+[ablation] SKIP ablate-notebook-architect__whydeeplearning__s1 (notebook + score present — resume)
+[ablation] === ablate-notebook-architect__whydeeplearning__s2 ===
+./scripts/run_ablation.sh: line 139: 587330 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-notebook-architect__whydeeplearning__s2; recording empty exec result
+[ablation] === ablate-notebook-architect__whydeeplearning__s3 ===
+[run_pipeline] Ablation: dropping 'notebook-architect' (merge mode)
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+The Stage 1 artifact already exists at the target path and fully satisfies the schema and completion gate (7 candidates, explicit ranking rationale, 5 selected concepts). Returning its contents:
+
+{
+  "course": "Machine Learning (Hung-yi Lee) — Why Deep Learning?",
+  "source_path": "/work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf",
+  "candidates": [
+    {
+      "concept": "Piecewise-linear approximation of arbitrary functions",
+      "importance_score": 9,
+      "demo_feasibility_sc
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s3/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+Both `02_notebook_structure.json` and `03_cell_analysis.json` already exist in that directory, are valid, follow their respective contracts exactly, and are fully consistent with the current `01_concepts.json` (same five selected concepts) and with each other (C01 defines `X_GRID`/helpers, C05 defines the `ACTIVATIONS` registry, C03 defines `TARGETS`, and C07/C09/C11 reuse them; no ambiguous placeholders; failure handling and executable sanity checks present). They satisfy the completion gate, s
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s3/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+{"final_notebook_path": "notebooks/whydeeplearning_interactive_skill.ipynb", "generated_cells": [{"cell_id": "C00", "status": "generated", "notes": "Title, abstract, five-part roadmap, and learning objectives."}, {"cell_id": "C01", "status": "generated", "notes": "Setup: imports with ipywidgets try/except fallback, %matplotlib inline, seed 0, X_GRID, new_axes/finalize helpers, sanity asserts and readiness print."}, {"cell_id": "C02", "status": "generated", "notes": "Concept 1 markdown: piecewise
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb (13 cells, 31390 bytes)
+[run_pipeline] Stage 4 complete: 13 cells (6 code, 7 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s3/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260627T153605Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s3/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s3
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s3/notebooks/whydeeplearning_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s3
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 627507 Killed                  "$EVALKIT_PY" "${ek_args[@]}"
+[ablation] evalkit scoring failed for ablate-notebook-architect__whydeeplearning__s3
+[ablation] === ablate-notebook-architect__ml2021_self_attention__s1 ===
+./scripts/run_ablation.sh: line 139: 783275 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-notebook-architect__ml2021_self_attention__s1; recording empty exec result
+[ablation] === ablate-notebook-architect__ml2021_self_attention__s2 ===
+./scripts/run_ablation.sh: line 139: 1312880 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-notebook-architect__ml2021_self_attention__s2; recording empty exec result
+[ablation] === ablate-notebook-architect__ml2021_self_attention__s3 ===
+[run_pipeline] Ablation: dropping 'notebook-architect' (merge mode)
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+{
+  "course": "Machine Learning 2021 (Hung-yi Lee) — Self-attention",
+  "source_path": "/work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf",
+  "candidates": [
+    {
+      "concept": "Self-attention mechanism (query/key/value, attention scores, weighted sum)",
+      "importance_score": 10,
+      "demo_feasibility_score": 10,
+      "prerequisites": ["Linear algebra (dot product, matrix multiplication)", "Word/vector embeddings", "Softmax"],
+      "why_it_matters": "This is the cen
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__ml2021_self_attention__s3/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+{
+  "cell_specs": [
+    {
+      "cell_id": "C01",
+      "implementation_plan": "Import numpy as np, matplotlib.pyplot as plt, and ipywidgets as widgets (plus from ipywidgets import interact). Call np.random.seed(0) and also create np_rng = np.random.default_rng(0) for reproducible matrix creation. Define softmax(x, axis=-1) that subtracts the max along axis for numerical stability, exponentiates, and divides by the sum along the same axis (keepdims=True). Enable inline plotting is implicit in Co
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__ml2021_self_attention__s3/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+All 16 cells written and validated (counts, ids, types, and non-empty sources match `02_notebook_structure.json`).
+
+{"final_notebook_path": "notebooks/ml2021_self_attention_interactive_skill.ipynb", "generated_cells": [{"cell_id": "C00", "status": "generated", "notes": "Title, learning objectives, and roadmap table."}, {"cell_id": "C01", "status": "generated", "notes": "Imports, seed (np.random.seed(0) + default_rng(0)), stable softmax helper, HAS_WIDGETS fallback flag, assertions."}, {"cell_id"
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__ml2021_self_attention__s3/notebooks/ml2021_self_attention_interactive_skill.ipynb (16 cells, 24540 bytes)
+[run_pipeline] Stage 4 complete: 16 cells (9 code, 7 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__ml2021_self_attention__s3/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260627T155813Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__ml2021_self_attention__s3/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__ml2021_self_attention__s3/notebooks/ml2021_self_attention_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-27T16:04:55.749908+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__ml2021_self_attention__s3/notebooks/ml2021_self_attention_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": false,
+  "duration_seconds": 3.0382,
+  "error_message": "An error occurred while executing the following cell:\n------------------\ndef sinusoidal_positional_encoding(seq_len: int, d_model: int) -> np.ndarray:\n    \"\"\"Fixed sinusoidal positional encoding of shape (seq_len, d_model).\"\"\"\n    pos = np.arange(seq_len)[:, None].astype(float)          # (seq_len, 1)\n    i = np.arange(d_model)[None, :].astype(float)            # (1, d_model)\n    angle_rates = 1.0 / np.power(10000.0, (2.0 * (i // 2)) / d_model)\n    angles = pos * angle_rates                               # (seq_len, d_model)\n    PE = np.zeros((seq_len, d_model))\n    PE[:, 0::2] = np.sin(angles[:, 0::2])\n    PE[:, 1::2] = np.cos(angles[:, 1::2])\n    return PE\n\n\nPE = sinusoidal_positional_encoding(N, D)\nassert PE.shape == (N, D)\n\n# Plot the encoding (positions on y, dimension on x).\nfig, ax = plt.subplots(figsize=(6, 3.5))\nim = ax.imshow(PE, aspect='auto', cmap='coolwarm')\nax.set_xlabel('encoding dimension'); ax.set_ylabel('position')\nax.set_yticks(range(N)); ax.set_yticklabels([f\"pos {p}\" for p in range(N)])\nax.set_title('Sinusoidal positional encoding')\nfig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)\nplt.tight_layout()\nplt.show()\n\n# 1) Bare self-attention IS permutation-equivariant.\nperm = np.array([2, 0, 3, 1])\nO = self_attention(X, Wq, Wk, Wv)['O']\nO_perm = self_attention(X[perm], Wq, Wk, Wv)['O']\nassert np.allclose(O_perm, O[perm], atol=1e-8)\nprint(\"bare self-attention equivariant (O_perm == O[perm]):\",\n      np.allclose(O_perm, O[perm], atol=1e-8))\n\n# 2) Adding positional encoding BREAKS that equivariance, injecting order.\nX_pe = X + sinusoidal_positional_encoding(N, D)\ndiff = np.max(np.abs(self_attention(X_pe[perm], Wq, Wk, Wv)['O']\n                     - self_attention(X_pe, Wq, Wk, Wv)['O'][perm]))\nprint(f\"with PE, max|O_perm - O[perm]| = {diff:.4f}  (> 0 => order now matters)\")\nassert diff > 1e-6\n------------------\n\n----- stdout -----\nbare self-attention equivariant (O_perm == O[perm]): True\nwith PE, max|O_perm - O[perm]| = 0.0000  (> 0 => order now matters)\n------------------\n\n\u001b[31m---------------------------------------------------------------------------\u001b[39m\n\u001b[31mAssertionError\u001b[39m                            Traceback (most recent call last)\n\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[9]\u001b[39m\u001b[32m, line 39\u001b[39m\n\u001b[32m     35\u001b[39m X_pe = X + sinusoidal_positional_encoding(N, D)\n\u001b[32m     36\u001b[39m diff = np.max(np.abs(self_attention(X_pe[perm], Wq, Wk, Wv)['O']\n\u001b[32m     37\u001b[39m                      - self_attention(X_pe, Wq, Wk, Wv)['O'][perm]))\n\u001b[32m     38\u001b[39m print(\u001b[33mf\"with PE, max|O_perm - O[perm]| = {diff:.4f}  (> 0 => order now matters)\"\u001b[39m)\n\u001b[32m---> \u001b[39m\u001b[32m39\u001b[39m \u001b[38;5;28;01massert\u001b[39;00m diff > \u001b[32m1e-6\u001b[39m\n\n\u001b[31mAssertionError\u001b[39m: \n",
+  "stats": {
+    "code_cell_count": 9,
+    "error_cell_count": 1,
+    "errors": [
+      {
+        "cell_index": 14,
+        "ename": "AssertionError",
+        "evalue": "",
+        "traceback_excerpt": "---------------------------------------------------------------------------\nAssertionError                            Traceback (most recent call last)\nCell In[9], line 39\n     35 X_pe = X + sinusoidal_positional_encoding(N, D)\n     36 diff = np.max(np.abs(self_attention(X_pe[perm], Wq, Wk, Wv)['O']\n     37                      - self_attention(X_pe, Wq, Wk, Wv)['O'][perm]))\n     38 print(f\"with PE, max|O_perm - O[perm]| = {diff:.4f}  (> 0 => order now matters)\")\n---> 39 assert diff > 1e-6\n\nAssertionError: "
+      }
+    ]
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__ml2021_self_attention__s3/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline cell errors (continued): 1
+    cell14: [31mAssertionError[39m: 
+  baseline: 9 code cells, 8 clean, total 1.8s
+  widgets: 15 enumerated, 3 drivable
+  widget planner: +9 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1626, 'out': 334}, 'raw_count': 9, 'kept': 9}
+  #@param fields: 0
+  semantic planner: +2 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 4259, 'out': 128}, 'raw_count': 2, 'kept': 2, 'dropped': []}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3/interactivity/frames)
+  controls scored: 5 (2 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=3.0 flags=['strong_concept_link']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 5236, 'out': 581}, 'frames_shown': 7, 'parsed_ok': True}
+
+per-control effectiveness:
+    query idx [widget/executed] = 4.0
+    num_heads [widget/executed] = 4.0
+    head idx [widget/executed] = 3.0
+    N [constant/reasoned] = 2.0
+    Dk [constant/reasoned] = 2.0
+
+#5 Interactivity = 3.0  (effectiveness, mean of 5 controls; 2 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__ml2021_self_attention__s3/notebooks/ml2021_self_attention_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3/interactivity/frames
+
+WARNING: image-heavy deck (7251 extractable chars over 43 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/ml2021_self_attention.pdf
+digest: notebook=22006 chars (executed.ipynb), 6 image(s); slides=7786 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 3.16  (2a=5.0 2b=2.0 2c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 15116, 'out': 384}, 'assertional_raw': 4.0, 'assertional_final': 5.0, 'correctness_raw': 4.0, 'correctness_final': 5.0, 'n_errors': 1, 'n_confirmed': 0, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [2.0, 2.0, 2.0], 'correctness': [4.0, 4.0, 3.0]}}
+   rationale: Notebook is largely faithful to slides on self-attention, multi-head attention, and positional encoding (slides 13–29, 32, 35–40). Main issue is in cell 14: it claims sinusoidal positional encoding 'breaks permutation-equivariance' and prints 'with PE, max|O_perm - O[perm]| = 0.0000 (> 0 => order no
+   2a error confirmed=False: The code output shows diff = 0.0000 and the subsequent assert diff > 1e-6 fails, so the displayed run does not actually 
+
+#3 Pedagogical Depth = 4.0
+   adds: ['A concrete worked example of single-token self-attention is visible in the printed intermediate values in code cell 5: q^1, raw scores, softmax weights, and the resulting output vector b^1.', 'The matrix-form derivation is made tangible by asserting that the vectorized output O[0] exactly matches the loop-computed b^1 in code cell 7, which helps connect the equations to computation.', "IMAGE 1 shows a readable attention heatmap A' with numeric cell annotations, making 'who attends to whom' much clearer than the slide's algebra alone.", 'The multi-head section is not just mentioned but visualized in the interactive head-specific attention maps; IMAGE 5 and IMAGE 6 show different heads producing different relevance patterns, illustrating why multiple heads can specialize.', 'IMAGE 2 shows sinusoidal positional encoding as an actual pattern across positions and dimensions, which makes the abstract PE formula more concrete.']
+   rationale: This notebook adds substantial instructional depth beyond the slides by turning the abstract self-attention equations into a full worked numerical example, then connecting that example to the vectorized form and to an attention heatmap (IMAGE 1). That is a real gain in understanding because the lear
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: The notebook chose the lecture’s core mechanism: self-attention in the Transformer, including single-head attention, multi-head attention, and positional encoding. (A) CENTRALITY: this is explicitly the focus of the lecture segment, not a side note. (B) RICHNESS / NON-TRIVIALITY: the concept has sev
+
+#7 Clarity = 3.27  (7a=3.0 7b=3.0 7c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 9366, 'out': 433}, 'n_citations': 2, 'self_consistency_k': 3, 'raw_scores': {'visual': [5.0, 3.0, 3.0], 'textual': [4.0, 3.0, 3.0], 'code_explanation': [4.0, 4.0, 3.0]}}
+   rationale: Visual clarity is capped by a real defect in the hero positional-encoding figure: IMAGE 2 (and the default interactive view IMAGE 3) show the heatmap title "Sinusoidal positional encoding" with the first token of the broader notebook context cut off in the rendered frame? More concretely, the attach
+   textual: cell 14: The cell prints a result claiming positional encoding changes the output, but the displayed value is `0.0000` and the su
+   code_explanation: cell 14: A single dense code block combines encoding construction, plotting, equivariance test, and a failing assertion with limi
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3/quality/quality_report.json
+
+=== summary ===
+  1_run_success          False
+  2_faithfulness         3.16
+  2a_assertional         5.0
+  2b_computational       2.0
+  2c_correctness         4.0
+  3_pedagogy             4.0
+  4_topic                5.0
+  5_interactivity        3.0
+  5_effectiveness        3.0
+  6_duration_seconds     3.0382
+  7_clarity              3.27
+  7a_visual              3.0
+  7b_textual             3.0
+  7c_code_explanation    4.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/ml2021_self_attention__s3/summary.json
+[ablation] === ablate-notebook-architect__autoencoder__s1 ===
+./scripts/run_ablation.sh: line 139: 1439508 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-notebook-architect__autoencoder__s1; recording empty exec result
+[ablation] === ablate-notebook-architect__autoencoder__s2 ===
+./scripts/run_ablation.sh: line 139: 1684917 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-notebook-architect__autoencoder__s2; recording empty exec result
+[ablation] === ablate-notebook-architect__autoencoder__s3 ===
+./scripts/run_ablation.sh: line 139: 1851815 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-notebook-architect__autoencoder__s3; recording empty exec result
+[ablation] === ablate-notebook-architect__gan__s1 ===
+./scripts/run_ablation.sh: line 139: 1873950 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-notebook-architect__gan__s1; recording empty exec result
+[ablation] === ablate-notebook-architect__gan__s2 ===
+./scripts/run_ablation.sh: line 139: 1876248 Killed                  "$RUNNER" "${args[@]}"
+[ablation] generation failed/no notebook for ablate-notebook-architect__gan__s2; recording empty exec result
+[ablation] === ablate-notebook-architect__gan__s3 ===
+./scripts/run_ablation.sh: line 139: 1905447 Killed                  "$RUNNER" "${args[@]}"

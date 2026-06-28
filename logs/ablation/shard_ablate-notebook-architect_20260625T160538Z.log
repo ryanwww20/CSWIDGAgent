@@ -1,0 +1,689 @@
+[ablation] === ablate-notebook-architect__MLBasic__s1 ===
+[run_pipeline] Ablation: dropping 'notebook-architect' (merge mode)
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+Stage 1 artifact written and validated.
+
+```json
+{
+  "course": "淺談機器學習原理 (Introduction to the Principles of Machine Learning) — Pokémon vs. Digimon Classifier",
+  "source_path": "/work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf",
+  "candidates": [
+    { "concept": "The Three-Step ML Framework (function with unknown parameters → define loss → optimization)", "importance_score": 9, "demo_feasibility_score": 9, "prerequisites": [], "why_it_matters": "Organizing skeleton of the lecture and of s
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+{
+  "cell_specs": [
+    {
+      "cell_id": "C01",
+      "implementation_plan": "Import numpy as np, matplotlib.pyplot as plt, and ipywidgets as widgets (plus from ipywidgets import interact, interactive, IntSlider, FloatSlider). Set a module-level seed SEED=42 and create RNG = np.random.default_rng(SEED) used by all later sampling. Configure matplotlib defaults (plt.rcParams figure.figsize=(8,4), enable inline rendering is automatic in Colab). Print the numpy and matplotlib versions and a one-li
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+The artifact is written and verified: 15 cells matching stage 2 in count, id order, and type; all sources non-empty; all code cells parse.
+
+{
+  "final_notebook_path": "notebooks/MLBasic_interactive_skill.ipynb",
+  "generated_cells": [
+    { "cell_id": "C00", "status": "generated", "notes": "Title, Pokémon-vs-Digimon story, scope note (synthetic 1-D edge-count data), and learning objectives." },
+    { "cell_id": "C01", "status": "generated", "notes": "Imports, optional-ipywidgets guard setting HA
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb (15 cells, 29309 bytes)
+[run_pipeline] Stage 4 complete: 15 cells (7 code, 8 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260625T160541Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+[IPKernelApp] ERROR | KeyboardInterrupt caught in kernel.
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T16:21:13.320141+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 363.7799,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 7,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 7 code cells, 7 clean, total 5.4s
+  widgets: 45 enumerated, 10 drivable
+  widget planner: +10 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1942, 'out': 401}, 'raw_count': 10, 'kept': 10}
+  #@param fields: 0
+  semantic planner: +3 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 3863, 'out': 393}, 'raw_count': 4, 'kept': 3, 'dropped': ['n_per_class:not_assigned']}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/interactivity/frames)
+  controls scored: 13 (2 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.0 flags=['only_cosmetic:trials', 'speculative:H_GRID', 'speculative:GRID_THIN', 'unstable:SEED']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 11911, 'out': 975}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    h [widget/executed] = 4.5
+    N [widget/executed] = 4.5
+    draw [widget/executed] = 4.0
+    N#1 [widget/executed] = 4.5
+    eps [widget/executed] = 4.5
+    trials [widget/executed] = 1.5
+    eps#1 [widget/executed] = 4.5
+    delta [widget/executed] = 4.5
+    H [widget/executed] = 4.5
+    N#2 [widget/executed] = 4.0
+    H_GRID [constant/reasoned] = 2.0
+    GRID_THIN [constant/reasoned] = 1.5
+    SEED [constant/executed] = 3.0
+
+#5 Interactivity = 3.65  (effectiveness, mean of 13 controls; 2 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s1/notebooks/MLBasic_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/interactivity/frames
+
+WARNING: image-heavy deck (5742 extractable chars over 35 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf
+digest: notebook=25307 chars (executed.ipynb), 6 image(s); slides=6186 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 4.62  (2a=5.0 2b=4.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 16857, 'out': 538}, 'assertional_raw': 4.0, 'assertional_final': 5.0, 'correctness_raw': 4.0, 'correctness_final': 5.0, 'n_errors': 1, 'n_confirmed': 0, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 2.0, 5.0], 'computational': [4.0, 4.0, 4.0], 'correctness': [5.0, 4.0, 5.0]}}
+   rationale: Notebook is largely faithful to the slide story: cells 2, 4, 6, 8, 10, 12, 14 map cleanly to slides 2, 7, 11–13, 17–19, 26–31, and 33–34. There are no obvious source contradictions in the main narrative, but the notebook adds extra specifics not in the slides (synthetic 1-D data generation, a partic
+   2c error confirmed=False: This is too strong as a general claim about the Pokémon-vs-Digimon classification problem; the source slides only show a
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A concrete synthetic Pokémon-vs-Digimon edge-count distribution with an actual visible overlap histogram, grounding the abstraction in IMAGE 1.', 'A fully worked threshold classifier loss curve over all thresholds, with the optimal threshold marked and the nonzero irreducible error made visible in IMAGE 2.', 'A training-vs-universe comparison showing that the best threshold on a sampled training set can differ from the best threshold on the full population, with both losses plotted together in the interactive output (IMAGE 3/4/6).', 'A visible Monte Carlo vs. Hoeffding/union-bound comparison for probability of a bad training set, including the decay with N and the dependence on |H| in IMAGE 5.', 'A sample-complexity calculation that solves for the required N and visually ties the analytic bound to a target delta in IMAGE 5.', "A model-complexity tradeoff sweep showing ideal loss, average train loss, and average true loss as |H| changes, which clarifies the underfitting/overfitting tension beyond the slide's brief statement in IMAGE 3/4/6."]
+   rationale: The notebook adds substantial pedagogical depth beyond the slides by turning the abstract generalization story into concrete, visible mechanics. IMAGE 1 shows an actual overlapping class distribution, so the learner sees why the task is not trivially separable. IMAGE 2 makes the loss landscape tangi
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: A) CENTRALITY: The notebook’s chosen concept is the lecture’s core throughline, not a side point: the three-step ML framework, empirical risk minimization on a training set, generalization, Hoeffding/union-bound sample complexity, and the model-complexity tradeoff are exactly what the slides build t
+
+#7 Clarity = 4.0  (7a=4.0 7b=4.0 7c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 10717, 'out': 445}, 'n_citations': 5, 'self_consistency_k': 3, 'raw_scores': {'visual': [4.0, 3.0, 4.0], 'textual': [4.0, 4.0, 4.0], 'code_explanation': [4.0, 4.0, 4.0]}}
+   rationale: The notebook is generally clean and easy to follow. The prose is well-scaffolded with clear headings in cells 0, 2, 4, 6, 8, 10, 12, and a recap in 14; equations render properly and the narrative explains each step of the ML story. Code cells are readable, modular, and narrated with adjacent markdow
+   visual: IMAGE 1: No prominent defect; histogram labels, title, and legend are legible and unobstructed.
+   visual: IMAGE 2: No prominent defect; loss curve, axes, legend, and threshold marker are cleanly rendered.
+   visual: IMAGE 3: Default interactive view is legible, though the log-scaled x-axis compresses the leftmost part of the tradeoff curve; no
+   textual: cells 0, 2, 4, 6, 8, 10, 12, 14: No structural prose defect found; headings and progression are clear, with equations rendered correctly.
+   code_explanation: cells 1, 3, 5, 7, 9, 11, 13: Code is broken into manageable, narrated cells with descriptive names and adjacent explanation; no opaque code dump.
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.62
+  2a_assertional         5.0
+  2b_computational       4.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        3.65
+  5_effectiveness        3.65
+  6_duration_seconds     363.7799
+  7_clarity              4.0
+  7a_visual              4.0
+  7b_textual             4.0
+  7c_code_explanation    4.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s1/summary.json
+[ablation] === ablate-notebook-architect__MLBasic__s2 ===
+[run_pipeline] Ablation: dropping 'notebook-architect' (merge mode)
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+{
+  "course": "淺談機器學習原理 (Introduction to the Principles of Machine Learning) — Pokémon vs. Digimon Classifier Case Study",
+  "source_path": "/work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf",
+  "candidates": [
+    {
+      "concept": "Three-step ML framework (function with unknown parameters → define loss → optimization)",
+      "importance_score": 8,
+      "demo_feasibility_score": 7,
+      "prerequisites": [],
+      "why_it_matters": "Frames the entire lecture and all of ML as a repeatable
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s2/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+{
+  "cell_specs": [
+    {
+      "cell_id": "C01",
+      "implementation_plan": "Import numpy as np, matplotlib.pyplot as plt, and ipywidgets as widgets (with `from ipywidgets import interact, IntSlider, FloatSlider, Dropdown`). Set a module-level constant GLOBAL_SEED = 0. Define make_rng(seed) returning np.random.default_rng(seed). Create a module-level default_rng = make_rng(GLOBAL_SEED). Configure matplotlib defaults: plt.rcParams['figure.figsize'] = (7, 4), a readable font size. Wrap the ipyw
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s2/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+Artifact written and verified: 16 cells matching `02_notebook_structure.json` in count, id, and type; all sources non-empty; all code cells parse.
+
+{"final_notebook_path": "notebooks/MLBasic_interactive_skill.ipynb", "generated_cells": [{"cell_id": "C00", "status": "generated", "notes": "Title, motivation, roadmap, learning objectives, synthetic-data caveat."}, {"cell_id": "C01", "status": "generated", "notes": "Imports, GLOBAL_SEED/make_rng/default_rng, label constants, plotting defaults, ipywi
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s2/notebooks/MLBasic_interactive_skill.ipynb (16 cells, 30355 bytes)
+[run_pipeline] Stage 4 complete: 16 cells (8 code, 8 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s2/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260625T162411Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s2/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+[IPKernelApp] ERROR | KeyboardInterrupt caught in kernel.
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s2/notebooks/MLBasic_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+[IPKernelApp] ERROR | KeyboardInterrupt caught in kernel.
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T16:32:50.013222+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s2/notebooks/MLBasic_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 4.5062,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 8,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s2/notebooks/MLBasic_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 8 code cells, 8 clean, total 4.2s
+  widgets: 30 enumerated, 6 drivable
+  widget planner: +9 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1621, 'out': 330}, 'raw_count': 9, 'kept': 9}
+  #@param fields: 0
+  semantic planner: +5 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 3526, 'out': 446}, 'raw_count': 5, 'kept': 5, 'dropped': []}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2/interactivity/frames)
+  controls scored: 11 (1 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.0 flags=['strong_concept_link', 'dead_control:e_pokemon', 'dead_control:e_digimon']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 10524, 'out': 1132}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    threshold h [widget/executed] = 4.0
+    N (train size) [widget/executed] = 4.0
+    base seed [widget/executed] = 4.0
+    eps [widget/executed] = 4.0
+    |H| [widget/executed] = 4.0
+    N (train size)#1 [widget/executed] = 4.0
+    N_POKEMON [constant/executed] = 4.0
+    N_DIGIMON [constant/executed] = 4.0
+    e_pokemon [input/executed] = 4.0
+    e_digimon [input/executed] = 4.0
+    H_grid [constant/reasoned] = 4.0
+
+#5 Interactivity = 4.0  (effectiveness, mean of 11 controls; 1 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s2/notebooks/MLBasic_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2/interactivity/frames
+
+WARNING: image-heavy deck (5742 extractable chars over 35 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf
+digest: notebook=26494 chars (executed.ipynb), 6 image(s); slides=6186 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 4.09  (2a=5.0 2b=3.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 16752, 'out': 399}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 4.0, 'correctness_final': 4.0, 'n_errors': 1, 'n_confirmed': 1, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [3.0, 4.0, 3.0], 'correctness': [5.0, 5.0, 5.0]}}
+   rationale: Notebook is broadly faithful to the slides and adds some extra pedagogical context. No clear source contradictions beyond mild numeric/order-of-magnitude differences that are explicitly labeled as synthetic in cell 0 and the caveats. The main issues are computational: the demo uses synthesized data 
+   2c error confirmed=True: This is stated too absolutely. In general, a larger hypothesis class weakens uniform bounds and can increase overfitting
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A concrete edge-count distribution plot for Pokémon vs. Digimon, showing the overlap that makes a threshold classifier imperfect (IMAGE 1).', 'A full loss landscape over thresholds with the minimizing threshold marked, so the learner can see how optimization selects h_all rather than just hearing the formula (IMAGE 2).', 'A worked comparison of two sampled training sets producing different h_train values and different true losses, making the randomness of finite-sample training tangible (cell 10; interaction frames not fully shown in the prompt but the cell is designed for this comparison).', 'An empirical-vs-analytic demonstration of bad-training-set probability, with Monte Carlo estimates over N alongside the union-bound/Hoeffding bound (cell 12; visible in the rendered interaction outputs such as IMAGE 3/4/5/6 for the trade-off section).', 'A visual model-complexity trade-off curve showing ideal loss, gap proxy, and total risk as |H| changes, including a marked sweet spot (IMAGE 3, IMAGE 5, IMAGE 6).']
+   rationale: This notebook adds substantial conceptual depth beyond the slide deck. The slides state the ideas abstractly—threshold classifier, 0/1 loss, training vs. population loss, union bound, Hoeffding, and the complexity trade-off—but the notebook makes them operational and visible. IMAGE 1 turns the Pokém
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: A) CENTRALITY: The notebook chooses a core lecture thread, not a side note: the full supervised-learning pipeline from function/loss/optimization through generalization, sample complexity, and model complexity. This is the main arc of the slides. B) RICHNESS / NON-TRIVIALITY: The concept is genuinel
+
+#7 Clarity = 4.29  (7a=4.0 7b=5.0 7c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 10612, 'out': 558}, 'n_citations': 5, 'self_consistency_k': 3, 'raw_scores': {'visual': [4.0, 3.0, 4.0], 'textual': [5.0, 3.0, 5.0], 'code_explanation': [4.0, 4.0, 4.0]}}
+   rationale: The notebook is generally well structured and easy to follow. The prose has clear sectioning, equations render correctly, and the code is mostly narrated. The main visual issue is in the interactive trade-off plot: the default view in IMAGE 3 is readable, but several labels in the legend and the cho
+   visual: IMAGE 2 / code cell 8: The annotation for h_all is placed close to the plotted curve, creating slight crowding around the minimum marker; this 
+   code_explanation: code cell 6: The cell contains several helper definitions and the interactive render function in one block; the prose announces the w
+   code_explanation: code cell 10: This cell bundles sampling, fitting, comparison printing, and widget setup into one dense block. It remains readable, bu
+   code_explanation: code cell 12: The Monte-Carlo estimator and rendering logic are grouped together with limited intermediate explanation, making the lon
+   code_explanation: code cell 14: The trade-off plot cell defines multiple theory helpers and the interactive renderer in one place; the code is sane but 
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.09
+  2a_assertional         5.0
+  2b_computational       3.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                5.0
+  5_interactivity        4.0
+  5_effectiveness        4.0
+  6_duration_seconds     4.5062
+  7_clarity              4.29
+  7a_visual              4.0
+  7b_textual             5.0
+  7c_code_explanation    4.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s2/summary.json
+[ablation] === ablate-notebook-architect__MLBasic__s3 ===
+[run_pipeline] Ablation: dropping 'notebook-architect' (merge mode)
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+{"course":"Pokémon/Digimon Classifier — Introduction to the Principles of Machine Learning (淺談機器學習原理)","source_path":"/work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf","candidates":[{"concept":"Threshold classifier with an unknown parameter (function with unknown parameters)","importance_score":9,"demo_feasibility_score":10,"prerequisites":["Basic Python","Reading a histogram"],"why_it_matters":"Introduces the core ML idea that a model is a family of functions f_h indexed by an unknown para
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s3/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+{
+  "cell_specs": [
+    {
+      "cell_id": "C02",
+      "implementation_plan": "Import numpy as np, matplotlib.pyplot as plt, and ipywidgets as widgets plus from ipywidgets import interact, IntSlider, FloatSlider. Wrap the ipywidgets import in try/except ImportError, setting a module-level flag WIDGETS_AVAILABLE = True/False so later cells can fall back to a single static call. Configure matplotlib inline behavior is automatic in Colab; set plt.rcParams for figure size (6,4) and a readable font 
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s3/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+All 16 cells match `02` in id/type/order, every source is non-empty, and all code cells parse. Here is the generation report:
+
+{
+  "final_notebook_path": "notebooks/MLBasic_interactive_skill.ipynb",
+  "generated_cells": [
+    {"cell_id": "C01", "status": "generated", "notes": "Title, motivation, three-step framework, central question, learning objectives."},
+    {"cell_id": "C02", "status": "generated", "notes": "Imports, WIDGETS_AVAILABLE guard with no-op fallback, seeded rng, calibration const
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s3/notebooks/MLBasic_interactive_skill.ipynb (16 cells, 27300 bytes)
+[run_pipeline] Stage 4 complete: 16 cells (8 code, 8 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s3/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260625T163521Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s3/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s3/notebooks/MLBasic_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T17:08:52.123037+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s3/notebooks/MLBasic_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 543.6701,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 8,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s3/notebooks/MLBasic_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline: 8 code cells, 8 clean, total 5.9s
+  widgets: 48 enumerated, 10 drivable
+  widget planner: +8 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 1949, 'out': 417}, 'raw_count': 8, 'kept': 8}
+  #@param fields: 0
+  semantic planner: +4 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 3882, 'out': 299}, 'raw_count': 4, 'kept': 4, 'dropped': []}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3/interactivity/frames)
+  controls scored: 14 (0 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.0 flags=['dead_control:mu0', 'dead_control:mu1', 'dead_control:sigma', 'dead_control:H_grid', 'strong_concept_link:N', 'strong_concept_link:H_size', 'strong_concept_link:eps', 'strong_concept_link:eps#1']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 11599, 'out': 1104}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    h [widget/executed] = 4.0
+    h#1 [widget/executed] = 4.0
+    N [widget/executed] = 5.0
+    reseed [widget/executed] = 4.0
+    eps [widget/executed] = 5.0
+    H_size [widget/executed] = 5.0
+    H_size#1 [widget/executed] = 5.0
+    delta [widget/executed] = 4.0
+    eps#1 [widget/executed] = 5.0
+    N#1 [widget/executed] = 3.0
+    mu0 [constant/executed] = 1.0
+    mu1 [constant/executed] = 1.0
+    sigma [constant/executed] = 1.0
+    H_grid [constant/executed] = 1.0
+
+#5 Interactivity = 3.43  (effectiveness, mean of 14 controls; 0 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__MLBasic__s3/notebooks/MLBasic_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3/interactivity/frames
+
+WARNING: image-heavy deck (5742 extractable chars over 35 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/MLBasic.pdf
+digest: notebook=23669 chars (executed.ipynb), 6 image(s); slides=6186 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 4.09  (2a=5.0 2b=3.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 15930, 'out': 435}, 'assertional_raw': 5.0, 'assertional_final': 5.0, 'correctness_raw': 4.0, 'correctness_final': 5.0, 'n_errors': 1, 'n_confirmed': 0, 'self_consistency_k': 3, 'raw_scores': {'assertional': [5.0, 5.0, 5.0], 'computational': [3.0, 3.0, 2.0], 'correctness': [5.0, 5.0, 5.0]}}
+   rationale: Notebook content is broadly aligned with slides: cells 0, 2, 5, 7, 9, 11, 13–15 track slides 1–34 and the main formulas are consistent. No clear source contradictions were found. Computationally, several demos are genuine, but some outcomes are baked in by calibration/hardcoded proxy choices: cell 1
+   2c error confirmed=False: This is a broad heuristic, not a universal explanation; the statement overgeneralizes by implying this is the reason dee
+
+#3 Pedagogical Depth = 4.0
+   adds: ['A concrete worked example of the Pokémon-vs-Digimon classifier with a visible overlapping edge-count histogram in IMAGE 1, making the threshold idea much more tangible than the slide.', 'A plotted loss curve for the full synthetic population with a marked best threshold, showing how the argmin over h is actually found rather than just stated.', 'A resampled training-set demo that visibly contrasts h_train with h_all and prints the training-loss vs true-loss gap, which clarifies why a good-looking sample can still mislead.', 'A visual Hoeffding/union-bound curve over N in IMAGE 4, plus a Monte Carlo sanity check, which turns the abstract probability bound into a concrete decay-with-sample-size picture.', 'A sample-complexity plot and numeric worked example for N >= log(2|H|/delta)/(2 eps^2), showing how the formula changes with eps and delta.', 'A tradeoff visualization in IMAGE 2/3/5/6 that decomposes complexity into ideal loss, generalization gap, and total proxy, making the underfitting-overfitting balance more intuitive.']
+   rationale: The notebook adds substantial explanatory depth beyond the slide by grounding the abstract ML pipeline in a concrete, visual one-parameter classification problem. IMAGE 1 shows an actual overlap between the two classes' edge-count distributions, which makes the threshold model and the existence of a
+
+#4 Topic-Worthiness = 5.0  (interactive_right_tool=True)
+   rationale: The notebook chose the core concept of the lecture segment: why machine learning generalizes, using the Pokémon vs. Digimon threshold-classifier case study to build up from hypothesis class, loss, empirical risk minimization, generalization gap, union bound, Hoeffding’s inequality, sample complexity
+
+#7 Clarity = 3.83  (7a=3.0 7b=5.0 7c=4.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 9790, 'out': 419}, 'n_citations': 3, 'self_consistency_k': 3, 'raw_scores': {'visual': [3.0, 3.0, 2.0], 'textual': [5.0, 5.0, 3.0], 'code_explanation': [4.0, 4.0, 4.0]}}
+   rationale: Visual clarity is pulled down by the default interactive view in IMAGE 2: the x-axis is log-scaled and the plot is legible, but the title and legend are crowded with the dashed best-|H| line and the legend box occupies a lot of the upper-right plotting area. More importantly, the same tradeoff figur
+   visual: IMAGE 2: The default/first tradeoff plot shows a crowded legend/title area and the dashed vertical marker sits very close to the 
+   code_explanation: IMAGE 10 / code cell 10: Dense block defining Hoeffding bound, plotting, and Monte Carlo check is only lightly narrated; several meaningful steps
+   code_explanation: code cell 14: The tradeoff visualization cell bundles two helper functions and the plot logic with brief comments only, so the reader 
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3/quality/quality_report.json
+
+=== summary ===
+  1_run_success          True
+  2_faithfulness         4.09
+  2a_assertional         5.0
+  2b_computational       3.0
+  2c_correctness         5.0
+  3_pedagogy             4.0
+  4_topic                5.0
+  5_interactivity        3.43
+  5_effectiveness        3.43
+  6_duration_seconds     543.6701
+  7_clarity              3.83
+  7a_visual              3.0
+  7b_textual             5.0
+  7c_code_explanation    4.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/MLBasic__s3/summary.json
+[ablation] === ablate-notebook-architect__whydeeplearning__s1 ===
+[run_pipeline] Ablation: dropping 'notebook-architect' (merge mode)
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+{"course":"Machine Learning (Hung-yi Lee) — Why Deep Learning?","source_path":"/work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf","candidates":[{"concept":"Piecewise-linear function approximation with activation functions","importance_score":9,"demo_feasibility_score":10,"prerequisites":["Linear functions","Basic Python/NumPy plotting"],"why_it_matters":"Establishes the core mechanism of neural networks: any continuous piecewise-linear target can be written as a constant plus a sum o
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s1/pipeline_outputs/01_concepts.json
+[run_pipeline] Running stage: cell-analyzer
+[DEBUG] raw output:
+{"cell_specs":[{"cell_id":"C01","implementation_plan":"Import numpy as np, matplotlib.pyplot as plt, and ipywidgets as widgets (with from ipywidgets import interactive, FloatSlider, IntSlider, Dropdown). Call %matplotlib inline. Set a module-level RNG via rng = np.random.default_rng(0) and SEED = 0. Define a shared plotting helper new_axes(title, xlabel='x', ylabel='y') that returns (fig, ax) with a fixed figsize=(6,4), grid on, and the given labels. Define X_GRID = np.linspace(-5, 5, 1001) for 
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s1/pipeline_outputs/03_cell_analysis.json
+[run_pipeline] Running stage: demo-coder
+[DEBUG] raw output:
+All 14 cells match `02_notebook_structure.json` in count, order, `cell_id`, and `cell_type`; every source is non-empty and all code cells parse cleanly. Returning the generation report.
+
+{
+  "final_notebook_path": "notebooks/whydeeplearning_interactive_skill.ipynb",
+  "generated_cells": [
+    {"cell_id": "C00", "status": "generated", "notes": "Markdown: title, framing question, learning objectives."},
+    {"cell_id": "C01", "status": "generated", "notes": "Setup: imports, RNG seed, new_axes help
+[run_pipeline] Assembled notebook: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb (14 cells, 26954 bytes)
+[run_pipeline] Stage 4 complete: 14 cells (8 code, 6 markdown)
+[run_pipeline] Wrote /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s1/pipeline_outputs/04_generation_report.json
+[run_pipeline] Stage 5 (notebook-verifier) skipped via --skip-verify
+[run_pipeline] Pipeline completed successfully.
+[run_pipeline] Run ID: run-20260625T171237Z
+[run_pipeline] Generation mode: artifact_driven
+[run_pipeline] Run log: /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s1/pipeline_outputs/run_log.json
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-25T17:19:50.113431+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": false,
+  "duration_seconds": 3.0046,
+  "error_message": "An error occurred while executing the following cell:\n------------------\n# === Quantitatively verify the 2^K claim by counting segments ===\n\ndef count_pieces(y, tol=1e-6):\n    \"\"\"Count linear segments of a sampled 1-D curve via slope-change detection.\n\n    slope = diff(y); a breakpoint is where the slope changes by more than `tol`.\n    pieces = (number of breakpoints) + 1.\n    \"\"\"\n    slope = np.diff(y)\n    breakpoints = np.sum(np.abs(np.diff(slope)) > tol)\n    return int(breakpoints) + 1\n\n\n# tol note: the smallest meaningful slope-change here is O(1) per grid step, far above\n# float noise (~1e-12), so tol=1e-6 cleanly separates real kinks from numerical jitter.\n\n# --- unit tests on count_pieces ---\nassert count_pieces(np.array([0.0, 1.0, 2.0, 3.0])) == 1      # straight line\nassert count_pieces(np.array([0.0, 1.0, 0.0, 1.0])) == 3      # three segments\n\nK_values = list(range(1, 9))\nmeasured_pieces = []\nexpected_pieces = []\nresults = []\nfor K in K_values:\n    y = compose_folds(UNIT_GRID, K)\n    measured = count_pieces(y)\n    expected = 2 ** K\n    measured_pieces.append(measured)\n    expected_pieces.append(expected)\n    results.append((K, expected, measured))\n    if measured != expected:\n        print(f'DIAGNOSTIC: K={K} measured={measured} expected={expected} '\n              f'grid={UNIT_GRID.size}')\n\n# --- print the table ---\nprint(f\"{'K':>3} | {'expected 2^K':>13} | {'measured':>9}\")\nprint('-' * 33)\nfor K, exp, meas in results:\n    print(f'{K:>3} | {exp:>13} | {meas:>9}')\n\n# --- the headline assertion: measured pieces == 2^K ---\nassert all(measured_pieces[i] == expected_pieces[i] for i in range(len(K_values)))\nprint('\\nAll counts match 2^K exactly. Depth -> exponential pieces, verified.')\n\n# --- plot measured vs expected on a log axis ---\nfig, ax = new_axes('Linear pieces grow as 2^K', xlabel='K (folding layers)',\n                   ylabel='number of linear pieces')\nax.semilogy(K_values, expected_pieces, 'o-', color='tab:blue', label='expected 2^K')\nax.semilogy(K_values, measured_pieces, 'x--', color='tab:red', label='measured')\nax.legend()\nplt.show()\n------------------\n\n----- stdout -----\nDIAGNOSTIC: K=6 measured=96 expected=64 grid=20001\nDIAGNOSTIC: K=7 measured=224 expected=128 grid=20001\nDIAGNOSTIC: K=8 measured=480 expected=256 grid=20001\n  K |  expected 2^K |  measured\n---------------------------------\n  1 |             2 |         2\n  2 |             4 |         4\n  3 |             8 |         8\n  4 |            16 |        16\n  5 |            32 |        32\n  6 |            64 |        96\n  7 |           128 |       224\n  8 |           256 |       480\n------------------\n\n\u001b[31m---------------------------------------------------------------------------\u001b[39m\n\u001b[31mAssertionError\u001b[39m                            Traceback (most recent call last)\n\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[6]\u001b[39m\u001b[32m, line 43\u001b[39m\n\u001b[32m     39\u001b[39m \u001b[38;5;28;01mfor\u001b[39;00m K, exp, meas \u001b[38;5;28;01min\u001b[39;00m results:\n\u001b[32m     40\u001b[39m     print(\u001b[33mf'{K:>3} | {exp:>13} | {meas:>9}'\u001b[39m)\n\u001b[32m     41\u001b[39m \n\u001b[32m     42\u001b[39m \u001b[38;5;66;03m# --- the headline assertion: measured pieces == 2^K ---\u001b[39;00m\n\u001b[32m---> \u001b[39m\u001b[32m43\u001b[39m \u001b[38;5;28;01massert\u001b[39;00m all(measured_pieces[i] == expected_pieces[i] \u001b[38;5;28;01mfor\u001b[39;00m i \u001b[38;5;28;01min\u001b[39;00m range(len(K_values)))\n\u001b[32m     44\u001b[39m print(\u001b[33m'\\nAll counts match 2^K exactly. Depth -> exponential pieces, verified.'\u001b[39m)\n\u001b[32m     45\u001b[39m \n\u001b[32m     46\u001b[39m \u001b[38;5;66;03m# --- plot measured vs expected on a log axis ---\u001b[39;00m\n\n\u001b[31mAssertionError\u001b[39m: \n",
+  "stats": {
+    "code_cell_count": 8,
+    "error_cell_count": 1,
+    "errors": [
+      {
+        "cell_index": 9,
+        "ename": "AssertionError",
+        "evalue": "",
+        "traceback_excerpt": "---------------------------------------------------------------------------\nAssertionError                            Traceback (most recent call last)\nCell In[6], line 43\n     39 for K, exp, meas in results:\n     40     print(f'{K:>3} | {exp:>13} | {meas:>9}')\n     41 \n     42 # --- the headline assertion: measured pieces == 2^K ---\n---> 43 assert all(measured_pieces[i] == expected_pieces[i] for i in range(len(K_values)))\n     44 print('\\nAll counts match 2^K exactly. Depth -> exponential pieces, verified.')\n     45 \n     46 # --- plot measured vs expected on a log axis ---\n\nAssertionError: "
+      }
+    ]
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+router: type=ipywidgets lane=kernel runnable=True signals=['ipywidgets', 'code_tweak']
+  baseline cell errors (continued): 1
+    cell9: [31mAssertionError[39m: 
+  baseline: 8 code cells, 7 clean, total 2.0s
+  widgets: 48 enumerated, 13 drivable
+  widget planner: +10 step(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 2111, 'out': 412}, 'raw_count': 10, 'kept': 10}
+  #@param fields: 0
+  semantic planner: +1 control(s) {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 3990, 'out': 103}, 'raw_count': 1, 'kept': 1, 'dropped': []}
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1/interactivity/filmstrip.json  (+ frames in /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1/interactivity/frames)
+  controls scored: 14 (1 reasoned, capped at 4.5)
+
+judge (gpt-5.4-mini): overall=4.5 flags=['strong_concept_link', 'speculative:fold']  {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 10006, 'out': 1114}, 'frames_shown': 14, 'parsed_ok': True}
+
+per-control effectiveness:
+    act [widget/executed] = 4.0
+    const [widget/executed] = 4.0
+    w1 [widget/executed] = 4.0
+    b1 [widget/executed] = 4.0
+    c1 [widget/executed] = 5.0
+    w2 [widget/executed] = 4.0
+    b2 [widget/executed] = 4.0
+    c2 [widget/executed] = 4.0
+    w3 [widget/executed] = 4.0
+    b3 [widget/executed] = 4.0
+    c3 [widget/executed] = 4.0
+    K [widget/executed] = 5.0
+    N [widget/executed] = 5.0
+    fold [view_only/reasoned] = 4.0
+
+#5 Interactivity = 4.21  (effectiveness, mean of 14 controls; 1 reasoned)
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1/interactivity/interactivity_score.json
+
+=== stage C: quality judges ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_quality_eval.py /work/b12901015/CSWIDGAgent/runs/ablate-notebook-architect__whydeeplearning__s1/notebooks/whydeeplearning_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1/quality --max-images 6 --judge-samples 3 --executed /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1/exec/executed.ipynb --slides /work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf --frames /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1/interactivity/frames
+
+WARNING: image-heavy deck (3230 extractable chars over 24 pages) — judges will see almost no slide content. Build a vision digest once per deck:
+  python scripts/eval_harness/slide_digest.py /work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf
+digest: notebook=24093 chars (executed.ipynb), 6 image(s); slides=3531 chars; transcript=0 chars; truncated=nothing
+judge=gpt-5.4-mini  verifier=gpt-5.4-mini  temperature=0.0  samples=3
+
+#2 Faithfulness&Correctness = 3.25  (2a=4.5 2b=2.0 2c=5.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 12292, 'out': 508}, 'assertional_raw': 4.0, 'assertional_final': 4.5, 'correctness_raw': 5.0, 'correctness_final': 5.0, 'n_errors': 2, 'n_confirmed': 1, 'self_consistency_k': 3, 'raw_scores': {'assertional': [4.5, 4.0, 5.0], 'computational': [2.0, 2.0, 2.0], 'correctness': [5.0, 5.0, 5.0]}}
+   rationale: Cells 0-2, 4-5, 6-13 broadly track the slide narrative (piecewise-linear pieces, ReLU/hard-sigmoid, depth vs width, Seide et al. table). However, cell 9 makes a strong quantitative claim that the measured piece count matches 2^K exactly, but its own output shows K=6,7,8 mismatches and the assertion 
+   2a error confirmed=False: The notebook's own printed results show mismatches for K=6,7,8 (96 vs 64, 224 vs 128, 480 vs 256) and the assertion fail
+   2a error confirmed=True: The actual measurement diverges from 2^K at K>=6, so the exact reproduction claim is unsupported by the notebook's own r
+
+#3 Pedagogical Depth = 5.0
+   adds: ['A concrete worked example showing a single ReLU piece and a 3-piece sum chasing a target piecewise-linear curve (IMAGE 1 and IMAGE 2), which makes the ‘sum of pieces’ idea much more tangible than the slide.', 'A vivid fold-map visualization of the deep mechanism: one 2-ReLU layer maps [0,1] to a tent function, then repeated composition produces the 3-fold, 8-piece curve shown in IMAGE 3 and IMAGE 4.', 'A runnable deep-vs-shallow expressivity comparison that plots pieces vs neuron budget and overlays the measured folded-network count, making the exponential-vs-linear gap visually explicit in IMAGE 5 and IMAGE 6.', 'A practical comparison to the slide’s motivation for depth: the WER table is reproduced and contrasted with deep+thin vs shallow+fat architectures, giving a numeric real-world example beyond the slide’s static table.']
+   rationale: The notebook substantially deepens the slide’s argument. The slide states the intuition—piecewise linearity, depth vs width, and ‘why deep?’—but the notebook turns that into visible mechanisms and examples. IMAGE 1 shows the shape of a single activation contribution; IMAGE 2 shows summing three such
+
+#4 Topic-Worthiness = 4.0  (interactive_right_tool=True)
+   rationale: (A) CENTRALITY: The notebook chose the lecture’s core theme — why depth matters vs. shallow width, including piecewise-linear construction and the exponential-pieces argument — which is central to the segment. (B) RICHNESS / NON-TRIVIALITY: This is a genuinely substantive concept with multiple movin
+
+#7 Clarity = 2.57  (7a=2.0 7b=3.0 7c=3.0)
+   {'model': 'gpt-5.4-mini-2026-03-17', 'provider': 'openai', 'usage': {'in': 10232, 'out': 463}, 'n_citations': 3, 'self_consistency_k': 3, 'raw_scores': {'visual': [2.0, 3.0, 2.0], 'textual': [3.0, 3.0, 3.0], 'code_explanation': [3.0, 3.0, 3.0]}}
+   rationale: Visual clarity is hurt by a prominent defect in Act 3’s measured-vs-expected plot: IMAGE 5/6 show a black measured point at K=8 plotted far above the blue curve on the log axis, while the notebook’s own text says the count is being verified; more importantly the first/default interaction view shown 
+   visual: cell 9: The intended verification figure never renders because the cell aborts on AssertionError after printing diagnostics; the
+   textual: cell 9: Claim-to-code flow breaks: the prose promises exact counting, but the cell prints diagnostics and then crashes with Asse
+   code_explanation: cell 9: Dense verification code is only lightly narrated; the slope-change counting method and its failure mode for larger K are
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1/quality/quality_report.json
+
+=== summary ===
+  1_run_success          False
+  2_faithfulness         3.25
+  2a_assertional         4.5
+  2b_computational       2.0
+  2c_correctness         5.0
+  3_pedagogy             5.0
+  4_topic                4.0
+  5_interactivity        4.21
+  5_effectiveness        4.21
+  6_duration_seconds     3.0046
+  7_clarity              2.57
+  7a_visual              2.0
+  7b_textual             3.0
+  7c_code_explanation    3.0
+
+wrote /work/b12901015/CSWIDGAgent/evalkit/results/ablate-notebook-architect/whydeeplearning__s1/summary.json
+[ablation] === ablate-notebook-architect__whydeeplearning__s2 ===
+[run_pipeline][ERROR] concept-extractor output failed validation: candidates[2] missing required keys: ['prerequisites', 'transcript_summary', 'why_it_matters']
+[run_pipeline] Ablation: dropping 'notebook-architect' (merge mode)
+[run_pipeline] Running stage: concept-extractor
+[DEBUG] raw output:
+{"course":"Why Deep Learning? (Hung-yi Lee, Machine Learning lecture)","source_path":"/work/b12901015/CSWIDGAgent/course_source/whydeeplearning.pdf","candidates":[{"concept":"Piecewise-linear function approximation with activation building blocks","importance_score":9,"demo_feasibility_score":10,"prerequisites":["linear functions","basic Python/NumPy","plotting"],"why_it_matters":"Foundational claim that any continuous function ≈ 'constant + sum of a set of' hard-sigmoid/sigmoid/ReLU pieces — th
+[ablation] generation failed/no notebook for ablate-notebook-architect__whydeeplearning__s2; recording empty exec result
+[ablation] === ablate-notebook-architect__whydeeplearning__s3 ===

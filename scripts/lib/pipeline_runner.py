@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -18,6 +19,13 @@ from pipeline_validator import (
     validate_demo_coder_outputs,
     validate_stage_output,
 )
+
+# Stages 1-3 are re-run on a stochastic schema-validation slip (e.g.
+# notebook-architect omitting 'assumptions'/'global_flow_notes'). Re-rolling only
+# affects whether we obtain a schema-valid artifact — the accepted output still
+# passes the same validation — so it does not change the artifact distribution
+# (non-confounding for the ablation). Override with STAGE_VALIDATION_ATTEMPTS env.
+STAGE_VALIDATION_ATTEMPTS = int(os.environ.get("STAGE_VALIDATION_ATTEMPTS", "5"))
 
 
 def log(message: str) -> None:
@@ -690,14 +698,12 @@ def main() -> None:
             stage["task"],
             response_mode=stage["response_mode"],
         )
-        stdout = run_claude_prompt(args.claude_bin, prompt, args.dry_run)
-        print(f"[DEBUG] raw output:\n{stdout[:500]}")
-        if args.dry_run:
-            if stage["name"] == "demo-coder":
-                log(f"[dry-run] would assemble notebook at {notebook_path}")
-            continue
-
         if stage["name"] == "demo-coder":
+            stdout = run_claude_prompt(args.claude_bin, prompt, args.dry_run)
+            print(f"[DEBUG] raw output:\n{stdout[:500]}")
+            if args.dry_run:
+                log(f"[dry-run] would assemble notebook at {notebook_path}")
+                continue
             # The report must come from the model's stdout — the on-disk
             # 04_generation_report.json may be stale from a prior topic, so no
             # disk fallback here.
@@ -731,27 +737,47 @@ def main() -> None:
             log(f"Wrote {report_path}")
             continue
 
-        # Stages 1-3: the agent also writes its artifact to disk, so tolerate a
-        # prose final message by falling back to that file.
-        payload = parse_stage_payload(stage["name"], stdout, stage["output"])
-
-        try:
-            if stage.get("also_writes_structure"):
-                # notebook-architect ablated: this merged stage wrote 02 to disk too,
-                # so validate the structure it produced and adopt it downstream.
-                if not structure_path.exists():
-                    die(f"{stage['name']} (merged) did not write {structure_path}")
-                structure_payload = load_json(structure_path)
-                validate_stage_output("notebook-architect", structure_payload)
-                validate_stage_output(stage["name"], payload, structure=structure_payload)
-            elif stage["name"] == "cell-analyzer":
-                if structure_payload is None:
+        # Stages 1-3: re-run the agent on a stochastic schema-validation slip.
+        # The agent also writes its artifact to disk, so tolerate a prose final
+        # message by falling back to that file.
+        payload = None
+        for sattempt in range(1, STAGE_VALIDATION_ATTEMPTS + 1):
+            stdout = run_claude_prompt(args.claude_bin, prompt, args.dry_run)
+            print(f"[DEBUG] raw output:\n{stdout[:500]}")
+            if args.dry_run:
+                break
+            payload = parse_stage_payload(stage["name"], stdout, stage["output"])
+            try:
+                if stage.get("also_writes_structure"):
+                    # notebook-architect ablated: this merged stage wrote 02 to disk too,
+                    # so validate the structure it produced and adopt it downstream.
+                    if not structure_path.exists():
+                        raise ValidationError(
+                            f"{stage['name']} (merged) did not write {structure_path}"
+                        )
                     structure_payload = load_json(structure_path)
-                validate_stage_output(stage["name"], payload, structure=structure_payload)
-            else:
-                validate_stage_output(stage["name"], payload)
-        except ValidationError as exc:
-            die(f"{stage['name']} output failed validation: {exc}")
+                    validate_stage_output("notebook-architect", structure_payload)
+                    validate_stage_output(stage["name"], payload, structure=structure_payload)
+                elif stage["name"] == "cell-analyzer":
+                    if structure_payload is None:
+                        structure_payload = load_json(structure_path)
+                    validate_stage_output(stage["name"], payload, structure=structure_payload)
+                else:
+                    validate_stage_output(stage["name"], payload)
+                break
+            except ValidationError as exc:
+                if sattempt < STAGE_VALIDATION_ATTEMPTS:
+                    log(
+                        f"{stage['name']} failed validation "
+                        f"(attempt {sattempt}/{STAGE_VALIDATION_ATTEMPTS}): {exc}; re-running stage"
+                    )
+                    continue
+                die(
+                    f"{stage['name']} output failed validation after "
+                    f"{STAGE_VALIDATION_ATTEMPTS} attempts: {exc}"
+                )
+        if args.dry_run:
+            continue
 
         write_json(stage["output"], payload, dry_run=False)
         load_json(stage["output"])
