@@ -1,0 +1,33 @@
+# Recreate the ablation eval env on local (macOS Apple Silicon).
+#   conda env create -f logs/ablation/environment.yml
+#   conda run -n ml-colab-eval python -m playwright install chromium   # interactivity stage
+# Mirrors the SSH `ml-colab-eval` env (Python 3.11, numpy 2.4.6, torch 2.12.1).
+# NOTE: on Apple Silicon torch is the plain build (no +cpu suffix).
+name: ml-colab-eval
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  # scientific / notebook execution stack
+  - numpy=2.4.6
+  - scipy=1.17.1
+  - pandas
+  - matplotlib=3.11
+  - pillow
+  - nbclient
+  - nbformat
+  - ipykernel
+  - jupyter_client
+  - ipywidgets
+  - jsonschema
+  - pymupdf            # imported as fitz; PDF slide ingestion
+  - pyyaml
+  - requests
+  - pip:
+      - torch==2.12.1          # Apple Silicon: plain build (Linux would be 2.12.1+cpu)
+      - openai==2.44.0         # evalkit quality judge (gpt-5.4-mini)
+      - anthropic==0.112.0
+      - playwright==1.60.0     # interactivity stage renders widget frames; needs `playwright install chromium`
+      - python-dotenv==1.2.2   # evalkit loads evalkit/.env
+      - tqdm==4.68.3

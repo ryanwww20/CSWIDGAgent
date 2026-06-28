@@ -1,0 +1,79 @@
+[ablation] === S0__MLBasic__s1 ===
+[ablation] SKIP S0__MLBasic__s1 (notebook + score present — resume)
+[ablation] === S0__MLBasic__s2 ===
+[ablation] SKIP S0__MLBasic__s2 (notebook + score present — resume)
+[ablation] === S0__MLBasic__s3 ===
+[ablation] SKIP S0__MLBasic__s3 (notebook + score present — resume)
+[ablation] === S0__whydeeplearning__s1 ===
+[ablation] SKIP S0__whydeeplearning__s1 (notebook + score present — resume)
+[ablation] === S0__whydeeplearning__s2 ===
+[ablation] SKIP S0__whydeeplearning__s2 (notebook + score present — resume)
+[ablation] === S0__whydeeplearning__s3 ===
+[ablation] SKIP S0__whydeeplearning__s3 (notebook + score present — resume)
+[ablation] === S0__ml2021_self_attention__s1 ===
+[ablation] SKIP S0__ml2021_self_attention__s1 (notebook + score present — resume)
+[ablation] === S0__ml2021_self_attention__s2 ===
+[ablation] SKIP S0__ml2021_self_attention__s2 (notebook + score present — resume)
+[ablation] === S0__ml2021_self_attention__s3 ===
+[ablation] SKIP S0__ml2021_self_attention__s3 (notebook + score present — resume)
+[ablation] === S0__autoencoder__s1 ===
+[ablation] RESUME S0__autoencoder__s1 (notebook present; re-scoring with evalkit only)
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 4010537 Killed                  "$PYTHON_BIN" "$ROOT_DIR/scripts/lib/execute_notebook.py" --notebook "$nb" --output "$run_dir/execution_result.json" --per-cell-timeout "$PER_CELL_TIMEOUT" --save-executed "$run_dir/executed.ipynb" > /dev/null
+run dir: /work/b12901015/CSWIDGAgent/evalkit/results/S0/autoencoder__s1
+
+=== stage A: execution ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/eval_notebook.py --input-notebook /work/b12901015/CSWIDGAgent/runs/S0__autoencoder__s1/notebooks/autoencoder_interactive_skill.ipynb --config /work/b12901015/CSWIDGAgent/evalkit/configs/cpu-stable.yaml --run-id exec --output-dir /work/b12901015/CSWIDGAgent/evalkit/results/S0/autoencoder__s1
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+{
+  "run_id": "exec",
+  "timestamp_utc": "2026-06-28T06:00:17.353831+00:00",
+  "input_notebook": "/work/b12901015/CSWIDGAgent/runs/S0__autoencoder__s1/notebooks/autoencoder_interactive_skill.ipynb",
+  "executed_notebook": "/work/b12901015/CSWIDGAgent/evalkit/results/S0/autoencoder__s1/exec/executed.ipynb",
+  "profile_name": "cpu-stable",
+  "lane": "final_judge",
+  "official_for_reporting": true,
+  "run_success": true,
+  "duration_seconds": 16.0858,
+  "error_message": null,
+  "stats": {
+    "code_cell_count": 12,
+    "error_cell_count": 0,
+    "errors": []
+  },
+  "hardware": {
+    "platform": "Linux-4.18.0-305.131.1.el8_4.x86_64-x86_64-with-glibc2.28",
+    "python_version": "3.11.15",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "gpu_name": "Tesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB\nTesla V100-SXM2-32GB",
+    "gpu_memory_total": "32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB\n32768 MiB",
+    "cuda_hint": "| NVIDIA-SMI 535.161.08             Driver Version: 535.161.08   CUDA Version: 12.2     |"
+  },
+  "config": {
+    "profile_name": "cpu-stable",
+    "lane": "final_judge",
+    "official_for_reporting": true,
+    "execution": {
+      "kernel_name": "python3",
+      "timeout_seconds": 180,
+      "startup_timeout_seconds": 90,
+      "allow_errors": false
+    },
+    "policy": {
+      "speed_metric_enabled": true,
+      "compare_across_profiles": false,
+      "notes": "Use this profile for all official reported metrics."
+    }
+  }
+}
+
+=== stage B: interactivity ===
+$ /work/b12901015/miniconda3/envs/ml-colab-eval/bin/python /work/b12901015/CSWIDGAgent/evalkit/evalkit/run_interactivity.py /work/b12901015/CSWIDGAgent/runs/S0__autoencoder__s1/notebooks/autoencoder_interactive_skill.ipynb --out /work/b12901015/CSWIDGAgent/evalkit/results/S0/autoencoder__s1/interactivity --max-points 3 --source slides
+
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 4011778 Killed                  "$EVALKIT_PY" "${ek_args[@]}"

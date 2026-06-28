@@ -1,0 +1,4 @@
+[resume] ts=20260628T084546Z  maxjobs=3  LD_LIBRARY_PATH=/work/b12901015/miniconda3/envs/ml-colab-eval/lib
+[resume] launched shard: S0 -> logs/ablation/shard_S0_20260628T084546Z.log (pid 347705)
+[resume] launched shard: ablate-concept-extractor -> logs/ablation/shard_ablate-concept-extractor_20260628T084546Z.log (pid 347713)
+[resume] launched shard: ablate-notebook-architect -> logs/ablation/shard_ablate-notebook-architect_20260628T084546Z.log (pid 347726)

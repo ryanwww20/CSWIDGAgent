@@ -1,0 +1,13 @@
+[ablation] === ablate-concept-extractor__MLBasic__s1 ===
+[ablation] SKIP ablate-concept-extractor__MLBasic__s1 (notebook + score present — resume)
+[ablation] === ablate-concept-extractor__MLBasic__s2 ===
+[ablation] SKIP ablate-concept-extractor__MLBasic__s2 (notebook + score present — resume)
+[ablation] === ablate-concept-extractor__MLBasic__s3 ===
+[ablation] SKIP ablate-concept-extractor__MLBasic__s3 (notebook + score present — resume)
+[ablation] === ablate-concept-extractor__whydeeplearning__s1 ===
+[ablation] SKIP ablate-concept-extractor__whydeeplearning__s1 (notebook + score present — resume)
+[ablation] === ablate-concept-extractor__whydeeplearning__s2 ===
+[ablation] RESUME ablate-concept-extractor__whydeeplearning__s2 (notebook present; re-scoring with evalkit only)
+/work/b12901015/miniconda3/envs/ml-colab-eval/lib/python3.11/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+./scripts/run_ablation.sh: line 139: 3399908 Killed                  "$PYTHON_BIN" "$ROOT_DIR/scripts/lib/execute_notebook.py" --notebook "$nb" --output "$run_dir/execution_result.json" --per-cell-timeout "$PER_CELL_TIMEOUT" --save-executed "$run_dir/executed.ipynb" > /dev/null
